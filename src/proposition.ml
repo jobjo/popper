@@ -2,6 +2,8 @@ type t = Pass | Fail of (Format.formatter -> unit -> unit) | Discard
 
 type person = { name : string; age : int } [@@deriving show]
 
+let is_fail = function Fail _ -> true | _ -> false
+
 let pass = Pass
 
 let fail f = Fail f

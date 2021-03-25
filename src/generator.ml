@@ -1,47 +1,25 @@
-open Stream
-
-type 'a output = {
-  value : 'a;
-  consumed : Stream.consumed list;
-  remaining : Input.t;
-}
-
-let data_of_output { consumed; _ } =
-  consumed |> List.concat_map (fun { data; _ } -> data) |> List.to_seq
-
-type 'a gen = { gen : Input.t -> 'a output }
+type 'a gen = { gen : Input.t -> 'a Output.t }
 
 let run input { gen } = gen input
 
-let mk_output ~value ~consumed remaining = { value; consumed; remaining }
-
-let map_output f { value; consumed; remaining } =
-  { value = f value; consumed; remaining }
-
 let run_self_init g = run (Input.make_self_init ()) g
 
-let eval_self_init g =
-  let { value; _ } = run_self_init g in
-  value
+let eval_self_init g = Output.value @@ run_self_init g
 
 let make gen = { gen }
 
-let tag tag gen =
-  make (fun input ->
-    let { value; consumed; remaining } = run input gen in
-    let data = List.fold_left (fun ds { data; _ } -> ds @ data) [] consumed in
-    let consumed = [ { tag; data } ] in
-    { value; consumed; remaining })
+let tag tag gen = make (fun input -> Output.tag tag @@ run input gen)
 
-let map f gen = make (fun input -> map_output f @@ run input gen)
+let map f gen = make (fun input -> Output.map f @@ run input gen)
 
-let return value = make (fun input -> mk_output ~value ~consumed:[] input)
+let return value =
+  make (fun input -> Output.make ~value ~consumed:[] ~remaining:input)
 
 let bind gen f =
   make (fun input ->
-    let { value; remaining; consumed = c1 } = run input gen in
-    let { value; remaining; consumed = c2 } = run remaining (f value) in
-    { value; remaining; consumed = c1 @ c2 })
+    let o1 = run input gen in
+    let o2 = run (Output.remaining o1) (f @@ Output.value o1) in
+    Output.set_consumed (Output.consumed o1 @ Output.consumed o2) o2)
 
 let both g1 g2 =
   let ( let* ) = bind in
@@ -54,9 +32,9 @@ let int32 =
     match Input.head_tail input with
     | None -> failwith "End-of-sequence"
     | Some (value, remaining) ->
-      mk_output ~value
-        ~consumed:[ { tag = Value; data = [ value ] } ]
-        remaining)
+      Output.make ~value
+        ~consumed:[ Consumed.make Tag.Value [ value ] ]
+        ~remaining)
 
 module Syntax = struct
   let ( let* ) = bind
@@ -98,15 +76,10 @@ let one_value_of vs = one_of @@ List.map return vs
 
 let promote f =
   make (fun input ->
-    let value x =
-      let g = f x in
-      let { value; _ } = run input g in
-      value
-    in
-    let consumed = [ { tag = Function; data = Input.take 1 input } ] in
+    let value x = Output.value @@ run input @@ f x in
+    let consumed = [ Consumed.make Tag.Function (Input.take 1 input) ] in
     let remaining = Input.drop 1 input in
-    mk_output ~value ~consumed remaining)
-  |> tag Function
+    Output.make ~value ~consumed ~remaining)
 
 let float =
   let+ n = tag Float int32 in
