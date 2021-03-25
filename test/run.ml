@@ -1,13 +1,6 @@
-(* open Alcotest *)
-
-(* let test_lowercase () = check string "same string" "hello!" "hello!"
-
-(* Run it *)
-let () =
-  run "Utils"
-    [ ("string-case", [ test_case "Lower case" `Quick test_lowercase ]) ] *)
-
+module Seq = Containers.Seq
 open Popper
+open Popper.Generator
 
 type t = {
   bool : bool;
@@ -49,16 +42,40 @@ let my_gen =
   let* h = fun_gen in
   return (f, g, h)
 
-let not_now _ =
-  (* Baseline *)
-  let input =
-    List.to_seq @@ List.map Int32.of_int [ 1093223; 2; 3; 4; 5; 6; 7; 8; 9 ]
+let test ~seed ~count prop =
+  let inputs = Input.make_seq seed in
+  let test input = run input prop in
+  let rec aux num_passed outputs =
+    if num_passed >= count then Result.Ok ()
+    else
+      let { value; _ } = Seq.head_exn outputs in
+      let next = Seq.tail_exn outputs in
+      match value with
+      | Proposition.Pass -> aux (num_passed + 1) next
+      | Proposition.Discard -> aux num_passed next
+      | Proposition.Fail pp ->
+        let pp out () =
+          Format.fprintf out "@[<v 2>Failed after %d attempts:@,%a@]"
+            num_passed pp ()
+        in
+        Result.Error pp
   in
-  (* Next *)
-  let { value = f, g, h; _ } = run input my_gen in
-  Printf.printf "f 1: %d\n" @@ f 1;
-  Printf.printf "g 1: %d\n" @@ g 1;
-  Printf.printf "h 1: %d\n" @@ h 1;
-  print_endline "=======================\n\n"
+  aux 0 (Seq.map test inputs)
 
-let () = Proposition.main ()
+type series = { data : int list } [@@deriving show]
+
+let rev { data } =
+  match data with
+  | [ x; y; z; h ] -> { data = [ h; z; x; y ] }
+  | _ -> { data = List.rev data }
+
+let test_rev_twice =
+  let open Syntax in
+  let* data = many int in
+  let series = { data } in
+  return (Proposition.equals pp_series (rev @@ rev series) series)
+
+let () =
+  match test ~seed:42 ~count:10 test_rev_twice with
+  | Ok () -> print_endline "Passed"
+  | Error pp -> pp Format.std_formatter ()

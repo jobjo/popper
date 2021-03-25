@@ -1,39 +1,24 @@
-module Stream = Stream
-module Random = Random
-module Proposition = Proposition
 open Stream
 
 type 'a output = {
   value : 'a;
   consumed : Stream.consumed list;
-  rest : int32 Seq.t;
+  remaining : Input.t;
 }
 
 let data_of_output { consumed; _ } =
   consumed |> List.concat_map (fun { data; _ } -> data) |> List.to_seq
 
-type 'a gen = { gen : int32 Seq.t -> 'a output }
+type 'a gen = { gen : Input.t -> 'a output }
 
-let run cs { gen } = gen cs
+let run input { gen } = gen input
 
-let mk_output ~value ~consumed rest = { value; consumed; rest }
+let mk_output ~value ~consumed remaining = { value; consumed; remaining }
 
-let map_output f { value; consumed; rest } =
-  { value = f value; consumed; rest }
+let map_output f { value; consumed; remaining } =
+  { value = f value; consumed; remaining }
 
-let make_input seed =
-  let module R = PRNG.Splitmix.Pure in
-  let accum s =
-    let n, s = R.int32 Int32.max_int s in
-    Some (n, s)
-  in
-  Seq.unfold accum seed
-
-let make_input_self_init () =
-  let module R = PRNG.Splitmix.Pure in
-  make_input @@ R.make_self_init ()
-
-let run_self_init g = run (make_input_self_init ()) g
+let run_self_init g = run (Input.make_self_init ()) g
 
 let eval_self_init g =
   let { value; _ } = run_self_init g in
@@ -42,21 +27,21 @@ let eval_self_init g =
 let make gen = { gen }
 
 let tag tag gen =
-  make (fun cs ->
-    let { value; consumed; rest } = run cs gen in
+  make (fun input ->
+    let { value; consumed; remaining } = run input gen in
     let data = List.fold_left (fun ds { data; _ } -> ds @ data) [] consumed in
     let consumed = [ { tag; data } ] in
-    { value; consumed; rest })
+    { value; consumed; remaining })
 
-let map f gen = make (fun cs -> map_output f @@ run cs gen)
+let map f gen = make (fun input -> map_output f @@ run input gen)
 
-let return value = make (fun cs -> mk_output ~value ~consumed:[] cs)
+let return value = make (fun input -> mk_output ~value ~consumed:[] input)
 
 let bind gen f =
-  make (fun cs ->
-    let { value; rest; consumed = c1 } = run cs gen in
-    let { value; rest; consumed = c2 } = run rest (f value) in
-    { value; rest; consumed = c1 @ c2 })
+  make (fun input ->
+    let { value; remaining; consumed = c1 } = run input gen in
+    let { value; remaining; consumed = c2 } = run remaining (f value) in
+    { value; remaining; consumed = c1 @ c2 })
 
 let both g1 g2 =
   let ( let* ) = bind in
@@ -65,11 +50,13 @@ let both g1 g2 =
   return (x, y)
 
 let int32 =
-  make (fun cs ->
-    match cs () with
-    | Nil -> failwith "End-of-sequence"
-    | Cons (value, rest) ->
-      mk_output ~value ~consumed:[ { tag = Value; data = [ value ] } ] rest)
+  make (fun input ->
+    match Input.head_tail input with
+    | None -> failwith "End-of-sequence"
+    | Some (value, remaining) ->
+      mk_output ~value
+        ~consumed:[ { tag = Value; data = [ value ] } ]
+        remaining)
 
 module Syntax = struct
   let ( let* ) = bind
@@ -116,13 +103,9 @@ let promote f =
       let { value; _ } = run input g in
       value
     in
-    let consumed =
-      [
-        { tag = Function; data = Containers.Seq.take 1 input |> List.of_seq };
-      ]
-    in
-    let rest = Containers.Seq.drop 1 input in
-    mk_output ~value ~consumed rest)
+    let consumed = [ { tag = Function; data = Input.take 1 input } ] in
+    let remaining = Input.drop 1 input in
+    mk_output ~value ~consumed remaining)
   |> tag Function
 
 let float =
@@ -139,14 +122,14 @@ let arrow g =
   let f x =
     make (fun input ->
       let () =
-        match Containers.Seq.head input with
+        match Input.head input with
         | Some x -> Printf.printf "Value %d\n" (Int32.to_int x)
         | None -> ()
       in
       let h = Int32.of_int @@ Hashtbl.hash x in
-      let data = Seq.map (Int32.logxor h) input in
+      let data = Input.map (Int32.logxor h) input in
       let () =
-        match Containers.Seq.head data with
+        match Input.head data with
         | Some x -> Printf.printf "Data value %d\n" (Int32.to_int x)
         | None -> ()
       in
@@ -162,4 +145,6 @@ let int =
   return (if b then Int.neg n else n)
 
 let string =
-  map (fun cs -> String.concat "" @@ List.map (String.make 1) cs) (many char)
+  map
+    (fun input -> String.concat "" @@ List.map (String.make 1) input)
+    (many char)
