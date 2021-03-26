@@ -52,3 +52,12 @@ let range mn mx =
     let+ n = int32 in
     let x = Int32.to_int n mod (mx - mn) in
     mn + x
+
+let rec sequence rs =
+  let open Syntax in
+  match rs with
+  | [] -> return []
+  | r :: rs ->
+    let* x = r in
+    let* xs = sequence rs in
+    return (x :: xs)

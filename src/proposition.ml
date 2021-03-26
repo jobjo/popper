@@ -20,9 +20,9 @@ let fail_with s = fail @@ fun out () -> Format.fprintf out "%s" s
 let equals (pp : Format.formatter -> 'a -> unit) (x : 'a) (y : 'a) =
   if x = y then
     pass
-  else (
+  else
     let msg out () = Format.fprintf out "@[<hv>%a @,<> @,%a@]" pp x pp y in
-    fail msg)
+    fail msg
 
 let is_true b =
   if b then Pass else Fail (fun out () -> Format.fprintf out "Expected `true`")

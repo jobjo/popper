@@ -18,6 +18,7 @@ val range : int -> int -> int t
 val bind : 'a t -> ('a -> 'b t) -> 'b t
 val map : ('a -> 'b) -> 'a t -> 'b t
 val generate : init:'s -> ('s -> ('a * 's) t) -> 'a Seq.t t
+val sequence : 'a t list -> 'a list t
 
 module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t

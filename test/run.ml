@@ -69,7 +69,13 @@ let test_rev_twice =
   return (Popper.Proposition.equals pp_series (rev @@ rev series) series)
 
 let () =
-  let seed = Random.Seed.make_self_init () in
-  match Random.eval seed @@ Test.test ~count:100_000 test_rev_twice with
-  | Ok () -> print_endline "passed"
-  | Error pp -> pp Format.std_formatter ()
+  let tbl =
+    Table.of_list
+      ~columns:[ Table.Left; Table.Left; Table.Right ]
+      [ [ "A1"; "A2"; "A3" ]
+      ; [ "A1"; "A2"; "A3" ]
+      ; [ "Gurka i Magen"; "Slugger"; "Markaryd" ]
+      ; [ "Sats"; "Mokus"; "332.3" ]
+      ]
+  in
+  Table.render ~to_string:Fun.id tbl
