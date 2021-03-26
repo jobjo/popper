@@ -32,17 +32,22 @@ let shrink_int32 n = Int32.div n 2l
 
 let shrink_operator { map; operators; values } =
   let* op_ix = Random.range 0 @@ Array.length operators in
+  Printf.printf "Index %d" op_ix;
   let ix = Array.get operators op_ix in
   let n = shrink_int32 @@ IM.find ix map in
   let map = IM.add ix n map in
   Random.return { map; operators; values }
 
 let shrink_value { map; operators; values } =
-  let* val_ix = Random.range 0 @@ Array.length values in
-  let ix = Array.get values val_ix in
-  let n = shrink_int32 @@ IM.find ix map in
-  let map = IM.add ix n map in
-  Random.return { map; operators; values }
+  if Array.length values = 0 then
+    Random.return { map; operators; values }
+  else
+    let* val_ix = Random.range 0 @@ Array.length values in
+    Printf.printf "Index %d" val_ix;
+    let ix = Array.get values val_ix in
+    let n = shrink_int32 @@ IM.find ix map in
+    let map = IM.add ix n map in
+    Random.return { map; operators; values }
 
 let shrink_one t =
   let* n = Random.range 0 10 in
@@ -50,13 +55,17 @@ let shrink_one t =
 
 let shrink t =
   let+ ts = Random.generate shrink_one t in
-  Seq.take 1000 ts
+  Seq.uniq ( = ) @@ Seq.take 1000 ts
 
 let to_input { map; _ } =
   Input.of_seq
     (Seq.unfold
        (fun ix ->
-         let v = match IM.find_opt ix map with Some v -> v | None -> 0l in
+         let v =
+           match IM.find_opt ix map with
+           | Some v -> v
+           | None -> 0l
+         in
          Some (v, ix + 1))
        0)
 
