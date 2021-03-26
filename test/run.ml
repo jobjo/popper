@@ -39,7 +39,8 @@ let my_gen =
 let find_next prop output =
   let open Random.Syntax in
   let rec aux ix =
-    if ix > 100 then Random.return None
+    if ix > 100 then
+      Random.return None
     else
       let* output =
         let+ inputs = Shrink.shrink output in
@@ -47,8 +48,10 @@ let find_next prop output =
         |> Seq.take 1000
         |> Seq.filter_map (fun input ->
              let output = Generator.run input prop in
-             if Proposition.is_fail @@ Output.value output then Some output
-             else None)
+             if Proposition.is_fail @@ Output.value output then
+               Some output
+             else
+               None)
         |> Seq.head
       in
       match output with
@@ -89,7 +92,8 @@ let test ~count prop =
   let inputs = Input.make_seq seed in
   let test input = run input prop in
   let rec aux num_passed outputs =
-    if num_passed >= count then Random.return @@ Result.Ok ()
+    if num_passed >= count then
+      Random.return @@ Result.Ok ()
     else
       let output = Seq.head_exn outputs in
       let next = Seq.tail_exn outputs in

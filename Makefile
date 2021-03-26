@@ -5,4 +5,4 @@ test:
 	dune runtest --force
 
 format:
-	dune build @fmt || true
+	dune build @fmt --auto-promote || true

@@ -54,7 +54,8 @@ end
 
 let range mn mx =
   let open Syntax in
-  if mx <= mn then return mn
+  if mx <= mn then
+    return mn
   else
     let+ n = int32 in
     let x = Int32.to_int n mod (mx - mn) in

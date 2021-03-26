@@ -25,7 +25,9 @@ let make_seq_self_init () = make_seq @@ Random.make_seed_self_init ()
 let make_seq seed = make_seq seed
 
 let head_tail input =
-  match input () with Seq.Nil -> None | Cons (n, rest) -> Some (n, rest)
+  match input () with
+  | Seq.Nil -> None
+  | Cons (n, rest) -> Some (n, rest)
 
 let head input = Option.map fst @@ head_tail input
 

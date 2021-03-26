@@ -2,7 +2,9 @@ type t = Pass | Fail of (Format.formatter -> unit -> unit) | Discard
 
 type person = { name : string; age : int } [@@deriving show]
 
-let is_fail = function Fail _ -> true | _ -> false
+let is_fail = function
+  | Fail _ -> true
+  | _ -> false
 
 let pass = Pass
 
@@ -11,18 +13,23 @@ let fail f = Fail f
 let fail_with s = fail @@ fun out () -> Format.fprintf out "%s" s
 
 let equals (pp : Format.formatter -> 'a -> unit) (x : 'a) (y : 'a) =
-  if x = y then pass
+  if x = y then
+    pass
   else
     let msg out () = Format.fprintf out "@[<hv>%a @,<> @,%a@]" pp x pp y in
     fail msg
 
 let is_true b =
-  if b then Pass
-  else Fail (fun out () -> Format.fprintf out "Expected `true`")
+  if b then
+    Pass
+  else
+    Fail (fun out () -> Format.fprintf out "Expected `true`")
 
 let is_false b =
-  if b then Fail (fun out () -> Format.fprintf out "Expected `false`")
-  else Pass
+  if b then
+    Fail (fun out () -> Format.fprintf out "Expected `false`")
+  else
+    Pass
 
 let and_ p1 p2 =
   match (p1, p2) with
