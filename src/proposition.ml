@@ -38,8 +38,7 @@ let and_ p1 p2 =
   | Fail pp, Pass -> Fail pp
   | Fail pp1, Fail pp2 ->
     Fail
-      (fun out () ->
-        Format.fprintf out "@[<hv>%a@,@;and@;@;%a@]" pp1 () pp2 ())
+      (fun out () -> Format.fprintf out "@[<hv>%a@,@;and@;@;%a@]" pp1 () pp2 ())
   | p, Discard -> p
   | Discard, p -> p
 

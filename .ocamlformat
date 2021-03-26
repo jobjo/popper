@@ -1,9 +1,11 @@
 profile=conventional
 break-infix=fit-or-vertical
-margin=78
+margin=80
 max-indent=2
+match-indent-nested=always
 break-before-in=fit-or-vertical
 break-cases=fit-or-vertical
 if-then-else=fit-or-vertical
 break-collection-expressions=fit-or-vertical
 break-infix=fit-or-vertical
+break-fun-decl=fit-or-vertical

@@ -30,31 +30,36 @@ let of_output output =
 
 let shrink_int32 n = Int32.div n 2l
 
-let shrink_operator { map; operators; values } =
-  let* op_ix = Random.range 0 @@ Array.length operators in
-  Printf.printf "Index %d" op_ix;
-  let ix = Array.get operators op_ix in
-  let n = shrink_int32 @@ IM.find ix map in
-  let map = IM.add ix n map in
-  Random.return { map; operators; values }
-
-let shrink_value { map; operators; values } =
-  if Array.length values = 0 then
-    Random.return { map; operators; values }
+let shrink_operator t =
+  if Array.length t.operators = 0 then
+    Random.return t
   else
-    let* val_ix = Random.range 0 @@ Array.length values in
-    Printf.printf "Index %d" val_ix;
-    let ix = Array.get values val_ix in
-    let n = shrink_int32 @@ IM.find ix map in
-    let map = IM.add ix n map in
-    Random.return { map; operators; values }
+    let* ix = Random.range 0 @@ Array.length t.operators in
+    let ix = Array.get t.operators ix in
+    let n = shrink_int32 @@ IM.find ix t.map in
+    let map = IM.add ix n t.map in
+    Random.return { t with map }
+
+let shrink_value t =
+  if Array.length t.values = 0 then
+    Random.return t
+  else
+    let* ix = Random.range 0 @@ Array.length t.values in
+    let ix = Array.get t.values ix in
+    let n = shrink_int32 @@ IM.find ix t.map in
+    let map = IM.add ix n t.map in
+    Random.return { t with map }
 
 let shrink_one t =
   let* n = Random.range 0 10 in
   if n >= 2 then shrink_value t else shrink_operator t
 
 let shrink t =
-  let+ ts = Random.generate shrink_one t in
+  let+ ts =
+    Random.generate ~init:t (fun t ->
+      let+ t = shrink_one t in
+      (t, t))
+  in
   Seq.uniq ( = ) @@ Seq.take 1000 ts
 
 let to_input { map; _ } =

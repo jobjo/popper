@@ -69,27 +69,33 @@ let print_input output =
 
 let shrink ~max_count output prop =
   let open Random.Syntax in
-  let rec aux ix output =
+  let rec aux ~ix ~num_unique output =
     print_input output;
     if ix >= max_count then
       match Output.value output with
-      | Proposition.Fail pp -> Random.return @@ Some (ix, pp)
+      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp)
       | _ -> Random.return None
     else
       match Output.value output with
       | Proposition.Fail _ -> (
-        let* output = find_next prop output in
-        match output with
-        | Some output -> aux (ix + 1) output
+        let* output_opt = find_next prop output in
+        match output_opt with
+        | Some new_output ->
+          let num_unique =
+            let output_matches =
+              Output.consumed output = Output.consumed new_output
+            in
+            num_unique + if output_matches then 0 else 1
+          in
+          aux ~ix:(ix + 1) ~num_unique new_output
         | None -> Random.return None)
       | _ -> Random.return None
   in
-  aux 0 output
+  aux ~ix:0 ~num_unique:0 output
 
 let test ~count prop =
   let open Random.Syntax in
-  let* seed = Random.seed in
-  let inputs = Input.make_seq seed in
+  let* inputs = Input.make_seq in
   let test input = run input prop in
   let rec aux num_passed outputs =
     if num_passed >= count then
@@ -102,7 +108,7 @@ let test ~count prop =
       | Proposition.Discard -> aux num_passed next
       | Proposition.Fail pp ->
         let* num_shrinks, pp =
-          let+ res = shrink ~max_count:10_000 output prop in
+          let+ res = shrink ~max_count:1000 output prop in
           Containers.Option.get_or ~default:(0, pp) res
         in
         let pp out () =
@@ -114,7 +120,12 @@ let test ~count prop =
   in
   aux 0 (Seq.map test inputs)
 
-type series = { data : string list; numbers : int list; name : string }
+type series = {
+  data : string list;
+  numbers : int list;
+  name : string;
+  range : float * float;
+}
 [@@deriving show]
 
 let rev ({ data; _ } as foo) =
@@ -127,12 +138,15 @@ let test_rev_twice =
   let* data = many string in
   let* numbers = many int in
   let* name = string in
-  let series = { data; numbers; name } in
+  let* x = float in
+  let* y = float in
+  let range = (min x y, max x y +. 2.) in
+  let series = { data; numbers; name; range } in
   return (Proposition.equals pp_series (rev @@ rev series) series)
 
 let () =
   let () = print_endline "Testing" in
-  let seed = Random.make_seed_self_init () in
+  let seed = Random.Seed.make_self_init () in
   match Random.eval seed @@ test ~count:10_000 test_rev_twice with
   | Ok () -> print_endline "passed"
   | Error pp -> pp Format.std_formatter ()

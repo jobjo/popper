@@ -2,10 +2,6 @@ type 'a gen = { gen : Input.t -> 'a Output.t }
 
 let run input { gen } = gen input
 
-let run_self_init g = run (Input.make_self_init ()) g
-
-let eval_self_init g = Output.value @@ run_self_init g
-
 let make gen = { gen }
 
 let tag tag gen = make (fun input -> Output.tag tag @@ run input gen)

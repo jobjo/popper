@@ -1,38 +1,38 @@
 module R = PRNG.Splitmix.Pure
 
-type seed = R.t
+module Seed = struct
+  type t = R.t
 
-type 'a t = { run : seed -> 'a * seed }
+  let make n = R.make [| n |]
 
-let make_seed n = R.make [| n |]
+  let make_self_init () = R.make_self_init ()
 
-let make_seed_self_init () = R.make_self_init ()
+  let split = R.split
+end
 
-let split_seed = R.split
+type 'a t = { run : Seed.t -> 'a * Seed.t }
 
 let run seed { run } = run seed
 
 let eval s r = fst @@ run s r
 
-let run_self_init r = fst @@ run (R.make_self_init ()) r
-
 let make run = { run }
 
 let int32 = make @@ fun s -> R.int32 Int32.max_int s
 
-let seed = make split_seed
+let seed = make Seed.split
 
 let return x = { run = (fun s -> (x, s)) }
 
-let generate f zero =
+let generate ~init f =
   make (fun seed ->
-    let s1, s2 = split_seed seed in
+    let s1, s2 = Seed.split seed in
     let accum (seed, t) =
       let r = f t in
-      let t, s = run seed r in
-      Some (t, (s, t))
+      let (x, t), s = run seed r in
+      Some (x, (s, t))
     in
-    let seq = Seq.unfold accum (s1, zero) in
+    let seq = Seq.unfold accum (s1, init) in
     (seq, s2))
 
 let bind { run } f =
