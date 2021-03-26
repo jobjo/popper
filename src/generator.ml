@@ -1,4 +1,4 @@
-type 'a gen = { gen : Input.t -> 'a Output.t }
+type 'a t = { gen : Input.t -> 'a Output.t }
 
 let run input { gen } = gen input
 

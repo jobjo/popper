@@ -78,3 +78,52 @@ let shrink output =
   let open Random.Syntax in
   let+ ts = shrink @@ of_output output in
   Seq.map to_input ts
+
+let find_next prop output =
+  let open Random.Syntax in
+  let rec aux ix =
+    if ix > 100 then
+      Random.return None
+    else
+      let* output =
+        let+ inputs = shrink output in
+        inputs
+        |> Seq.take 1000
+        |> Seq.filter_map (fun input ->
+             let output = Generator.run input prop in
+             if Proposition.is_fail @@ Output.value output then
+               Some output
+             else
+               None)
+        |> Seq.head
+      in
+      match output with
+      | Some output -> Random.return (Some output)
+      | None -> aux (ix + 1)
+  in
+  aux 0
+
+let shrink ~max_count output prop =
+  let open Random.Syntax in
+  let rec aux ~ix ~num_unique output =
+    if ix >= max_count then
+      match Output.value output with
+      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp)
+      | _ -> Random.return None
+    else
+      match Output.value output with
+      | Proposition.Fail _ -> (
+        let* output_opt = find_next prop output in
+        match output_opt with
+        | Some new_output ->
+          let num_unique =
+            let output_matches =
+              Output.consumed output = Output.consumed new_output
+            in
+            num_unique + if output_matches then 0 else 1
+          in
+          aux ~ix:(ix + 1) ~num_unique new_output
+        | None -> Random.return None)
+      | _ -> Random.return None
+  in
+  aux ~ix:0 ~num_unique:0 output

@@ -1,0 +1,28 @@
+module Seq = Containers.Seq
+
+let test ~count prop =
+  let open Random.Syntax in
+  let* inputs = Input.make_seq in
+  let test input = Generator.run input prop in
+  let rec aux num_passed outputs =
+    if num_passed >= count then
+      Random.return @@ Result.Ok ()
+    else
+      let output = Seq.head_exn outputs in
+      let next = Seq.tail_exn outputs in
+      match Output.value output with
+      | Proposition.Pass -> aux (num_passed + 1) next
+      | Proposition.Discard -> aux num_passed next
+      | Proposition.Fail pp ->
+        let* num_shrinks, pp =
+          let+ res = Shrink.shrink ~max_count:1000 output prop in
+          Containers.Option.get_or ~default:(0, pp) res
+        in
+        let pp out () =
+          Format.fprintf out
+            "@[<v 2>Failed after %d attempts and %d shrinks:@,%a@]" num_passed
+            num_shrinks pp ()
+        in
+        Random.return (Result.Error pp)
+  in
+  aux 0 (Seq.map test inputs)

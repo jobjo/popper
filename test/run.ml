@@ -1,6 +1,6 @@
 module Seq = Containers.Seq
 open Popper
-open Popper.Generator
+open Generator
 
 type t = {
   bool : bool;
@@ -13,6 +13,7 @@ type t = {
 [@@deriving show]
 
 let gen =
+  let open Generator in
   let open Syntax in
   let* name = string in
   let* numbers = many int in
@@ -27,7 +28,7 @@ let print_list xs =
   List.iter (fun i -> Printf.printf "%d; " (Int32.to_int i)) xs;
   Printf.printf "]\n"
 
-let fun_gen : (int -> int) gen = arrow int
+let fun_gen : (int -> int) Generator.t = Generator.arrow Generator.int
 
 let my_gen =
   let open Syntax in
@@ -36,89 +37,12 @@ let my_gen =
   let* h = fun_gen in
   return (f, g, h)
 
-let find_next prop output =
-  let open Random.Syntax in
-  let rec aux ix =
-    if ix > 100 then
-      Random.return None
-    else
-      let* output =
-        let+ inputs = Shrink.shrink output in
-        inputs
-        |> Seq.take 1000
-        |> Seq.filter_map (fun input ->
-             let output = Generator.run input prop in
-             if Proposition.is_fail @@ Output.value output then
-               Some output
-             else
-               None)
-        |> Seq.head
-      in
-      match output with
-      | Some output -> Random.return (Some output)
-      | None -> aux (ix + 1)
-  in
-  aux 0
-
 let print_input output =
-  Output.consumed output
-  |> List.concat_map Consumed.data
+  Popper.Output.consumed output
+  |> List.concat_map Popper.Consumed.data
   |> List.map (fun n -> Printf.sprintf "%d" @@ Int32.to_int n)
   |> String.concat "; "
   |> Printf.printf "[%s]\n"
-
-let shrink ~max_count output prop =
-  let open Random.Syntax in
-  let rec aux ~ix ~num_unique output =
-    print_input output;
-    if ix >= max_count then
-      match Output.value output with
-      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp)
-      | _ -> Random.return None
-    else
-      match Output.value output with
-      | Proposition.Fail _ -> (
-        let* output_opt = find_next prop output in
-        match output_opt with
-        | Some new_output ->
-          let num_unique =
-            let output_matches =
-              Output.consumed output = Output.consumed new_output
-            in
-            num_unique + if output_matches then 0 else 1
-          in
-          aux ~ix:(ix + 1) ~num_unique new_output
-        | None -> Random.return None)
-      | _ -> Random.return None
-  in
-  aux ~ix:0 ~num_unique:0 output
-
-let test ~count prop =
-  let open Random.Syntax in
-  let* inputs = Input.make_seq in
-  let test input = run input prop in
-  let rec aux num_passed outputs =
-    if num_passed >= count then
-      Random.return @@ Result.Ok ()
-    else
-      let output = Seq.head_exn outputs in
-      let next = Seq.tail_exn outputs in
-      match Output.value output with
-      | Proposition.Pass -> aux (num_passed + 1) next
-      | Proposition.Discard -> aux num_passed next
-      | Proposition.Fail pp ->
-        let* num_shrinks, pp =
-          let+ res = shrink ~max_count:1000 output prop in
-          Containers.Option.get_or ~default:(0, pp) res
-        in
-        let pp out () =
-          Format.fprintf out
-            "@[<v 2>Failed after %d attempts and %d shrinks:@,%a@]" num_passed
-            num_shrinks pp ()
-        in
-        Random.return (Result.Error pp)
-  in
-  aux 0 (Seq.map test inputs)
 
 type series = {
   data : string list;
@@ -142,11 +66,11 @@ let test_rev_twice =
   let* y = float in
   let range = (min x y, max x y +. 2.) in
   let series = { data; numbers; name; range } in
-  return (Proposition.equals pp_series (rev @@ rev series) series)
+  return (Popper.Proposition.equals pp_series (rev @@ rev series) series)
 
 let () =
   let () = print_endline "Testing" in
-  let seed = Random.Seed.make_self_init () in
-  match Random.eval seed @@ test ~count:10_000 test_rev_twice with
+  let seed = Popper.Random.Seed.make_self_init () in
+  match Popper.Random.eval seed @@ Test.test ~count:10_000 test_rev_twice with
   | Ok () -> print_endline "passed"
   | Error pp -> pp Format.std_formatter ()
