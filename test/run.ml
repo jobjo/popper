@@ -2,14 +2,14 @@ module Seq = Containers.Seq
 open Popper
 open Generator
 
-type t = {
-  bool : bool;
-  name : string;
-  numbers : int list;
-  number : int;
-  float : float;
-  fn : int -> bool;
-}
+type t =
+  { bool : bool
+  ; name : string
+  ; numbers : int list
+  ; number : int
+  ; float : float
+  ; fn : int -> bool
+  }
 [@@deriving show]
 
 let gen =
@@ -44,33 +44,32 @@ let print_input output =
   |> String.concat "; "
   |> Printf.printf "[%s]\n"
 
-type series = {
-  data : string list;
-  numbers : int list;
-  name : string;
-  range : float * float;
-}
+type series =
+  { data : string list
+  ; numbers : int list
+  ; name : string
+  ; range : int * int
+  }
 [@@deriving show]
 
-let rev ({ data; _ } as foo) =
+let rev ({ data; _ } as series) =
   match data with
-  | [ x; y; z; h; _; _; _; _ ] -> { foo with data = [ h; z; x; y ] }
-  | _ -> { foo with data = List.rev data }
+  | [ x; y; z ] -> { series with data = [ z; x; y ] }
+  | _ -> { series with data = List.rev data }
 
 let test_rev_twice =
   let open Syntax in
   let* data = many string in
   let* numbers = many int in
   let* name = string in
-  let* x = float in
-  let* y = float in
-  let range = (min x y, max x y +. 2.) in
+  let* mn = range 0 100 in
+  let* mx = range (mn + 10) (mn + 20) in
+  let range = mn, mx in
   let series = { data; numbers; name; range } in
   return (Popper.Proposition.equals pp_series (rev @@ rev series) series)
 
 let () =
-  let () = print_endline "Testing" in
-  let seed = Popper.Random.Seed.make_self_init () in
-  match Popper.Random.eval seed @@ Test.test ~count:10_000 test_rev_twice with
+  let seed = Random.Seed.make_self_init () in
+  match Random.eval seed @@ Test.test ~count:100_000 test_rev_twice with
   | Ok () -> print_endline "passed"
   | Error pp -> pp Format.std_formatter ()

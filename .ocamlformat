@@ -1,4 +1,4 @@
-profile=conventional
+profile=janestreet
 break-infix=fit-or-vertical
 margin=80
 max-indent=2
@@ -9,3 +9,4 @@ if-then-else=fit-or-vertical
 break-collection-expressions=fit-or-vertical
 break-infix=fit-or-vertical
 break-fun-decl=fit-or-vertical
+let-binding-spacing=compact

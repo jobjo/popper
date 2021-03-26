@@ -2,17 +2,21 @@ open Random.Syntax
 module Seq = Containers.Seq
 module IM = Map.Make (Int)
 
-type t = { map : int32 IM.t; operators : int array; values : int array }
+type t =
+  { map : int32 IM.t
+  ; operators : int array
+  ; values : int array
+  }
 
 let of_output output =
   let data =
     Output.consumed output
     |> List.concat_map (fun cons ->
-         List.map (fun d -> (Consumed.tag cons, d)) @@ Consumed.data cons)
-    |> List.mapi (fun ix (tag, d) -> (ix, tag, d))
+         List.map (fun d -> Consumed.tag cons, d) @@ Consumed.data cons)
+    |> List.mapi (fun ix (tag, d) -> ix, tag, d)
   in
   let map =
-    data |> List.map (fun (ix, _, d) -> (ix, d)) |> List.to_seq |> IM.of_seq
+    data |> List.map (fun (ix, _, d) -> ix, d) |> List.to_seq |> IM.of_seq
   in
   let operators =
     List.filter_map
@@ -58,7 +62,7 @@ let shrink t =
   let+ ts =
     Random.generate ~init:t (fun t ->
       let+ t = shrink_one t in
-      (t, t))
+      t, t)
   in
   Seq.uniq ( = ) @@ Seq.take 1000 ts
 
@@ -79,10 +83,10 @@ let shrink output =
   let+ ts = shrink @@ of_output output in
   Seq.map to_input ts
 
-let find_next prop output =
+let find_next ~max_count prop output =
   let open Random.Syntax in
   let rec aux ix =
-    if ix > 100 then
+    if ix > max_count then
       Random.return None
     else
       let* output =
@@ -103,18 +107,20 @@ let find_next prop output =
   in
   aux 0
 
-let shrink ~max_count output prop =
+let shrink ~max_count_find_next ~max_count_shrinks output prop =
   let open Random.Syntax in
   let rec aux ~ix ~num_unique output =
-    if ix >= max_count then
+    if ix >= max_count_shrinks then (
       match Output.value output with
       | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp)
-      | _ -> Random.return None
-    else
+      | _ -> Random.return None)
+    else (
       match Output.value output with
-      | Proposition.Fail _ -> (
-        let* output_opt = find_next prop output in
-        match output_opt with
+      | Proposition.Fail _ ->
+        let* output_opt =
+          find_next ~max_count:max_count_find_next prop output
+        in
+        (match output_opt with
         | Some new_output ->
           let num_unique =
             let output_matches =
@@ -124,6 +130,6 @@ let shrink ~max_count output prop =
           in
           aux ~ix:(ix + 1) ~num_unique new_output
         | None -> Random.return None)
-      | _ -> Random.return None
+      | _ -> Random.return None)
   in
   aux ~ix:0 ~num_unique:0 output

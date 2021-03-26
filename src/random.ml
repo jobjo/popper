@@ -4,25 +4,18 @@ module Seed = struct
   type t = R.t
 
   let make n = R.make [| n |]
-
   let make_self_init () = R.make_self_init ()
-
   let split = R.split
 end
 
 type 'a t = { run : Seed.t -> 'a * Seed.t }
 
 let run seed { run } = run seed
-
 let eval s r = fst @@ run s r
-
 let make run = { run }
-
 let int32 = make @@ fun s -> R.int32 Int32.max_int s
-
 let seed = make Seed.split
-
-let return x = { run = (fun s -> (x, s)) }
+let return x = { run = (fun s -> x, s) }
 
 let generate ~init f =
   make (fun seed ->
@@ -33,7 +26,7 @@ let generate ~init f =
       Some (x, (s, t))
     in
     let seq = Seq.unfold accum (s1, init) in
-    (seq, s2))
+    seq, s2)
 
 let bind { run } f =
   make (fun s ->
@@ -44,11 +37,10 @@ let bind { run } f =
 let map f { run } =
   make (fun s ->
     let x, s = run s in
-    (f x, s))
+    f x, s)
 
 module Syntax = struct
   let ( let* ) = bind
-
   let ( let+ ) x f = map f x
 end
 

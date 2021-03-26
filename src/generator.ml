@@ -1,11 +1,8 @@
 type 'a t = { gen : Input.t -> 'a Output.t }
 
 let run input { gen } = gen input
-
 let make gen = { gen }
-
 let tag tag gen = make (fun input -> Output.tag tag @@ run input gen)
-
 let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
@@ -28,17 +25,15 @@ let int32 =
     match Input.head_tail input with
     | None -> failwith "End-of-sequence"
     | Some (value, remaining) ->
-      Output.make ~value
+      Output.make
+        ~value
         ~consumed:[ Consumed.make Tag.Value [ value ] ]
         ~remaining)
 
 module Syntax = struct
   let ( let* ) = bind
-
   let ( let+ ) x f = map f x
-
   let ( and* ) = both
-
   let ( and+ ) = both
 end
 
