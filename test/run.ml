@@ -69,13 +69,21 @@ let test_rev_twice =
   return (Popper.Proposition.equals pp_series (rev @@ rev series) series)
 
 let () =
+  Fmt_tty.setup_std_outputs ~style_renderer:`Ansi_tty ();
   let tbl =
     Table.of_list
       ~columns:[ Table.Left; Table.Left; Table.Right ]
-      [ [ "A1"; "A2"; "A3" ]
-      ; [ "A1"; "A2"; "A3" ]
-      ; [ "Gurka i Magen"; "Slugger"; "Markaryd" ]
-      ; [ "Sats"; "Mokus"; "332.3" ]
+      [ [ Table.text "A1"
+        ; Table.text "A2"
+        ; Table.with_color Table.Green @@ Table.text "A3"
+        ]
+      ; [ Table.text "A1"; Table.text "A2"; Table.text "A3" ]
+      ; [ Table.with_color Table.Red @@ Table.text "Gurka i Magen"
+        ; Table.text "Slugger"
+        ; Table.text "Markaryd"
+        ]
+      ; [ Table.text "Sats"; Table.text "Mokus"; Table.text "332.3" ]
       ]
   in
-  Table.render ~to_string:Fun.id tbl
+  let pp = Table.render tbl in
+  Format.fprintf Format.std_formatter "@[<v 2>@,%a@]" pp ()
