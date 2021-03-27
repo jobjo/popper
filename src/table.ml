@@ -6,48 +6,26 @@ module PM = Map.Make (struct
   let compare = compare
 end)
 
-type align =
+type alignment =
   | Left
   | Center
   | Right
 
-type pos =
-  { row : int
-  ; col : int
-  }
-
-type color =
-  | Red
-  | Green
-
 type cell =
-  { color : color option
+  { color : Printer.color option
   ; value : string
   }
 
-let style_code = function
-  | Some Red -> "31"
-  | Some Green -> "32"
-  | None -> "0"
-
-let pp_color color pp out v =
-  let set color =
-    Format.pp_print_as out 0 "\027[";
-    Format.pp_print_as out 0 (style_code color);
-    Format.pp_print_as out 0 "m"
-  in
-  set @@ Some color;
-  pp out v;
-  set None
-
-let text value = { color = None; value }
-let with_color color cell = { cell with color = Some color }
+let left = Left
+let right = Right
+let center = Center
+let text ?color value = { color; value }
 
 type t =
   { num_rows : int
   ; num_cols : int
   ; cell : row:int -> col:int -> cell option
-  ; columns : align list
+  ; columns : alignment list
   }
 
 let max_column_length ~num_rows ~cell col =
@@ -77,7 +55,7 @@ let render_cell ~column_width { color; value } align out =
     | Right -> Printf.sprintf "%s%s" (make_space space) value
   in
   match color with
-  | Some color -> pp_color color Format.pp_print_string out cell_str
+  | Some color -> Printer.pp_color color Format.pp_print_string out cell_str
   | None -> Format.fprintf out "%s" cell_str
 
 let of_list ~columns rows =
@@ -96,7 +74,7 @@ let of_list ~columns rows =
   in
   { cell; num_rows; num_cols; columns }
 
-let render { num_rows; num_cols; cell; columns } out () =
+let pp out { num_rows; num_cols; cell; columns } =
   let col_widths = List.init num_cols (max_column_length ~num_rows ~cell) in
   let cols_and_widths = List.combine columns col_widths in
   let render_cell ~row ~col ~column_width column =
