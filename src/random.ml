@@ -39,6 +39,19 @@ let map f { run } =
     let x, s = run s in
     f x, s)
 
+let delayed f = make (fun seed -> run seed @@ f ())
+
+let time f x =
+  let start = Unix.gettimeofday () in
+  let res = f x in
+  let stop = Unix.gettimeofday () in
+  res, stop -. start
+
+let timed { run } =
+  make (fun seed ->
+    let (x, s), t = time run seed in
+    (x, t), s)
+
 module Syntax = struct
   let ( let* ) = bind
   let ( let+ ) x f = map f x

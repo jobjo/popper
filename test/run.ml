@@ -54,21 +54,89 @@ type series =
 
 let rev ({ data; _ } as series) =
   match data with
-  | [ x; y; z ] -> { series with data = [ z; x; y ] }
+  | [ x; y; z; _; _; _; _; _ ] -> { series with data = [ z; x; y ] }
   | _ -> { series with data = List.rev data }
 
-let test_rev_twice =
-  let open Syntax in
-  let* data = many string in
-  let* numbers = many int in
-  let* name = string in
-  let* mn = range 0 100 in
-  let* mx = range (mn + 10) (mn + 20) in
-  let range = mn, mx in
-  let series = { data; numbers; name; range } in
-  return (Popper.Proposition.equals pp_series (rev @@ rev series) series)
+type exp =
+  | Lit of bool
+  | And of exp * exp
+  | Or of exp * exp
+  | Not of exp
+[@@deriving show]
 
-let () =
+let rec eval = function
+  | Lit b -> b
+  | And (e1, e2) -> eval e1 || eval e2
+  | Or (e1, e2) -> eval e1 || eval e2
+  | Not b -> not @@ eval b
+
+let gen_exp =
+  let open Syntax in
+  let rec aux size () =
+    let lit = one_value_of [ Lit true; Lit false ] in
+    let and_ () =
+      let* e1 = delayed (aux (size * 2)) in
+      let* e2 = delayed (aux (size * 2)) in
+      return @@ And (e1, e2)
+    in
+    let or_ () =
+      let* e1 = delayed (aux (size * 2)) in
+      let* e2 = delayed (aux (size * 2)) in
+      return @@ And (e1, e2)
+    in
+    let not_ () = map (fun x -> Not x) (delayed (aux (size + 1))) in
+    if size > 5 then
+      lit
+    else
+      one_of [ lit; delayed and_; delayed or_; delayed not_ ]
+  in
+  delayed (aux 1)
+
+let test_exp_and =
+  let open Proposition in
+  let open Syntax in
+  Test.test
+    (let+ e1 = gen_exp
+     and+ e2 = gen_exp in
+     log_input
+       (fun out () -> Format.pp_print_list pp_exp out [ e1; e2 ])
+       (equals Format.pp_print_bool (eval e1 && eval e2) (eval (And (e1, e2)))))
+
+let test_rev_twice =
+  let open Proposition in
+  let open Syntax in
+  Test.test
+    ~count:1000
+    (let* data = many string in
+     let* numbers = many int in
+     let* name = string in
+     let* mn = range 0 100 in
+     let* mx = range (mn + 10) (mn + 20) in
+     let range = mn, mx in
+     let series = { data; numbers; name; range } in
+     return (equals pp_series (rev @@ rev series) series))
+
+let dummy = Test.unit @@ fun () -> Proposition.pass
+
+let sub_suite =
+  Test.suite
+    [ "Dummy test", dummy
+    ; "AB", dummy
+    ; "Bsdfasdasdf", Test.unit (fun () -> Proposition.Discard)
+    ]
+
+let suite =
+  Test.suite
+    [ "Asdfads", dummy
+    ; "Reverse twice", test_rev_twice
+    ; "Exp and", test_exp_and
+    ; "Sub suite", sub_suite
+    ]
+
+(* Fook *)
+let () = Test.run suite
+
+(* let () =
   let open Table in
   Fmt_tty.setup_std_outputs ~style_renderer:`Ansi_tty ();
   let tbl =
@@ -83,4 +151,4 @@ let () =
       ; [ text "Sats"; text "Mokus"; text "332.3" ]
       ]
   in
-  Format.fprintf Format.std_formatter "@[<v 2>@,%a@]" pp tbl
+  Format.fprintf Format.std_formatter "@[<v 2>@,%a@]" pp tbl *)

@@ -12,7 +12,7 @@ type alignment =
   | Right
 
 type cell =
-  { color : Printer.color option
+  { color : Printer.Color.t option
   ; value : string
   }
 
@@ -32,7 +32,7 @@ let max_column_length ~num_rows ~cell col =
   List.init num_rows (fun row ->
     Option.fold
       ~none:0
-      ~some:(fun { value; _ } -> 4 + String.length value)
+      ~some:(fun { value; _ } -> 2 + String.length value)
       (cell ~row ~col))
   |> List.fold_left max 0
 

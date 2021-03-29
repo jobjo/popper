@@ -20,6 +20,8 @@ let both g1 g2 =
   let* y = g2 in
   return (x, y)
 
+let delayed f = make (fun input -> run input @@ f ())
+
 let int32 =
   make (fun input ->
     match Input.head_tail input with

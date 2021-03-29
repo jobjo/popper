@@ -19,6 +19,8 @@ val bind : 'a t -> ('a -> 'b t) -> 'b t
 val map : ('a -> 'b) -> 'a t -> 'b t
 val generate : init:'s -> ('s -> ('a * 's) t) -> 'a Seq.t t
 val sequence : 'a t list -> 'a list t
+val timed : 'a t -> ('a * float) t
+val delayed : (unit -> 'a t) -> 'a t
 
 module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t

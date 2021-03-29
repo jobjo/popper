@@ -21,11 +21,28 @@ let equals (pp : Format.formatter -> 'a -> unit) (x : 'a) (y : 'a) =
   if x = y then
     pass
   else
-    let msg out () = Format.fprintf out "@[<hv>%a @,<> @,%a@]" pp x pp y in
+    let msg out () =
+      let pp out () = Format.fprintf out "@[<hv>%a @,<>@;%a@]" pp x pp y in
+      Format.fprintf out "@[<v 2>Reason:@;@;%a@]" (Printer.red pp) ()
+    in
     fail msg
 
 let is_true b =
   if b then Pass else Fail (fun out () -> Format.fprintf out "Expected `true`")
+
+let log_input pp_input = function
+  | Pass -> Pass
+  | Fail pp_fail ->
+    Fail
+      (fun out () ->
+        Format.fprintf
+          out
+          "@[<v 2>Input:@;@;%a@]@,@,%a"
+          (Printer.blue pp_input)
+          ()
+          pp_fail
+          ())
+  | Discard -> Discard
 
 let is_false b =
   if b then Fail (fun out () -> Format.fprintf out "Expected `false`") else Pass
