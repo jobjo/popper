@@ -3,3 +3,4 @@ _build
 *.byte
 *.native
 .merlin
+.vscode
