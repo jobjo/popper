@@ -6,13 +6,15 @@ let tag tag gen = make (fun input -> Output.tag tag @@ run input gen)
 let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
-  make (fun input -> Output.make ~value ~consumed:[] ~remaining:input)
+  make (fun input -> Output.make ~value ~consumed:[] ~remaining:input ~logs:[])
 
 let bind gen f =
   make (fun input ->
     let o1 = run input gen in
     let o2 = run (Output.remaining o1) (f @@ Output.value o1) in
-    Output.set_consumed (Output.consumed o1 @ Output.consumed o2) o2)
+    let consumed = Output.consumed o1 @ Output.consumed o2 in
+    let logs = Output.logs o1 @ Output.logs o2 in
+    o2 |> Output.set_consumed consumed |> Output.set_logs logs)
 
 let both g1 g2 =
   let ( let* ) = bind in
@@ -22,6 +24,10 @@ let both g1 g2 =
 
 let delayed f = make (fun input -> run input @@ f ())
 
+let log log =
+  make (fun input ->
+    Output.make ~value:() ~consumed:[] ~remaining:input ~logs:[ log ])
+
 let int32 =
   make (fun input ->
     match Input.head_tail input with
@@ -30,7 +36,8 @@ let int32 =
       Output.make
         ~value
         ~consumed:[ Consumed.make Tag.Value [ value ] ]
-        ~remaining)
+        ~remaining
+        ~logs:[])
 
 module Syntax = struct
   let ( let* ) = bind
@@ -72,7 +79,7 @@ let promote f =
     let value x = Output.value @@ run input @@ f x in
     let consumed = [ Consumed.make Tag.Function (Input.take 1 input) ] in
     let remaining = Input.drop 1 input in
-    Output.make ~value ~consumed ~remaining)
+    Output.make ~value ~consumed ~remaining ~logs:[])
 
 let float =
   let+ n = tag Float int32 in

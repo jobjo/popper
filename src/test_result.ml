@@ -18,6 +18,7 @@ type result =
   ; num_passed : int
   ; status : status
   ; time : float
+  ; logs : string list
   }
 
 type t =
@@ -138,7 +139,7 @@ let pp_header
  OK   Test foo -> testing bar   Passed 200 samples.       0.020ms
 *)
 let pp_results out res =
-  let to_row { name; num_passed; status; time } =
+  let to_row { name; num_passed; status; time; _ } =
     let status_cell =
       match status with
       | Pass -> Table.text ~color:Printer.Color.green "✓"
@@ -221,6 +222,7 @@ let pp_failed_results out res =
         ; num_passed
         ; status = Fail { explanation = _; num_shrinks; pp }
         ; time = _
+        ; logs
         } ->
         let name = Option.fold ~none:"" ~some:(Printf.sprintf "`%s'") name in
         let pp_header out () =
@@ -235,12 +237,32 @@ let pp_failed_results out res =
             (Printer.blue pp_print_int)
             num_shrinks
         in
+        let pp_logs out () =
+          match logs with
+          | [] -> ()
+          | logs ->
+            fprintf
+              out
+              "@,@[<v 2>Logs:@,@,%a@]"
+              (fun out () ->
+                List.iter
+                  (fun log ->
+                    log
+                    |> String.split_on_char '\n'
+                    |> List.iter (fun line ->
+                         fprintf out "%a@," (Printer.blue pp_print_string) line);
+                    fprintf out "@,")
+                  logs)
+              ()
+        in
         fprintf
           out
-          "@[<v 2>%a@[<v 2>@,%a@]@,@]@.@."
+          "@[<v 2>%a@[<v 2>@,%a@,%a@]@,@]@.@."
           (with_box pp_header)
           ()
           pp
+          ()
+          pp_logs
           ()
       | _ -> ())
     res

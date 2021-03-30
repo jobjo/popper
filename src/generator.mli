@@ -20,6 +20,7 @@ val arrow : 'a t -> ('b -> 'a) t
 val int : int t
 val string : string t
 val delayed : (unit -> 'a t) -> 'a t
+val log : string -> unit t
 
 module Syntax : sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t

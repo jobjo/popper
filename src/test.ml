@@ -59,9 +59,9 @@ let test ?(count = 200) prop =
     let* inputs = Input.make_seq in
     let rec aux ~num_discarded ~num_passed outputs =
       if num_passed >= count then
-        Random.return (num_passed, Test_result.Pass)
+        Random.return (num_passed, Test_result.Pass, [])
       else if num_discarded > max_count_discarded then
-        Random.return (num_passed, Test_result.Discarded { num_discarded })
+        Random.return (num_passed, Test_result.Discarded { num_discarded }, [])
       else
         let output = Seq.head_exn outputs in
         let next () = Seq.tail_exn outputs () in
@@ -71,14 +71,23 @@ let test ?(count = 200) prop =
         | Proposition.Discard ->
           aux ~num_discarded:(num_discarded + 1) ~num_passed next
         | Proposition.Fail pp ->
-          let* num_shrinks, pp =
-            let+ res =
-              Shrink.shrink ~max_count_find_next ~max_count_shrinks output prop
-            in
-            Containers.Option.get_or ~default:(0, pp) res
+          let* res =
+            Shrink.shrink ~max_count_find_next ~max_count_shrinks output prop
           in
-          Random.return
-            (num_passed, Test_result.Fail { num_shrinks; explanation = "?"; pp })
+          let explanation =
+            Printf.sprintf "Failed after %d samples" num_passed
+          in
+          (match res with
+          | Some (num_shrinks, pp, output) ->
+            Random.return
+              ( num_passed
+              , Test_result.Fail { num_shrinks; explanation; pp }
+              , Output.logs output )
+          | None ->
+            Random.return
+              ( num_passed
+              , Test_result.Fail { num_shrinks = 0; explanation; pp }
+              , Output.logs output ))
     in
     aux
       ~num_discarded:0
@@ -86,11 +95,16 @@ let test ?(count = 200) prop =
       (Seq.map (Fun.flip Generator.run prop) inputs)
   in
   let test =
-    let+ (num_passed, status), time = Random.timed @@ Random.delayed eval in
-    { Test_result.name = None; num_passed; status; time }
+    let+ (num_passed, status, logs), time =
+      Random.timed @@ Random.delayed eval
+    in
+    { Test_result.name = None; num_passed; status; time; logs }
   in
   single test
 
 let unit f =
   let prop = Generator.delayed (fun () -> Generator.return @@ f ()) in
   test ~count:1 prop
+
+let equals pp x y = Generator.return @@ Proposition.equals pp x y
+let is_true b = Generator.return @@ Proposition.is_true b

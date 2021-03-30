@@ -1,7 +1,15 @@
 type 'a t
 
-val make : value:'a -> consumed:Consumed.t list -> remaining:Input.t -> 'a t
+val make
+  :  value:'a
+  -> consumed:Consumed.t list
+  -> remaining:Input.t
+  -> logs:string list
+  -> 'a t
+
 val set_consumed : Consumed.t list -> 'a t -> 'a t
+val logs : 'a t -> string list
+val set_logs : string list -> 'a t -> 'a t
 val set_remaining : Input.t -> 'a t -> 'a t
 val set_value : 'a -> 'a t -> 'a t
 val value : 'a t -> 'a

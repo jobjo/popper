@@ -112,7 +112,7 @@ let shrink ~max_count_find_next ~max_count_shrinks output prop =
   let rec aux ~ix ~num_unique output =
     if ix >= max_count_shrinks then
       match Output.value output with
-      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp)
+      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp, output)
       | _ -> Random.return None
     else
       match Output.value output with
