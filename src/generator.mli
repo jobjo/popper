@@ -20,7 +20,9 @@ val arrow : 'a t -> ('b -> 'a) t
 val int : int t
 val string : string t
 val delayed : (unit -> 'a t) -> 'a t
-val log : string -> unit t
+val log_string : string -> unit t
+val log_with : (Format.formatter -> 'a -> unit) -> 'a -> unit t
+val log_key_value : key:string -> string -> unit t
 
 module Syntax : sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t

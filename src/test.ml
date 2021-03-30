@@ -5,6 +5,21 @@ type t =
   | Single of Test_result.result Random.t
   | Suite of (string * t) list
 
+let is_result_passed { Test_result.status; _ } =
+  match status with
+  | Pass -> true
+  | _ -> false
+
+let is_result_fail { Test_result.status; _ } =
+  match status with
+  | Fail _ -> true
+  | _ -> false
+
+let is_result_discarded { Test_result.status; _ } =
+  match status with
+  | Discarded _ -> true
+  | _ -> false
+
 let run ?(seed = Random.Seed.make 42) ts =
   let rec flatten = function
     | Single res -> [ None, res ]
@@ -29,14 +44,10 @@ let run ?(seed = Random.Seed.make 42) ts =
            Random.map (fun x -> { x with Test_result.name }) res)
       |> Random.sequence
     in
-    let num_failed =
-      List.length @@ List.filter Test_result.result_fail results
-    in
-    let num_passed =
-      List.length @@ List.filter Test_result.result_passed results
-    in
+    let num_failed = List.length @@ List.filter is_result_fail results in
+    let num_passed = List.length @@ List.filter is_result_passed results in
     let num_discarded =
-      List.length @@ List.filter Test_result.result_discarded results
+      List.length @@ List.filter is_result_discarded results
     in
     num_passed, num_failed, num_discarded, results
   in
@@ -59,9 +70,10 @@ let test ?(count = 200) prop =
     let* inputs = Input.make_seq in
     let rec aux ~num_discarded ~num_passed outputs =
       if num_passed >= count then
-        Random.return (num_passed, Test_result.Pass, [])
+        Random.return (num_passed, Test_result.Pass, Log.empty)
       else if num_discarded > max_count_discarded then
-        Random.return (num_passed, Test_result.Discarded { num_discarded }, [])
+        Random.return
+          (num_passed, Test_result.Discarded { num_discarded }, Log.empty)
       else
         let output = Seq.head_exn outputs in
         let next () = Seq.tail_exn outputs () in
@@ -70,7 +82,7 @@ let test ?(count = 200) prop =
           aux ~num_discarded ~num_passed:(num_passed + 1) next
         | Proposition.Discard ->
           aux ~num_discarded:(num_discarded + 1) ~num_passed next
-        | Proposition.Fail pp ->
+        | Proposition.Fail { pp; location } ->
           let* res =
             Shrink.shrink ~max_count_find_next ~max_count_shrinks output prop
           in
@@ -81,13 +93,13 @@ let test ?(count = 200) prop =
           | Some (num_shrinks, pp, output) ->
             Random.return
               ( num_passed
-              , Test_result.Fail { num_shrinks; explanation; pp }
-              , Output.logs output )
+              , Test_result.Fail { num_shrinks; explanation; pp; location }
+              , Output.log output )
           | None ->
             Random.return
               ( num_passed
-              , Test_result.Fail { num_shrinks = 0; explanation; pp }
-              , Output.logs output ))
+              , Test_result.Fail { num_shrinks = 0; explanation; pp; location }
+              , Output.log output ))
     in
     aux
       ~num_discarded:0
@@ -95,10 +107,10 @@ let test ?(count = 200) prop =
       (Seq.map (Fun.flip Generator.run prop) inputs)
   in
   let test =
-    let+ (num_passed, status, logs), time =
+    let+ (num_passed, status, log), time =
       Random.timed @@ Random.delayed eval
     in
-    { Test_result.name = None; num_passed; status; time; logs }
+    { Test_result.name = None; num_passed; status; time; log }
   in
   single test
 
@@ -106,5 +118,7 @@ let unit f =
   let prop = Generator.delayed (fun () -> Generator.return @@ f ()) in
   test ~count:1 prop
 
-let equals pp x y = Generator.return @@ Proposition.equals pp x y
-let is_true b = Generator.return @@ Proposition.is_true b
+let equal ?loc testable x y =
+  Generator.return @@ Proposition.equal ?loc testable x y
+
+let is_true ?loc b = Generator.return @@ Proposition.is_true ?loc b

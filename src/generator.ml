@@ -6,15 +6,16 @@ let tag tag gen = make (fun input -> Output.tag tag @@ run input gen)
 let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
-  make (fun input -> Output.make ~value ~consumed:[] ~remaining:input ~logs:[])
+  make (fun input ->
+    Output.make ~value ~consumed:Consumed.empty ~remaining:input ~log:Log.empty)
 
 let bind gen f =
   make (fun input ->
     let o1 = run input gen in
     let o2 = run (Output.remaining o1) (f @@ Output.value o1) in
-    let consumed = Output.consumed o1 @ Output.consumed o2 in
-    let logs = Output.logs o1 @ Output.logs o2 in
-    o2 |> Output.set_consumed consumed |> Output.set_logs logs)
+    let consumed = Consumed.add (Output.consumed o1) (Output.consumed o2) in
+    let log = Log.add (Output.log o1) (Output.log o2) in
+    o2 |> Output.set_consumed consumed |> Output.set_log log)
 
 let both g1 g2 =
   let ( let* ) = bind in
@@ -26,7 +27,27 @@ let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
-    Output.make ~value:() ~consumed:[] ~remaining:input ~logs:[ log ])
+    Output.make ~value:() ~consumed:Consumed.empty ~remaining:input ~log)
+
+let log_string s =
+  let pp out = Format.pp_print_string out s in
+  log @@ Log.of_pp pp
+
+let log_with pp x =
+  let pp out = Format.fprintf out "%a" pp x in
+  log @@ Log.of_pp pp
+
+let log_key_value ~key value =
+  let pp out () =
+    Format.fprintf
+      out
+      "%a = %a"
+      (Printer.yellow Format.pp_print_string)
+      key
+      (Printer.blue Format.pp_print_string)
+      value
+  in
+  log_with pp ()
 
 let int32 =
   make (fun input ->
@@ -35,9 +56,9 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
-        ~consumed:[ Consumed.make Tag.Value [ value ] ]
+        ~consumed:(Consumed.make Tag.Value [ value ])
         ~remaining
-        ~logs:[])
+        ~log:Log.empty)
 
 module Syntax = struct
   let ( let* ) = bind
@@ -77,9 +98,9 @@ let one_value_of vs = one_of @@ List.map return vs
 let promote f =
   make (fun input ->
     let value x = Output.value @@ run input @@ f x in
-    let consumed = [ Consumed.make Tag.Function (Input.take 1 input) ] in
+    let consumed = Consumed.make Tag.Function (Input.take 1 input) in
     let remaining = Input.drop 1 input in
-    Output.make ~value ~consumed ~remaining ~logs:[])
+    Output.make ~value ~consumed ~remaining ~log:Log.empty)
 
 let float =
   let+ n = tag Float int32 in

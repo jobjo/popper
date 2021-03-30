@@ -4,6 +4,7 @@ type failure =
   { num_shrinks : int
   ; pp : Format.formatter -> unit -> unit
   ; explanation : string
+  ; location : string option
   }
 
 type discard = { num_discarded : int }
@@ -18,7 +19,7 @@ type result =
   ; num_passed : int
   ; status : status
   ; time : float
-  ; logs : string list
+  ; log : Log.t
   }
 
 type t =
@@ -28,21 +29,6 @@ type t =
   ; time : float
   ; results : result list
   }
-
-let result_passed { status; _ } =
-  match status with
-  | Pass -> true
-  | _ -> false
-
-let result_fail { status; _ } =
-  match status with
-  | Fail _ -> true
-  | _ -> false
-
-let result_discarded { status; _ } =
-  match status with
-  | Discarded _ -> true
-  | _ -> false
 
 let num_tests { num_passed; num_failed; num_discarded; _ } =
   num_passed + num_discarded + num_failed
@@ -131,20 +117,39 @@ let pp_header
  OK   Test foo -> testing bar   Passed 200 samples.       0.020ms
 *)
 let pp_results out res =
+  let open Printer in
   let to_row { name; num_passed; status; time; _ } =
     let status_cell =
+      let bracket color icon =
+        Table.cell (fun out () ->
+          fprintf
+            out
+            "%a%a%a"
+            (faint pp_print_string)
+            "["
+            (color pp_print_string)
+            icon
+            (faint pp_print_string)
+            "]")
+      in
       match status with
-      | Pass -> Table.text ~color:Printer.Color.green "✓"
-      | Fail _ -> Table.text ~color:Printer.Color.red "✖"
-      | Discarded _ -> Table.text ~color:Printer.Color.yellow "☐"
+      | Pass -> bracket green "✓"
+      | Fail _ -> bracket red "✖"
+      | Discarded _ -> bracket yellow "☐"
     in
     let name =
       let color =
         match status with
-        | Fail _ -> Printer.Color.red
-        | _ -> Printer.Color.blue
+        | Fail _ -> red
+        | _ -> Printer.blue
       in
-      Table.text ~color @@ Option.fold ~none:"" ~some:Fun.id name
+      Table.cell
+      @@ fun out () ->
+      fprintf
+        out
+        "%a"
+        (color pp_print_string)
+        (Option.fold ~none:"" ~some:Fun.id name)
     in
     let num_passed =
       let msg =
@@ -158,33 +163,23 @@ let pp_results out res =
         | Discarded { num_discarded } ->
           Printf.sprintf "Passed %d and %d discarded" num_passed num_discarded
       in
-      Table.text ~color:Printer.Color.faint msg
+      Table.cell @@ fun out () -> fprintf out "%a" (faint pp_print_string) msg
     in
     let time =
-      Table.text
-        ~color:Printer.Color.blue
-        (Printf.sprintf "%.0fms" (time *. 1000.))
+      Table.cell
+      @@ fun out () ->
+      let msg = Printf.sprintf "%.0fms" (time *. 1000.) in
+      fprintf out "%a" (blue pp_print_string) msg
     in
     [ status_cell; name; num_passed; time ]
   in
   let columns = [ Table.left; Table.left; Table.left; Table.right ] in
   Table.of_list ~columns @@ List.map to_row res |> Table.pp out
 
-let rendered_text_width =
-  let reg = Str.regexp "\\[[0-9]+m" in
-  fun s ->
-    s
-    |> Str.global_replace reg ""
-    |> String.to_seq
-    |> Seq.filter (fun c -> Char.code c <> 27)
-    |> Seq.fold_left (fun n _ -> n + 1) 0
-
 (* Inspired by Alcotest: 
 https://github.com/mirage/alcotest/blob/a5d3c0e498a8706427e6337d49a1cbf235b4231d/src/alcotest-engine/pp.ml#L184 *)
 let with_box (type a) f out (a : a) =
-  let text_width =
-    Format.kasprintf Fun.id "| %a |" f a |> rendered_text_width
-  in
+  let text_width = Util.Format.rendered_length f a + 4 in
   let width =
     let min_box_width = 90 in
     max min_box_width text_width
@@ -212,9 +207,9 @@ let pp_failed_results out res =
     (function
       | { name
         ; num_passed
-        ; status = Fail { explanation = _; num_shrinks; pp }
+        ; status = Fail { explanation = _; num_shrinks; location; pp }
         ; time = _
-        ; logs
+        ; log
         } ->
         let name = Option.fold ~none:"" ~some:(Printf.sprintf "`%s'") name in
         let pp_header out () =
@@ -229,32 +224,35 @@ let pp_failed_results out res =
             (Printer.blue pp_print_int)
             num_shrinks
         in
-        let pp_logs out () =
-          match logs with
-          | [] -> ()
-          | logs ->
+        let pp_reason out () =
+          Format.fprintf out "@[<v 2>Reason:@;@;%a@]" pp ()
+        in
+        let pp_log out () =
+          if Util.Format.rendered_length Log.pp log > 0 then
+            fprintf out "@,@[<v 2>Log:@,@,%a@]" Log.pp log
+          else
+            ()
+        in
+        let pp_location out () =
+          match location with
+          | Some loc ->
             fprintf
               out
-              "@,@[<v 2>Logs:@,@,%a@]"
-              (fun out () ->
-                List.iter
-                  (fun log ->
-                    log
-                    |> String.split_on_char '\n'
-                    |> List.iter (fun line ->
-                         fprintf out "%a@," (Printer.blue pp_print_string) line);
-                    fprintf out "@,")
-                  logs)
-              ()
+              "@[<v 2>Location:@,@,%a@]"
+              (Printer.blue pp_print_string)
+              loc
+          | None -> ()
         in
         fprintf
           out
-          "@[<v 2>%a@[<v 2>@,%a@,%a@]@,@]@.@."
+          "@[<v 2>%a@[<v 2>@,%a@,%a@,%a@,@]@,@]"
           (with_box pp_header)
           ()
-          pp
+          pp_reason
           ()
-          pp_logs
+          pp_log
+          ()
+          pp_location
           ()
       | _ -> ())
     res

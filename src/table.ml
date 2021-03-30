@@ -11,15 +11,16 @@ type alignment =
   | Center
   | Right
 
-type cell =
-  { color : Printer.Color.t option
-  ; value : string
-  }
+type cell = Format.formatter -> unit -> unit
 
 let left = Left
 let right = Right
 let center = Center
-let text ?color value = { color; value }
+
+(* let text ?color value =
+  { color; value = (fun out () -> Format.fprintf out "%s" value) } *)
+
+let cell = Fun.id
 
 type t =
   { num_rows : int
@@ -32,31 +33,28 @@ let max_column_length ~num_rows ~cell col =
   List.init num_rows (fun row ->
     Option.fold
       ~none:0
-      ~some:(fun { value; _ } -> 2 + String.length value)
+      ~some:(fun value -> 2 + Util.Format.rendered_length value ())
       (cell ~row ~col))
   |> List.fold_left max 0
 
 let make_space n = String.concat "" @@ List.init n (Fun.const " ")
 
-let render_cell ~column_width { color; value } align out =
-  let cell_width = String.length value in
+let render_cell ~column_width cell align out =
+  let cell_width = Util.Format.rendered_length cell () in
   let space = column_width - cell_width in
-  let cell_str =
-    match align with
-    | Left -> Printf.sprintf "%s%s" value (make_space space)
-    | Center ->
-      let space_left = space / 2 in
-      let space_right = (space / 2) + (space mod 2) in
-      Printf.sprintf
-        "%s%s%s"
-        (make_space space_left)
-        value
-        (make_space space_right)
-    | Right -> Printf.sprintf "%s%s" (make_space space) value
-  in
-  match color with
-  | Some color -> Printer.pp_color color Format.pp_print_string out cell_str
-  | None -> Format.fprintf out "%s" cell_str
+  match align with
+  | Left -> Format.fprintf out "%a%s" cell () (make_space space)
+  | Center ->
+    let space_left = space / 2 in
+    let space_right = (space / 2) + (space mod 2) in
+    Format.fprintf
+      out
+      "%s%a%s"
+      (make_space space_left)
+      cell
+      ()
+      (make_space space_right)
+  | Right -> Format.fprintf out "%s%a" (make_space space) cell ()
 
 let of_list ~columns rows =
   let cell =
@@ -79,8 +77,7 @@ let pp out { num_rows; num_cols; cell; columns } =
   let cols_and_widths = List.combine columns col_widths in
   let render_cell ~row ~col ~column_width column =
     let cell =
-      Option.fold ~none:{ color = None; value = "" } ~some:Fun.id
-      @@ cell ~row ~col
+      Option.fold ~none:(fun _ _ -> ()) ~some:Fun.id @@ cell ~row ~col
     in
     render_cell ~column_width cell column out
   in

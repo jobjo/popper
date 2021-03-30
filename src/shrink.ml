@@ -10,9 +10,7 @@ type t =
 
 let of_output output =
   let data =
-    Output.consumed output
-    |> List.concat_map (fun cons ->
-         List.map (fun d -> Consumed.tag cons, d) @@ Consumed.data cons)
+    Consumed.to_list @@ Output.consumed output
     |> List.mapi (fun ix (tag, d) -> ix, tag, d)
   in
   let map =
@@ -95,10 +93,9 @@ let find_next ~max_count prop output =
         |> Seq.take 1000
         |> Seq.filter_map (fun input ->
              let output = Generator.run input prop in
-             if Proposition.is_fail @@ Output.value output then
-               Some output
-             else
-               None)
+             match Output.value output with
+             | Proposition.Fail _ -> Some output
+             | _ -> None)
         |> Seq.head
       in
       match output with
@@ -112,7 +109,8 @@ let shrink ~max_count_find_next ~max_count_shrinks output prop =
   let rec aux ~ix ~num_unique output =
     if ix >= max_count_shrinks then
       match Output.value output with
-      | Proposition.Fail pp -> Random.return @@ Some (num_unique, pp, output)
+      | Proposition.Fail { pp; location = _ } ->
+        Random.return @@ Some (num_unique, pp, output)
       | _ -> Random.return None
     else
       match Output.value output with

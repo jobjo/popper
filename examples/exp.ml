@@ -37,12 +37,14 @@ let gen =
   delayed (aux 1)
 
 let test_and =
+  let open Generator in
   Test.test
     (let* e1 = gen in
      let* e2 = gen in
-     let* () = Generator.log (show e1) in
-     let* () = Generator.log (show e2) in
-     Test.is_true ((eval e1 && eval e2) = eval (And (e1, e2))))
+     let* () = log_key_value ~key:"e1" (show e1) in
+     let* () = log_key_value ~key:"e2" (show e2) in
+     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
+     Test.is_true ~loc:__LOC__ condition)
 
 let test_or =
   Test.test

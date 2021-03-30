@@ -1,0 +1,10 @@
+type t = Format.formatter -> unit -> unit
+
+let empty _ _ = ()
+
+let of_pp (pp : Format.formatter -> unit) out () =
+  let pp out () = pp out in
+  Format.fprintf out "%a@," pp ()
+
+let pp out (t : t) = t out ()
+let add p1 p2 out () = Format.fprintf out "%a%a" pp p1 pp p2

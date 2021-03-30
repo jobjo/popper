@@ -1,26 +1,23 @@
 type 'a t =
   { value : 'a
-  ; consumed : Consumed.t list
+  ; consumed : Consumed.t
   ; remaining : Input.t
-  ; logs : string list
+  ; log : Log.t
   }
 
-let make ~value ~consumed ~remaining ~logs =
-  { value; consumed; remaining; logs }
-
+let make ~value ~consumed ~remaining ~log = { value; consumed; remaining; log }
 let value { value; _ } = value
 let consumed { consumed; _ } = consumed
 let set_consumed consumed output = { output with consumed }
 let set_value value output = { output with value }
 let set_remaining remaining output = { output with remaining }
 let remaining { remaining; _ } = remaining
-let logs { logs; _ } = logs
-let set_logs logs output = { output with logs }
+let log { log; _ } = log
+let set_log log output = { output with log }
 
-let map f { value; consumed; remaining; logs } =
-  { value = f value; consumed; remaining; logs }
+let map f { value; consumed; remaining; log } =
+  { value = f value; consumed; remaining; log }
 
-let tag tag { value; consumed; remaining; logs } =
-  let data = List.concat_map Consumed.data consumed in
-  let consumed = [ Consumed.make tag data ] in
-  { value; consumed; remaining; logs }
+let tag tag { value; consumed; remaining; log } =
+  let consumed = Consumed.tag tag consumed in
+  { value; consumed; remaining; log }

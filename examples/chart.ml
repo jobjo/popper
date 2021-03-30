@@ -19,11 +19,13 @@ let gen =
   let* y_axis = string in
   let* x_values = sequence @@ List.init num_values (fun _ -> int) in
   let* y_values = sequence @@ List.init num_values (fun _ -> int) in
-  return { x_values; y_values; x_axis; y_axis }
+  let chart = { x_values; y_values; x_axis; y_axis } in
+  return chart
 
 let test_flip =
   Test.test
+    ~count:1000
     (let* s = gen in
-     Test.equals pp (flip @@ flip s) s)
+     Test.equal pp (flip @@ flip s) s)
 
 let suite = Test.suite [ "Flip series", test_flip ]

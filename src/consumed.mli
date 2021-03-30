@@ -1,5 +1,7 @@
 type t
 
-val make : Tag.t -> Int32.t list -> t
-val data : t -> Int32.t list
-val tag : t -> Tag.t
+val empty : t
+val add : t -> t -> t
+val tag : Tag.t -> t -> t
+val make : Tag.t -> int32 list -> t
+val to_list : t -> (Tag.t * int32) list
