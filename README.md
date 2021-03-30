@@ -1,6 +1,11 @@
 # Popper
 
-*An OCaml testing library in the spirit of Karl Popper*
+*An OCaml testing library in the spirit of Karl Popper.*
+
+## Examples
+
+Hello-world:
+
 
 ```ocaml
 open Popper
