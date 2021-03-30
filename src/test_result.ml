@@ -47,14 +47,6 @@ let result_discarded { status; _ } =
 let num_tests { num_passed; num_failed; num_discarded; _ } =
   num_passed + num_discarded + num_failed
 
-(* OK: 5/5 tests passed! *)
-
-(* OK: 4/5 tests passed, 1 discarded and 0 failed. *)
-
-(* FAIL: 4/5 tests passed and 1 failed. *)
-
-(* FAIL: 3/5 tests passed, 1 discared and 1 failed. *)
-
 let pp_header
   out
   ({ num_passed; num_failed; num_discarded; time; results = _ } as res)
@@ -93,7 +85,7 @@ let pp_header
     (* PASS a/n tests passed, x discared and 0 failed in ns!*)
     fprintf
       out
-      "%a %a, %a and %a in %a!"
+      "%a %a, %a and %a in %a."
       (Printer.green pp_print_string)
       pass_label
       pp_passed
@@ -273,7 +265,7 @@ let pp out ({ results; _ } as res) =
   else
     fprintf
       out
-      "@;@[<v 2>%a@,@,%a@]@;%a"
+      "@.@[<v 2>%a@,@,%a@]@;%a"
       pp_header
       res
       pp_results

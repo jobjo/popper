@@ -14,3 +14,11 @@ let suite =
 
 let () = Test.run suite
 ```
+
+When run gives:
+
+```
+PASS: 1/1 tests passed in 0.03s.
+
+  ✓    Passed 200 samples    28ms
+```
