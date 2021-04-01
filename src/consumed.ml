@@ -8,6 +8,10 @@ let tag t c = Tag (t, c)
 let make t ds = tag t @@ Entries ds
 let empty = Entries []
 
+let is_empty = function
+  | Entries [] -> true
+  | _ -> false
+
 let to_list t =
   let data = ref [] in
   let add t d = data := (t, d) :: !data in

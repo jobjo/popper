@@ -18,6 +18,7 @@ type result =
   ; status : status
   ; time : float
   ; log : Log.t
+  ; is_unit : bool
   }
 
 type t =

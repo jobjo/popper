@@ -70,36 +70,52 @@ let test ?(count = 200) f =
     let* inputs = Input.make_seq in
     let rec aux ~num_discarded ~num_passed outputs =
       if num_passed >= count then
-        Random.return (num_passed, Test_result.Pass, Log.empty)
+        Random.return (num_passed, Test_result.Pass, Log.empty, false)
       else if num_discarded > max_count_discarded then
         Random.return
-          (num_passed, Test_result.Discarded { num_discarded }, Log.empty)
+          (num_passed, Test_result.Discarded { num_discarded }, Log.empty, false)
       else
         let output = Seq.head_exn outputs in
+        let is_unit = Consumed.is_empty @@ Output.consumed output in
         let next () = Seq.tail_exn outputs () in
         match Output.value output with
         | Proposition.Pass ->
-          aux ~num_discarded ~num_passed:(num_passed + 1) next
+          if is_unit then
+            Random.return (1, Test_result.Pass, Log.empty, is_unit)
+          else
+            aux ~num_discarded ~num_passed:(num_passed + 1) next
         | Proposition.Discard ->
-          aux ~num_discarded:(num_discarded + 1) ~num_passed next
+          if is_unit then
+            Random.return
+              ( 1
+              , Test_result.Discarded { num_discarded = 1 }
+              , Log.empty
+              , is_unit )
+          else
+            aux ~num_discarded:(num_discarded + 1) ~num_passed next
         | Proposition.Fail { pp; location } ->
           let* res =
             Shrink.shrink ~max_count_find_next ~max_count_shrinks output @@ f ()
           in
           let explanation =
-            Printf.sprintf "Failed after %d samples" num_passed
+            if is_unit then
+              "Failed"
+            else
+              Printf.sprintf "Failed after %d samples" num_passed
           in
           (match res with
           | Some (num_shrinks, pp, output) ->
             Random.return
               ( num_passed
               , Test_result.Fail { num_shrinks; explanation; pp; location }
-              , Output.log output )
+              , Output.log output
+              , is_unit )
           | None ->
             Random.return
               ( num_passed
               , Test_result.Fail { num_shrinks = 0; explanation; pp; location }
-              , Output.log output ))
+              , Output.log output
+              , is_unit ))
     in
     aux
       ~num_discarded:0
@@ -107,10 +123,10 @@ let test ?(count = 200) f =
       (Seq.map (fun x -> Generator.run x @@ f ()) inputs)
   in
   let test =
-    let+ (num_passed, status, log), time =
+    let+ (num_passed, status, log, is_unit), time =
       Random.timed @@ Random.delayed eval
     in
-    { Test_result.name = None; num_passed; status; time; log }
+    { Test_result.name = None; num_passed; status; time; log; is_unit }
   in
   single test
 

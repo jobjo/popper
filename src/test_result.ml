@@ -20,6 +20,7 @@ type result =
   ; status : status
   ; time : float
   ; log : Log.t
+  ; is_unit : bool
   }
 
 type t =
@@ -118,7 +119,7 @@ let pp_header
 *)
 let pp_results out res =
   let open Printer in
-  let to_row { name; num_passed; status; time; _ } =
+  let to_row { name; num_passed; status; time; is_unit; log = _ } =
     let status_cell =
       let bracket color icon =
         Table.cell (fun out () ->
@@ -155,10 +156,10 @@ let pp_results out res =
       let msg =
         match status with
         | Pass ->
-          Printf.sprintf
-            "Passed %d %s"
-            num_passed
-            (if num_passed = 1 then "sample" else "samples")
+          if is_unit then
+            "Passed"
+          else
+            Printf.sprintf "Passed %d samples" num_passed
         | Fail { explanation; _ } -> explanation
         | Discarded { num_discarded } ->
           Printf.sprintf "Passed %d and %d discarded" num_passed num_discarded
@@ -210,19 +211,23 @@ let pp_failed_results out res =
         ; status = Fail { explanation = _; num_shrinks; location; pp }
         ; time = _
         ; log
+        ; is_unit
         } ->
         let name = Option.fold ~none:"" ~some:(Printf.sprintf "`%s'") name in
         let pp_header out () =
-          fprintf
-            out
-            "Failed %a after %a %s and %a shrinks."
-            (Printer.red pp_print_string)
-            name
-            (Printer.blue pp_print_int)
-            num_passed
-            (if num_passed = 1 then "sample" else "samples")
-            (Printer.blue pp_print_int)
-            num_shrinks
+          if is_unit then
+            fprintf out "Failed %a" (Printer.red pp_print_string) name
+          else
+            fprintf
+              out
+              "Failed %a after %a %s and %a shrinks."
+              (Printer.red pp_print_string)
+              name
+              (Printer.blue pp_print_int)
+              num_passed
+              (if num_passed = 1 then "sample" else "samples")
+              (Printer.blue pp_print_int)
+              num_shrinks
         in
         let pp_reason out () =
           Format.fprintf out "@[<v 2>Reason:@;@;%a@]" pp ()
