@@ -1,7 +1,6 @@
 type t
 
-val test : ?count:int -> Proposition.t Generator.t -> t
-val unit : (unit -> Proposition.t) -> t
+val test : ?count:int -> (unit -> Proposition.t Generator.t) -> t
 val suite : (string * t) list -> t
 val run : ?seed:Random.Seed.t -> t -> unit
 

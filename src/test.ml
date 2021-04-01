@@ -65,7 +65,7 @@ let max_count_shrinks = 1000
 let max_count_find_next = 100
 let max_count_discarded = 1000
 
-let test ?(count = 200) prop =
+let test ?(count = 200) f =
   let eval () =
     let* inputs = Input.make_seq in
     let rec aux ~num_discarded ~num_passed outputs =
@@ -84,7 +84,7 @@ let test ?(count = 200) prop =
           aux ~num_discarded:(num_discarded + 1) ~num_passed next
         | Proposition.Fail { pp; location } ->
           let* res =
-            Shrink.shrink ~max_count_find_next ~max_count_shrinks output prop
+            Shrink.shrink ~max_count_find_next ~max_count_shrinks output @@ f ()
           in
           let explanation =
             Printf.sprintf "Failed after %d samples" num_passed
@@ -104,7 +104,7 @@ let test ?(count = 200) prop =
     aux
       ~num_discarded:0
       ~num_passed:0
-      (Seq.map (Fun.flip Generator.run prop) inputs)
+      (Seq.map (fun x -> Generator.run x @@ f ()) inputs)
   in
   let test =
     let+ (num_passed, status, log), time =
@@ -113,10 +113,6 @@ let test ?(count = 200) prop =
     { Test_result.name = None; num_passed; status; time; log }
   in
   single test
-
-let unit f =
-  let prop = Generator.delayed (fun () -> Generator.return @@ f ()) in
-  test ~count:1 prop
 
 let equal ?loc testable x y =
   Generator.return @@ Proposition.equal ?loc testable x y
