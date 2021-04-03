@@ -1,0 +1,3 @@
+(library
+ (public_name popper)
+ (libraries containers pringo str))

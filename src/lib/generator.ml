@@ -56,7 +56,7 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
-        ~consumed:(Consumed.make Tag.Value [ value ])
+        ~consumed:(Consumed.make [ value ])
         ~remaining
         ~log:Log.empty)
 
@@ -77,17 +77,43 @@ let rec sequence gs =
     let* xs = sequence gs in
     return (x :: xs)
 
-let many g =
-  let* n = tag Operator @@ map Int32.to_int int32 in
-  sequence @@ List.init (n mod 10) (fun _ -> g)
-
 let range mn mx =
   let+ n = tag Int int32 in
   mn + (Int32.to_int n mod (mx - mn))
 
 let one_of gs =
-  let* n = range 0 (List.length gs) in
+  let* n = tag Tag.Operator @@ range 0 (List.length gs) in
   List.nth gs n
+
+let sized f =
+  let* n = tag Tag.Size int32 in
+  let max_size = 100l in
+  let block = Int32.div Int32.max_int max_size in
+  let n = Int32.to_int @@ Int32.div n block in
+  f n
+
+let list g =
+  let rec aux size =
+    if size <= 1 then
+      return []
+    else
+      let f () =
+        let+ x = g
+        and+ xs = aux (size - 1) in
+        x :: xs
+      in
+      one_of [ return []; delayed f ]
+  in
+  sized aux
+
+let option g =
+  sized (fun size ->
+    if size <= 1 then
+      return None
+    else
+      one_of [ return None; map Option.some g ])
+
+let result ~ok ~error = one_of [ map Result.ok ok; map Result.error error ]
 
 let char =
   let+ n = tag Char @@ map Int32.to_int int32 in
@@ -98,13 +124,16 @@ let one_value_of vs = one_of @@ List.map return vs
 let promote f =
   make (fun input ->
     let value x = Output.value @@ run input @@ f x in
-    let consumed = Consumed.make Tag.Function (Input.take 1 input) in
+    let consumed =
+      Consumed.tag Tag.Function @@ Consumed.make (Input.take 1 input)
+    in
     let remaining = Input.drop 1 input in
     Output.make ~value ~consumed ~remaining ~log:Log.empty)
 
 let float =
-  let+ n = tag Float int32 in
-  Int32.float_of_bits n
+  tag Tag.Float
+  @@ let+ n = tag Float int32 in
+     Int32.float_of_bits n
 
 let int64 =
   let+ f = float in
@@ -115,18 +144,8 @@ let bool = one_value_of [ false; true ]
 let arrow g =
   let f x =
     make (fun input ->
-      let () =
-        match Input.head input with
-        | Some x -> Printf.printf "Value %d\n" (Int32.to_int x)
-        | None -> ()
-      in
       let h = Int32.of_int @@ Hashtbl.hash x in
       let data = Input.map (Int32.logxor h) input in
-      let () =
-        match Input.head data with
-        | Some x -> Printf.printf "Data value %d\n" (Int32.to_int x)
-        | None -> ()
-      in
       run data g)
   in
   promote f
@@ -141,4 +160,10 @@ let int =
 let string =
   map
     (fun input -> String.concat "" @@ List.map (String.make 1) input)
-    (many char)
+    (list char)
+
+let with_consumed g =
+  make (fun input ->
+    let output = run input g in
+    let c = Output.consumed output in
+    Output.map (fun x -> x, c) output)

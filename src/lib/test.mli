@@ -6,7 +6,7 @@ val run : ?seed:Random.Seed.t -> t -> unit
 
 val equal
   :  ?loc:string
-  -> 'a Comparable.t
+  -> 'a Comparator.t
   -> 'a
   -> 'a
   -> Proposition.t Generator.t

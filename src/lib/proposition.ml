@@ -11,11 +11,11 @@ let fail ?loc pp = Fail { pp; location = loc }
 let fail_with ?loc s = fail ?loc (fun out () -> Format.fprintf out "%s" s)
 
 let equal ?loc testable x y =
-  if Comparable.equal testable x y then
+  if Comparator.equal testable x y then
     pass
   else
     let pp out () =
-      let pp = Comparable.pp testable in
+      let pp = Comparator.pp testable in
       Format.fprintf out "@[<hv>%a @,<>@;%a@]" pp x pp y
     in
     fail ?loc (Printer.red pp)

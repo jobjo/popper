@@ -2,4 +2,4 @@
  (name run)
  (libraries alcotest containers popper)
  (preprocess
-  (pps ppx_deriving.make ppx_deriving.show)))
+  (pps ppx_deriving.make ppx_deriving.show ppx_deriving_popper)))

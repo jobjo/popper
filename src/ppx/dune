@@ -1,0 +1,9 @@
+(library
+ (name ppx_deriving_popper)
+ (public_name ppx_deriving_popper)
+ (libraries ppxlib)
+ (preprocess
+  (pps ppxlib.metaquot))
+ (ppx_runtime_libraries popper)
+ (modules ppx_deriving_popper)
+ (kind ppx_deriver))
