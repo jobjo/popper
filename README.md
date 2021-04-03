@@ -62,6 +62,8 @@ let test_and =
     let* e2 = generate in
     let* () = log_key_value ~key:"e1" (show e1) in
     let* () = log_key_value ~key:"e2" (show e2) in
+    let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
+    Test.is_true ~loc:__LOC__ condition)
 
 let () = Test.run test_and
 ```
