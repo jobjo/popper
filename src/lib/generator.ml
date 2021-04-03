@@ -37,7 +37,7 @@ let log_with pp x =
   let pp out = Format.fprintf out "%a" pp x in
   log @@ Log.of_pp pp
 
-let log_key_value ~key value =
+let log_key_value key value =
   let pp out () =
     Format.fprintf
       out

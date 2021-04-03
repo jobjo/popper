@@ -25,7 +25,7 @@ val string : string t
 val delayed : (unit -> 'a t) -> 'a t
 val log_string : string -> unit t
 val log_with : (Format.formatter -> 'a -> unit) -> 'a -> unit t
-val log_key_value : key:string -> string -> unit t
+val log_key_value : string -> string -> unit t
 val with_consumed : 'a t -> ('a * Consumed.t) t
 
 module Syntax : sig
