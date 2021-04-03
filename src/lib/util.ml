@@ -9,3 +9,10 @@ module Format = struct
     |> Seq.filter (fun c -> Char.code c <> 27)
     |> Seq.fold_left (fun n _ -> n + 1) 0
 end
+
+module Seq = struct
+  let head_tail_exn s =
+    match s () with
+    | Seq.Nil -> failwith "Unexpected"
+    | Cons (a, f) -> a, f
+end

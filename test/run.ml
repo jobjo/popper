@@ -16,16 +16,19 @@ type contact =
 [@@deriving show, popper]
 
 let my_test =
-  Test.test ~count:1 (fun () ->
+  Test.test ~count:200 (fun () ->
     let open Generator.Syntax in
     let* person, consumed = Generator.with_consumed generate_person in
-    fprintf
-      std_formatter
-      "@.@[<v>%a@,%a@]"
-      Consumed.pp
-      consumed
-      pp_person
-      person;
-    Test.is_true true)
+    let f () =
+      fprintf
+        std_formatter
+        "@.@.@[<v 2>Consumed:@,%a@]@;@;@[<v 2>Person:@,%a@]"
+        Consumed.pp
+        consumed
+        pp_person
+        person
+    in
+    let _ = f in
+    Test.is_true (List.length person.friends <> 10))
 
 (* let () = Test.run my_test *)

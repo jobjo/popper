@@ -213,6 +213,7 @@ let pp_failed_results out res =
         ; log
         ; is_unit
         } ->
+        let num_samples = num_passed + 1 in
         let name = Option.fold ~none:"" ~some:(Printf.sprintf "`%s'") name in
         let pp_header out () =
           if is_unit then
@@ -224,8 +225,8 @@ let pp_failed_results out res =
               (Printer.red pp_print_string)
               name
               (Printer.blue pp_print_int)
-              num_passed
-              (if num_passed = 1 then "sample" else "samples")
+              num_samples
+              (if num_samples = 1 then "sample" else "samples")
               (Printer.blue pp_print_int)
               num_shrinks
         in

@@ -75,9 +75,8 @@ let test ?(count = 200) f =
         Random.return
           (num_passed, Test_result.Discarded { num_discarded }, Log.empty, false)
       else
-        let output = Seq.head_exn outputs in
+        let output, next = Util.Seq.head_tail_exn outputs in
         let is_unit = Consumed.is_empty @@ Output.consumed output in
-        let next () = Seq.tail_exn outputs () in
         match Output.value output with
         | Proposition.Pass ->
           if is_unit then
