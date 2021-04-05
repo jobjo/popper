@@ -36,3 +36,10 @@ let list t =
 let int = make ( = ) pp_print_int
 let string = make String.equal pp_print_string
 let bool = make Bool.equal pp_print_bool
+
+let option t =
+  let eq = equal t in
+  let printer =
+    pp_print_option ~none:(fun formatter () -> fprintf formatter "None") @@ pp t
+  in
+  make (Option.equal eq) printer

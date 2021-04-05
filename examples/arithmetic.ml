@@ -5,6 +5,7 @@ open Format
 
 let simple_sum x y = x + y
 let simple_diff x y = x - y
+let simple_div x y = if y = 0 then None else Some (x / y)
 
 type point =
   { x : int
@@ -49,5 +50,19 @@ let test_point_sum =
     print the failing case *)
     Test.is_true (actual = expected))
 
+let test_division =
+  Test.test ~count:100 (fun () ->
+    let* x = range (-10) 10 in
+    let* y = range (-10) 10 in
+    let expected = if y = 0 then None else Some (x / y) in
+    let actual = simple_div x y in
+    let comparator = Comparator.option Comparator.int in
+    Test.equal comparator actual expected)
+
 let suite =
-  Test.suite [ "Sum", test_sum; "Diff", test_diff; "Point Sum", test_point_sum ]
+  Test.suite
+    [ "Sum", test_sum
+    ; "Diff", test_diff
+    ; "Point Sum", test_point_sum
+    ; "Divide", test_division
+    ]
