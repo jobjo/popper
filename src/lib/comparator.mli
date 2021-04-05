@@ -8,3 +8,4 @@ val list : 'a t -> 'a list t
 val int : int t
 val bool : bool t
 val string : string t
+val option : 'a t -> 'a option t

@@ -36,3 +36,14 @@ let list t =
 let int = make ( = ) pp_print_int
 let string = make String.equal pp_print_string
 let bool = make Bool.equal pp_print_bool
+
+let option t =
+  let eq = equal t in
+  let printer = pp_print_option @@ pp t in
+  make
+    (fun x_opt y_opt ->
+      match x_opt, y_opt with
+      | Some x, Some y -> eq x y
+      | None, None -> true
+      | _, _ -> false)
+    printer
