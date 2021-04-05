@@ -42,10 +42,4 @@ let option t =
   let printer =
     pp_print_option ~none:(fun formatter () -> fprintf formatter "None") @@ pp t
   in
-  make
-    (fun x_opt y_opt ->
-      match x_opt, y_opt with
-      | Some x, Some y -> eq x y
-      | None, None -> true
-      | _, _ -> false)
-    printer
+  make (Option.equal eq) printer
