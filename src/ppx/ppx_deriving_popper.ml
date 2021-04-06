@@ -19,12 +19,35 @@ let generator_of_type ~size ~loc = function
     let e = A.evar ~loc @@ fun_name t in
     [%expr Popper.Generator.delayed (fun () -> [%e e] [%e size])]
 
-let rec of_tuple ~loc types f =
+let rec of_label_declarations ~loc fields f =
+  let size = [%expr size / [%e A.eint ~loc @@ List.length fields]] in
+  let accum (var, value) body =
+    let name = A.pvar ~loc var in
+    [%expr
+      Popper.Generator.Syntax.(
+        let* [%p name] = [%e value] in
+        [%e body])]
+  in
+  let field_exprs = List.map (of_label_declaration ~size) fields in
+  let ident_exps =
+    List.map
+      (fun (name, _) ->
+        let exp = A.evar ~loc name in
+        ({ txt = lident name; loc }, exp))
+      field_exprs
+  in
+  let record =
+    [%expr Popper.Generator.return [%e f @@ A.pexp_record ~loc ident_exps None]]
+  in
+  List.fold_right accum field_exprs record
+
+and of_tuple ~loc types f =
   let size = [%expr size / [%e A.eint ~loc @@ List.length types]] in
   let accum (name, value) body =
     [%expr
-      let* [%p A.pvar ~loc name] = [%e value] in
-      [%e body]]
+      Popper.Generator.Syntax.(
+        let* [%p A.pvar ~loc name] = [%e value] in
+        [%e body])]
   in
   let exprs = List.map (of_core_type ~size) types in
   let name_exp_list =
@@ -51,6 +74,17 @@ and of_applied_type ~size ~name ts =
         ~error:[%e of_core_type ~size t2]]
   | s, _ -> failwith ("Unsupported type operator: " ^ s)
 
+and of_row_field_desc = function
+  | Rtag (name, _, []) ->
+    [%expr Popper.Generator.return [%e A.pexp_variant ~loc name.txt None]]
+  | Rtag (name, _, cts) ->
+    of_tuple ~loc cts
+    @@ fun expr -> [%expr [%e A.pexp_variant ~loc name.txt (Some expr)]]
+  | Rinherit _ -> failwith "Rinherit"
+
+and of_row_field { prf_desc; _ } = of_row_field_desc prf_desc
+and of_row_fields rfs = List.map of_row_field rfs
+
 and of_core_type_desc ~size = function
   | Ptyp_constr ({ txt = Lident name; loc }, []) ->
     generator_of_type ~size ~loc name
@@ -60,12 +94,14 @@ and of_core_type_desc ~size = function
     [%expr Popper.Generator.arrow [%e gen_exp]]
   | Ptyp_tuple ts -> of_tuple ~loc ts Fun.id
   | Ptyp_alias (t, _) -> of_core_type ~size t
-  (* 
-  | Ptyp_variant of row_field list * closed_flag * label list option
-  | Ptyp_poly of string loc list * core_type
-  | Ptyp_package of package_type
-  | Ptyp_extension of extension 
-  *)
+  | Ptyp_variant (row_fields, _, _) ->
+    let exps = of_row_fields row_fields in
+    [%expr
+      if size <= 0 then
+        [%e List.hd exps]
+      else
+        Popper.Generator.one_of [%e A.elist ~loc exps]]
+  | Ptyp_poly _ -> failwith "Unsupported Ptype_poly"
   | _ -> failwith "Deriving popper failed for type"
 
 and of_core_type ~size { ptyp_desc; ptyp_attributes = _; _ } =
@@ -96,8 +132,9 @@ let of_record ~loc ~fun_name fields =
   let accum (var, value) body =
     let name = A.pvar ~loc var in
     [%expr
-      let* [%p name] = [%e value] in
-      [%e body]]
+      Popper.Generator.Syntax.(
+        let* [%p name] = [%e value] in
+        [%e body])]
   in
   let field_exprs = List.map (of_label_declaration ~size) fields in
   let ident_exps =
@@ -116,7 +153,6 @@ let of_record ~loc ~fun_name fields =
     [%expr
       fun size ->
         ignore size;
-        let open Popper.Generator.Syntax in
         [%e body]]
   in
   A.value_binding ~loc ~pat ~expr
@@ -127,15 +163,16 @@ let of_constructor_declaration
   ~size:_
   { pcd_name = { txt = name; _ }; pcd_args; pcd_res = _; _ }
   =
+  let constr_decl =
+    let name = with_loc ~loc name in
+    A.constructor_declaration ~loc ~name ~args:pcd_args ~res:None
+  in
+  let construct expr = [%expr [%e A.econstruct constr_decl (Some expr)]] in
   match pcd_args with
-  | Pcstr_tuple ts ->
-    let constr_decl =
-      let name = with_loc ~loc name in
-      A.constructor_declaration ~loc ~name ~args:pcd_args ~res:None
-    in
-    of_tuple ~loc ts
-    @@ fun expr -> [%expr [%e A.econstruct constr_decl (Some expr)]]
-  | _ -> failwith "Constructor not supported"
+  | Pcstr_tuple [] ->
+    [%expr Popper.Generator.return [%e A.econstruct constr_decl None]]
+  | Pcstr_tuple ts -> of_tuple ~loc ts construct
+  | Pcstr_record ldl -> of_label_declarations ~loc ldl construct
 
 let of_variant ~loc ~fun_name constrs =
   let size = [%expr (size - 1) / [%e A.eint ~loc (List.length constrs)]] in
@@ -145,7 +182,6 @@ let of_variant ~loc ~fun_name constrs =
   let expr =
     [%expr
       fun size ->
-        let open Popper.Generator.Syntax in
         if size <= 0 then
           [%e List.hd exps]
         else
@@ -174,8 +210,8 @@ let of_type_declaration
       | Some t ->
         let expr =
           [%expr
-            fun _ ->
-              let open Popper.Generator.Syntax in
+            fun size ->
+              ignore size;
               [%e of_core_type ~size:[%expr size] t]]
         in
         let pat = A.pvar ~loc fun_name in
@@ -183,11 +219,21 @@ let of_type_declaration
       | None -> failwith "Unsupprted type kind")
     | _ -> failwith "Unsupported type kind"
   in
-  ( fn
-  , A.value_binding
+  let pat = A.pvar ~loc fun_name in
+  let expr =
+    let type_constraint =
+      let li = Ldot (Ldot (Lident "Popper", "Generator"), "t") in
+      A.ptyp_constr
+        ~loc
+        (with_loc ~loc li)
+        [ A.ptyp_constr ~loc (with_loc ~loc (Lident type_name)) [] ]
+    in
+    A.pexp_constraint
       ~loc
-      ~pat:(A.pvar ~loc fun_name)
-      ~expr:[%expr Popper.Generator.sized [%e A.evar ~loc fun_name]] )
+      [%expr Popper.Generator.sized [%e A.evar ~loc fun_name]]
+      type_constraint
+  in
+  (fn, A.value_binding ~loc ~pat ~expr)
 
 let of_type_declarations = List.map of_type_declaration
 
@@ -216,17 +262,19 @@ let comparator name =
           [%e A.evar ~loc @@ eq_name name]
           [%e A.evar ~loc @@ pp_name name]]
 
+let sized ~rec_flag bindings = bindings |> A.pstr_value_list ~loc rec_flag
+let aliases bindings = bindings |> A.pstr_value_list ~loc Nonrecursive
+
+let comparators type_names =
+  List.map comparator type_names |> A.pstr_value_list ~loc Nonrecursive
+
 let generate_impl ~ctxt:_ (rec_flag, type_declarations) =
   let bindings = of_type_declarations type_declarations in
   let rec_flag = really_recursive rec_flag type_declarations in
-  let sized = bindings |> List.map fst |> A.pstr_value_list ~loc rec_flag in
-  let aliases =
-    bindings |> List.map snd |> A.pstr_value_list ~loc Nonrecursive
-  in
+  let sized = sized ~rec_flag @@ List.map fst bindings in
+  let aliases = aliases @@ List.map snd bindings in
   let type_names = type_names type_declarations in
-  let comparators =
-    List.map comparator type_names |> A.pstr_value_list ~loc Nonrecursive
-  in
+  let comparators = comparators type_names in
   sized @ aliases @ comparators
 
 let impl_generator = Deriving.Generator.V2.make_noarg generate_impl
