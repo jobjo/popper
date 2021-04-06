@@ -74,3 +74,20 @@ let rec sequence rs =
     let* x = r in
     let* xs = sequence rs in
     return (x :: xs)
+
+let choose opts =
+  let sum = List.fold_left (fun s (fr, _) -> s + fr) 0 opts in
+  make
+  @@ fun s ->
+  let rand_float, s = R.int sum s in
+  let rec aux acc = function
+    | [ (_, r) ] -> r
+    | (f, r) :: frs ->
+      let acc = acc + f in
+      if acc >= rand_float then
+        r
+      else
+        aux acc frs
+    | [] -> failwith "Empty"
+  in
+  run s @@ aux 0 opts

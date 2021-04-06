@@ -111,27 +111,12 @@ let pp_header
       pp_time
       ()
 
-(*
- OK   Test foo -> testing bar   Passed 200 samples.       0.020ms
- OK   Test zoo                  Passed 200 samples.       0.001ms
- FAIL Test apa                  Failed after 23 sample.   0.001ms
- OK   Test foo -> testing bar   Passed 200 samples.       0.020ms
-*)
 let pp_results out res =
   let open Printer in
   let to_row { name; num_passed; status; time; is_unit; log = _ } =
     let status_cell =
       let bracket color icon =
-        Table.cell (fun out () ->
-          fprintf
-            out
-            "%a%a%a"
-            (faint pp_print_string)
-            "["
-            (color pp_print_string)
-            icon
-            (faint pp_print_string)
-            "]")
+        Table.cell (fun out () -> fprintf out "%a" (color pp_print_string) icon)
       in
       match status with
       | Pass -> bracket green "✓"
@@ -150,7 +135,7 @@ let pp_results out res =
         out
         "%a"
         (color pp_print_string)
-        (Option.fold ~none:"" ~some:Fun.id name)
+        (Option.fold ~none:"Anonymous" ~some:Fun.id name)
     in
     let num_passed =
       let msg =
@@ -244,14 +229,14 @@ let pp_failed_results out res =
           | Some loc ->
             fprintf
               out
-              "@[<v 2>Location:@,@,%a@]"
+              "@[<v 2>Location:@,@,%a@]@;"
               (Printer.blue pp_print_string)
               loc
           | None -> ()
         in
         fprintf
           out
-          "@[<v 2>%a@[<v 2>@,%a@,%a@,%a@,@]@,@]"
+          "@[<v 2>%a@[<v 2>@,%a@,%a@,%a@]@,@]"
           (with_box pp_header)
           ()
           pp_reason
@@ -269,7 +254,7 @@ let pp out ({ results; _ } as res) =
   else
     fprintf
       out
-      "@.@[<v 2>%a@,@,%a@]@;%a"
+      "@.@[<v 2>%a@,%a@]@;%a"
       pp_header
       res
       pp_results

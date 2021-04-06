@@ -21,6 +21,7 @@ val generate : init:'s -> ('s -> ('a * 's) t) -> 'a Seq.t t
 val sequence : 'a t list -> 'a list t
 val timed : 'a t -> ('a * float) t
 val delayed : (unit -> 'a t) -> 'a t
+val choose : (int * 'a t) list -> 'a t
 
 module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t

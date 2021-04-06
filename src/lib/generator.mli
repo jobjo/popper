@@ -10,6 +10,7 @@ val sequence : 'a t list -> 'a list t
 val option : 'a t -> 'a option t
 val result : ok:'a t -> error:'b t -> ('a, 'b) result t
 val sized : (int -> 'a t) -> 'a t
+val set_max_size : int -> 'a t -> 'a t
 val list : 'a t -> 'a list t
 val int32 : int32 t
 val range : int -> int -> int t
