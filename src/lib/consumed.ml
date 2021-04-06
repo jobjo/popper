@@ -15,29 +15,25 @@ let is_empty = function
 let to_list t =
   let data = ref [] in
   let add t d = data := (t, d) :: !data in
-  let rec aux tag = function
-    | Entries ds -> List.iter (add tag) ds
+  let rec aux tags = function
+    | Entries ds -> List.iter (add tags) ds
     | Add (l, r) ->
-      aux tag l;
-      aux tag r
-    | Tag (tag2, t) ->
-      let tag =
-        match tag with
-        | Some t -> t
-        | None -> tag2
-      in
-      aux (Some tag) t
+      aux tags l;
+      aux tags r
+    | Tag (tag, t) ->
+      let tags = tag :: tags in
+      aux tags t
   in
-  aux None t;
-  List.rev !data
-  |> List.map (fun (t, v) -> Option.fold ~none:Tag.Value ~some:Fun.id t, v)
+  aux [] t;
+  List.rev !data |> List.map (fun (ts, v) -> List.rev ts, v)
 
 let pp out t =
   let open Format in
   List.mapi
-    (fun ix (tag, data) ->
+    (fun ix (tags, data) ->
       [ Table.cell (fun out () -> fprintf out "%d" ix)
-      ; Table.cell (fun out () -> fprintf out "%s" @@ Tag.to_string tag)
+      ; Table.cell (fun out () ->
+          fprintf out "%s" @@ String.concat "," @@ List.map Tag.to_string tags)
       ; Table.cell (fun out () -> fprintf out "%d" @@ Int32.to_int data)
       ])
     (to_list t)

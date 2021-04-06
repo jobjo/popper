@@ -6,6 +6,7 @@ type t =
   { map : int32 IM.t
   ; operators : int array
   ; values : int array
+  ; max_size : int
   }
 
 let of_output output =
@@ -18,17 +19,24 @@ let of_output output =
   in
   let operators =
     List.filter_map
-      (fun (ix, tag, _) -> if Tag.is_operator tag then Some ix else None)
+      (fun (ix, tags, _) ->
+        match List.rev tags with
+        | [] -> None
+        | tag :: _ -> if Tag.is_operator tag then Some ix else None)
       data
     |> Array.of_list
   in
   let values =
     List.filter_map
-      (fun (ix, tag, _) -> if Tag.is_value tag then Some ix else None)
+      (fun (ix, tags, _) ->
+        match List.rev tags with
+        | [] -> None
+        | tag :: _ -> if Tag.is_value tag then Some ix else None)
       data
     |> Array.of_list
   in
-  { map; operators; values }
+  let max_size = Output.max_size output in
+  { map; operators; values; max_size }
 
 let shrink_int32 n = Int32.div n 2l
 
@@ -53,8 +61,16 @@ let shrink_value t =
     Random.return { t with map }
 
 let shrink_one t =
-  let* n = Random.range 0 10 in
-  if n >= 2 then shrink_value t else shrink_operator t
+  if Array.length t.values = 0 then
+    shrink_operator t
+  else if Array.length t.operators = 0 then
+    shrink_value t
+  else
+    let* n = Random.range 0 10 in
+    if n >= 3 then
+      shrink_value t
+    else
+      shrink_operator t
 
 let shrink t =
   let+ ts =
@@ -64,8 +80,9 @@ let shrink t =
   in
   Seq.uniq ( = ) @@ Seq.take 1000 ts
 
-let to_input { map; _ } =
+let to_input { map; max_size; _ } =
   Input.of_seq
+    ~max_size
     (Seq.unfold
        (fun ix ->
          let v =

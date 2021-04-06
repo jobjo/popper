@@ -61,13 +61,13 @@ let run ?(seed = Random.Seed.make 42) ts =
 
 let single t = Single t
 let suite ts = Suite ts
-let max_count_shrinks = 1000
-let max_count_find_next = 100
+let max_count_shrinks = 10_000
+let max_count_find_next = 10_000
 let max_count_discarded = 1000
 
-let test ?(count = 200) f =
+let test ?(count = 200) test_fun =
   let eval () =
-    let* inputs = Input.make_seq in
+    let* inputs = Input.make_seq ~max_size:100 in
     let rec aux ~num_discarded ~num_passed outputs =
       if num_passed >= count then
         Random.return (num_passed, Test_result.Pass, Log.empty, false)
@@ -94,13 +94,14 @@ let test ?(count = 200) f =
             aux ~num_discarded:(num_discarded + 1) ~num_passed next
         | Proposition.Fail { pp; location } ->
           let* res =
-            Shrink.shrink ~max_count_find_next ~max_count_shrinks output @@ f ()
+            Shrink.shrink ~max_count_find_next ~max_count_shrinks output
+            @@ test_fun ()
           in
           let explanation =
             if is_unit then
               "Failed"
             else
-              Printf.sprintf "Failed after %d samples" num_passed
+              Printf.sprintf "Failed after %d samples" (num_passed + 1)
           in
           (match res with
           | Some (num_shrinks, pp, output) ->
@@ -119,7 +120,7 @@ let test ?(count = 200) f =
     aux
       ~num_discarded:0
       ~num_passed:0
-      (Seq.map (fun x -> Generator.run x @@ f ()) inputs)
+      (Seq.map (fun x -> Generator.run x @@ test_fun ()) inputs)
   in
   let test =
     let+ (num_passed, status, log, is_unit), time =

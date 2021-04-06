@@ -7,7 +7,13 @@ let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
   make (fun input ->
-    Output.make ~value ~consumed:Consumed.empty ~remaining:input ~log:Log.empty)
+    let max_size = Input.max_size input in
+    Output.make
+      ~value
+      ~max_size
+      ~consumed:Consumed.empty
+      ~remaining:input
+      ~log:Log.empty)
 
 let bind gen f =
   make (fun input ->
@@ -27,7 +33,13 @@ let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
-    Output.make ~value:() ~consumed:Consumed.empty ~remaining:input ~log)
+    let max_size = Input.max_size input in
+    Output.make
+      ~value:()
+      ~max_size
+      ~consumed:Consumed.empty
+      ~remaining:input
+      ~log)
 
 let log_string s =
   let pp out = Format.pp_print_string out s in
@@ -37,15 +49,16 @@ let log_with pp x =
   let pp out = Format.fprintf out "%a" pp x in
   log @@ Log.of_pp pp
 
-let log_key_value ~key value =
+let log_key_value key value =
+  let lines = String.split_on_char '\n' value in
   let pp out () =
     Format.fprintf
       out
-      "%a = %a"
+      "@[<hv 2>%a@;=@;%a@]"
       (Printer.yellow Format.pp_print_string)
       key
-      (Printer.blue Format.pp_print_string)
-      value
+      (Printer.blue (Format.pp_print_list Format.pp_print_string))
+      lines
   in
   log_with pp ()
 
@@ -56,6 +69,7 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
+        ~max_size:(Input.max_size input)
         ~consumed:(Consumed.make [ value ])
         ~remaining
         ~log:Log.empty)
@@ -85,12 +99,18 @@ let one_of gs =
   let* n = tag Tag.Operator @@ range 0 (List.length gs) in
   List.nth gs n
 
+let max_size = make (fun input -> run input (return @@ Input.max_size input))
+
 let sized f =
   let* n = tag Tag.Size int32 in
-  let max_size = 100l in
+  let* max_size = max_size in
+  let max_size = Int32.of_int max_size in
   let block = Int32.div Int32.max_int max_size in
   let n = Int32.to_int @@ Int32.div n block in
   f n
+
+let set_max_size max_size g =
+  make (fun input -> run (Input.set_max_size max_size input) g)
 
 let list g =
   let rec aux size =
@@ -128,7 +148,12 @@ let promote f =
       Consumed.tag Tag.Function @@ Consumed.make (Input.take 1 input)
     in
     let remaining = Input.drop 1 input in
-    Output.make ~value ~consumed ~remaining ~log:Log.empty)
+    Output.make
+      ~value
+      ~max_size:(Input.max_size input)
+      ~consumed
+      ~remaining
+      ~log:Log.empty)
 
 let float =
   tag Tag.Float
