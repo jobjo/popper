@@ -15,4 +15,5 @@ let test_rev_twice =
     let* xs = list int in
     Test.equal ~loc:__LOC__ Comparator.(list int) (List.rev (List.rev xs)) xs)
 
-let suite = Test.suite [ "Reverse", test_rev; "Reverse twice", test_rev_twice ]
+let suite =
+  Test.suite [ ("Reverse", test_rev); ("Reverse twice", test_rev_twice) ]

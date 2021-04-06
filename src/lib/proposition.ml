@@ -45,7 +45,7 @@ let is_false ?loc b =
     fail_expected ?loc "false" "true"
 
 let and_ p1 p2 =
-  match p1, p2 with
+  match (p1, p2) with
   | Pass, Pass -> Pass
   | Pass, Fail pp -> Fail pp
   | Fail fl, Pass -> Fail fl
@@ -60,7 +60,7 @@ let and_ p1 p2 =
   | Discard, p -> p
 
 let or_ p1 p2 =
-  match p1, p2 with
+  match (p1, p2) with
   | Pass, _ -> Pass
   | _, Pass -> Pass
   | Fail { pp = pp1; location }, Fail { pp = pp2; location = _ } ->

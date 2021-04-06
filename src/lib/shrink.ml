@@ -12,10 +12,10 @@ type t =
 let of_output output =
   let data =
     Consumed.to_list @@ Output.consumed output
-    |> List.mapi (fun ix (tag, d) -> ix, tag, d)
+    |> List.mapi (fun ix (tag, d) -> (ix, tag, d))
   in
   let map =
-    data |> List.map (fun (ix, _, d) -> ix, d) |> List.to_seq |> IM.of_seq
+    data |> List.map (fun (ix, _, d) -> (ix, d)) |> List.to_seq |> IM.of_seq
   in
   let operators =
     List.filter_map
@@ -76,7 +76,7 @@ let shrink t =
   let+ ts =
     Random.generate ~init:t (fun t ->
       let+ t = shrink_one t in
-      t, t)
+      (t, t))
   in
   Seq.uniq ( = ) @@ Seq.take 1000 ts
 

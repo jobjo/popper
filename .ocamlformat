@@ -11,3 +11,4 @@ break-infix=fit-or-vertical
 break-fun-decl=fit-or-vertical
 let-binding-spacing=compact
 parens-ite=false
+parens-tuple=always

@@ -61,8 +61,8 @@ let test_division =
 
 let suite =
   Test.suite
-    [ "Sum", test_sum
-    ; "Diff", test_diff
-    ; "Point Sum", test_point_sum
-    ; "Divide", test_division
+    [ ("Sum", test_sum)
+    ; ("Diff", test_diff)
+    ; ("Point Sum", test_point_sum)
+    ; ("Divide", test_division)
     ]

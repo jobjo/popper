@@ -9,7 +9,7 @@ let make ~max_size =
   let gen ix =
     if ix <= 10_000 then
       let+ x = Random.int32 in
-      x, ix + 1
+      (x, ix + 1)
     else
       Random.return (0l, ix + 1)
   in
@@ -20,7 +20,7 @@ let make_seq ~max_size =
   Random.generate ~init:2 (fun size ->
     let max_size = min size max_size in
     let+ x = make ~max_size in
-    x, max_size + 1)
+    (x, max_size + 1))
 
 let of_list ~max_size xs = { max_size; data = List.to_seq xs }
 let of_seq ~max_size data = { max_size; data }
