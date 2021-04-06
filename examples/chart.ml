@@ -19,4 +19,4 @@ let test_flip =
     let* s = generate in
     Test.equal comparator (flip s) s)
 
-let suite = Test.suite [ "Flip series", test_flip ]
+let suite = Test.suite [ ("Flip series", test_flip) ]

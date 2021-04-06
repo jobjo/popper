@@ -51,5 +51,5 @@ module Seq = struct
   let head_tail_exn s =
     match s () with
     | Seq.Nil -> failwith "Unexpected"
-    | Cons (a, f) -> a, f
+    | Cons (a, f) -> (a, f)
 end

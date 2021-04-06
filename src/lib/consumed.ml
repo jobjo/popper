@@ -25,7 +25,7 @@ let to_list t =
       aux tags t
   in
   aux [] t;
-  List.rev !data |> List.map (fun (ts, v) -> List.rev ts, v)
+  List.rev !data |> List.map (fun (ts, v) -> (List.rev ts, v))
 
 let pp out t =
   let open Format in

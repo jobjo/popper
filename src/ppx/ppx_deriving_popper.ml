@@ -31,7 +31,7 @@ let rec of_tuple ~loc types f =
     List.mapi
       (fun i x ->
         let name = Printf.sprintf "x%d" i in
-        name, x)
+        (name, x))
       exprs
   in
   let evars = List.map (fun (n, _) -> A.evar ~loc n) name_exp_list in
@@ -41,7 +41,7 @@ let rec of_tuple ~loc types f =
   List.fold_right accum name_exp_list tuple
 
 and of_applied_type ~size ~name ts =
-  match name, ts with
+  match (name, ts) with
   | "option", [ t ] -> [%expr Popper.Generator.option [%e of_core_type ~size t]]
   | "list", [ t ] -> [%expr Popper.Generator.list [%e of_core_type ~size t]]
   | "result", [ t1; t2 ] ->
@@ -89,7 +89,7 @@ and of_label_declaration
   }
   =
   let type_name = of_core_type_desc ~size ptyp_desc in
-  name, [%expr [%e type_name]]
+  (name, [%expr [%e type_name]])
 
 let of_record ~loc ~fun_name fields =
   let size = [%expr size / [%e A.eint ~loc @@ List.length fields]] in
@@ -104,7 +104,7 @@ let of_record ~loc ~fun_name fields =
     List.map
       (fun (name, _) ->
         let exp = A.evar ~loc name in
-        { txt = lident name; loc }, exp)
+        ({ txt = lident name; loc }, exp))
       field_exprs
   in
   let record =

@@ -191,4 +191,4 @@ let with_consumed g =
   make (fun input ->
     let output = run input g in
     let c = Output.consumed output in
-    Output.map (fun x -> x, c) output)
+    Output.map (fun x -> (x, c)) output)

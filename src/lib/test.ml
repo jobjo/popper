@@ -22,7 +22,7 @@ let is_result_discarded { Test_result.status; _ } =
 
 let run ?(seed = Random.Seed.make 42) ts =
   let rec flatten = function
-    | Single res -> [ None, res ]
+    | Single res -> [ (None, res) ]
     | Suite ts ->
       List.concat_map
         (fun (name1, test) ->
@@ -33,7 +33,7 @@ let run ?(seed = Random.Seed.make 42) ts =
                 | None -> Some name1
                 | Some n2 -> Some (Printf.sprintf "%s -> %s" name1 n2)
               in
-              name, res)
+              (name, res))
             (flatten test))
         ts
   in
@@ -49,7 +49,7 @@ let run ?(seed = Random.Seed.make 42) ts =
     let num_discarded =
       List.length @@ List.filter is_result_discarded results
     in
-    num_passed, num_failed, num_discarded, results
+    (num_passed, num_failed, num_discarded, results)
   in
   let random =
     let+ (num_passed, num_failed, num_discarded, results), time =

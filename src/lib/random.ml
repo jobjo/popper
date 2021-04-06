@@ -15,7 +15,7 @@ let eval s r = fst @@ run s r
 let make run = { run }
 let int32 = make @@ fun s -> R.int32 Int32.max_int s
 let seed = make Seed.split
-let return x = { run = (fun s -> x, s) }
+let return x = { run = (fun s -> (x, s)) }
 
 let generate ~init f =
   make (fun seed ->
@@ -26,7 +26,7 @@ let generate ~init f =
       Some (x, (s, t))
     in
     let seq = Seq.unfold accum (s1, init) in
-    seq, s2)
+    (seq, s2))
 
 let bind { run } f =
   make (fun s ->
@@ -37,7 +37,7 @@ let bind { run } f =
 let map f { run } =
   make (fun s ->
     let x, s = run s in
-    f x, s)
+    (f x, s))
 
 let delayed f = make (fun seed -> run seed @@ f ())
 
@@ -45,12 +45,12 @@ let time f x =
   let start = Unix.gettimeofday () in
   let res = f x in
   let stop = Unix.gettimeofday () in
-  res, stop -. start
+  (res, stop -. start)
 
 let timed { run } =
   make (fun seed ->
     let (x, s), t = time run seed in
-    (x, t), s)
+    ((x, t), s))
 
 module Syntax = struct
   let ( let* ) = bind

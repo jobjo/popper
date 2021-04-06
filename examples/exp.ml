@@ -30,4 +30,4 @@ let test_or =
     let* e2 = generate in
     Test.is_true ((eval e1 || eval e2) = eval (Or (e1, e2))))
 
-let suite = Test.suite [ "Exp and", test_and; "Exp or", test_or ]
+let suite = Test.suite [ ("Exp and", test_and); ("Exp or", test_or) ]

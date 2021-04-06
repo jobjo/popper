@@ -61,7 +61,7 @@ let render_cell ~column_width cell align out =
 let of_list ~columns rows =
   let cell =
     let map =
-      List.mapi (fun row -> List.mapi (fun col cell -> (row, col), cell)) rows
+      List.mapi (fun row -> List.mapi (fun col cell -> ((row, col), cell))) rows
       |> List.concat
       |> List.to_seq
       |> PM.of_seq
