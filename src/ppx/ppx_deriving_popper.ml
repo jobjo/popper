@@ -154,16 +154,15 @@ let of_variant ~loc ~fun_name constrs =
   A.value_binding ~loc ~pat ~expr
 
 let of_type_declaration
-  ({ ptype_name = { txt = type_name; _ }
-   ; ptype_params = _
-   ; ptype_cstrs = _
-   ; ptype_kind
-   ; ptype_loc = loc
-   ; ptype_private = _
-   ; ptype_manifest
-   ; ptype_attributes = _
-   } :
-    type_declaration)
+  { ptype_name = { txt = type_name; _ }
+  ; ptype_params = _
+  ; ptype_cstrs = _
+  ; ptype_kind
+  ; ptype_loc = loc
+  ; ptype_private = _
+  ; ptype_manifest
+  ; ptype_attributes = _
+  }
   =
   let fun_name = fun_name type_name in
   let fn =
@@ -192,12 +191,43 @@ let of_type_declaration
 
 let of_type_declarations = List.map of_type_declaration
 
+let pp_name = function
+  | "t" -> "pp"
+  | name -> Printf.sprintf "pp_%s" name
+
+let eq_name = function
+  | "t" -> "equal"
+  | name -> Printf.sprintf "equal_%s" name
+
+let type_names =
+  List.map (fun { ptype_name = { txt = type_name; _ }; _ } -> type_name)
+
+let comparator_name = function
+  | "t" -> "comparator"
+  | name -> Printf.sprintf "%s_comparator" name
+
+let comparator name =
+  A.value_binding
+    ~loc
+    ~pat:(A.pvar ~loc @@ comparator_name name)
+    ~expr:
+      [%expr
+        Popper.Comparator.make
+          [%e A.evar ~loc @@ eq_name name]
+          [%e A.evar ~loc @@ pp_name name]]
+
 let generate_impl ~ctxt:_ (rec_flag, type_declarations) =
-  let xs = of_type_declarations type_declarations in
+  let bindings = of_type_declarations type_declarations in
   let rec_flag = really_recursive rec_flag type_declarations in
-  let impl = xs |> List.map fst |> A.pstr_value_list ~loc rec_flag in
-  let aliases = xs |> List.map snd |> A.pstr_value_list ~loc Nonrecursive in
-  impl @ aliases
+  let sized = bindings |> List.map fst |> A.pstr_value_list ~loc rec_flag in
+  let aliases =
+    bindings |> List.map snd |> A.pstr_value_list ~loc Nonrecursive
+  in
+  let type_names = type_names type_declarations in
+  let comparators =
+    List.map comparator type_names |> A.pstr_value_list ~loc Nonrecursive
+  in
+  sized @ aliases @ comparators
 
 let impl_generator = Deriving.Generator.V2.make_noarg generate_impl
 let my_deriver = Deriving.add "popper" ~str_type_decl:impl_generator
