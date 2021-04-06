@@ -18,16 +18,16 @@ let equal ?loc testable x y =
       let pp = Comparator.pp testable in
       Format.fprintf out "@[<hv>%a @,<>@;%a@]" pp x pp y
     in
-    fail ?loc (Printer.red pp)
+    fail ?loc (Util.Format.red pp)
 
 let fail_expected ?loc e v =
   let pp out () =
     Format.fprintf
       out
       "Expected %a but got %a."
-      (Printer.blue Format.pp_print_string)
+      (Util.Format.blue Format.pp_print_string)
       e
-      (Printer.red Format.pp_print_string)
+      (Util.Format.red Format.pp_print_string)
       v
   in
   fail ?loc pp

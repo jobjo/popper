@@ -55,9 +55,9 @@ let log_key_value key value =
     Format.fprintf
       out
       "@[<hv 2>%a@;=@;%a@]"
-      (Printer.yellow Format.pp_print_string)
+      (Util.Format.yellow Format.pp_print_string)
       key
-      (Printer.blue (Format.pp_print_list Format.pp_print_string))
+      (Util.Format.blue (Format.pp_print_list Format.pp_print_string))
       lines
   in
   log_with pp ()

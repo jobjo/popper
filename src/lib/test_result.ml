@@ -45,24 +45,24 @@ let pp_header
     fprintf
       out
       "%a/%a tests passed"
-      (Printer.green pp_print_int)
+      (Util.Format.green pp_print_int)
       num_passed
-      (Printer.blue pp_print_int)
+      (Util.Format.blue pp_print_int)
       num_tests
   in
   let pp_discarded out () =
-    fprintf out "%a discarded" (Printer.yellow pp_print_int) num_discarded
+    fprintf out "%a discarded" (Util.Format.yellow pp_print_int) num_discarded
   in
   let pp_failed out () =
-    fprintf out "%a failed" (Printer.red pp_print_int) num_failed
+    fprintf out "%a failed" (Util.Format.red pp_print_int) num_failed
   in
-  let pp_time = Printer.blue @@ fun out () -> fprintf out "%.2fs" time in
+  let pp_time = Util.Format.blue @@ fun out () -> fprintf out "%.2fs" time in
   (* OK: n/n tests passed!*)
   if num_passed = num_tests then
     fprintf
       out
       "%a %a in %a."
-      (Printer.green pp_print_string)
+      (Util.Format.green pp_print_string)
       pass_label
       pp_passed
       ()
@@ -73,7 +73,7 @@ let pp_header
     fprintf
       out
       "%a %a, %a and %a in %a."
-      (Printer.green pp_print_string)
+      (Util.Format.green pp_print_string)
       pass_label
       pp_passed
       ()
@@ -88,7 +88,7 @@ let pp_header
     fprintf
       out
       "%a %a, %a and %a in %a."
-      (Printer.red pp_print_string)
+      (Util.Format.red pp_print_string)
       fail_label
       pp_passed
       ()
@@ -102,7 +102,7 @@ let pp_header
     fprintf
       out
       "%a %a and %a in %a."
-      (Printer.red pp_print_string)
+      (Util.Format.red pp_print_string)
       fail_label
       pp_passed
       ()
@@ -112,7 +112,7 @@ let pp_header
       ()
 
 let pp_results out res =
-  let open Printer in
+  let open Util.Format in
   let to_row { name; num_passed; status; time; is_unit; log = _ } =
     let status_cell =
       let bracket color icon =
@@ -127,7 +127,7 @@ let pp_results out res =
       let color =
         match status with
         | Fail _ -> red
-        | _ -> Printer.blue
+        | _ -> Util.Format.blue
       in
       Table.cell
       @@ fun out () ->
@@ -173,7 +173,7 @@ let with_box (type a) f out (a : a) =
   let line = List.init (width - 2) (fun _ -> "─") |> String.concat "" in
   let pp_top out () = fprintf out "%s%s%s" "┌" line "┐" in
   let pp_mid out () =
-    let pp_bar out () = Printer.faint pp_print_string out "│" in
+    let pp_bar out () = Util.Format.faint pp_print_string out "│" in
     let space = String.make (width - text_width) ' ' in
     fprintf out "%a %a%s %a" pp_bar () f a space pp_bar ()
   in
@@ -181,11 +181,11 @@ let with_box (type a) f out (a : a) =
   fprintf
     out
     "%a@.%a@.%a"
-    (Printer.faint pp_top)
+    (Util.Format.faint pp_top)
     ()
     pp_mid
     ()
-    (Printer.faint pp_bottom)
+    (Util.Format.faint pp_bottom)
     ()
 
 let pp_failed_results out res =
@@ -202,17 +202,17 @@ let pp_failed_results out res =
         let name = Option.fold ~none:"" ~some:(Printf.sprintf "`%s'") name in
         let pp_header out () =
           if is_unit then
-            fprintf out "Failed %a" (Printer.red pp_print_string) name
+            fprintf out "Failed %a" (Util.Format.red pp_print_string) name
           else
             fprintf
               out
               "Failed %a after %a %s and %a shrinks."
-              (Printer.red pp_print_string)
+              (Util.Format.red pp_print_string)
               name
-              (Printer.blue pp_print_int)
+              (Util.Format.blue pp_print_int)
               num_samples
               (if num_samples = 1 then "sample" else "samples")
-              (Printer.blue pp_print_int)
+              (Util.Format.blue pp_print_int)
               num_shrinks
         in
         let pp_reason out () =
@@ -230,7 +230,7 @@ let pp_failed_results out res =
             fprintf
               out
               "@[<v 2>Location:@,@,%a@]@;"
-              (Printer.blue pp_print_string)
+              (Util.Format.blue pp_print_string)
               loc
           | None -> ()
         in
