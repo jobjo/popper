@@ -11,13 +11,13 @@ type point =
   { x : int
   ; y : int
   }
-[@@deriving show, popper]
+[@@deriving show, eq, popper]
 
 let point_sum p1 p2 : point =
   { x = simple_sum p1.x p2.x; y = simple_sum p1.y p2.y }
 
 let test_sum =
-  Test.test ~count:50 (fun () ->
+  Test.test (fun () ->
     (* Getting two built-in generators *)
     let* left = int in
     let* right = int in
@@ -30,7 +30,7 @@ let test_sum =
     Test.equal comparator actual expected)
 
 let test_diff =
-  Test.test ~count:50 (fun () ->
+  Test.test (fun () ->
     (* Getting two built-in generators *)
     let* left = int in
     let* right = int in
@@ -41,17 +41,15 @@ let test_diff =
     Test.equal comparator actual expected)
 
 let test_point_sum =
-  Test.test ~count:50 (fun () ->
+  Test.test (fun () ->
     let* left = generate_point in
     let* right = generate_point in
     let expected = { x = left.x + right.x; y = left.y + right.y } in
     let actual = point_sum left right in
-    (* Skip using comparators and pretty printers, however this doesn't
-    print the failing case *)
-    Test.is_true (actual = expected))
+    Test.equal ~loc:__LOC__ point_comparator expected actual)
 
 let test_division =
-  Test.test ~count:100 (fun () ->
+  Test.test (fun () ->
     let* x = range (-10) 10 in
     let* y = range (-10) 10 in
     let expected = if y = 0 then None else Some (x / y) in

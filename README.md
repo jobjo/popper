@@ -47,7 +47,7 @@ type t =
   | And of t * t
   | Or of t * t
   | Not of t
-[@@deriving show, popper]
+[@@deriving show, eq, popper]
 
 let rec eval = function
   | Lit b -> b
@@ -68,8 +68,34 @@ let test_and =
 let () = Test.run test_and
 ```
 
-Gives:
+Yields:
 
 ![image](https://user-images.githubusercontent.com/820478/113483019-43015500-9499-11eb-8302-de90ce5deefc.png)
 
+### Deriving comparators
+
+An example of using a derived comparator.
+
+```ocaml
+open Popper
+open Generator.Syntax
+
+type t =
+  { x_values : int list
+  ; y_values : int list
+  ; x_axis : string
+  ; y_axis : string
+  }
+[@@deriving show, eq, popper]
+
+let flip { x_values; y_values; x_axis; y_axis } =
+  { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
+
+let test_flip_twice =
+  Test.test (fun () ->
+    let* s = generate in
+    Test.equal comparator (flip (flip s)) s)
+
+let suite = Test.suite [ ("Flip chart", test_flip) ]
+```
 

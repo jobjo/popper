@@ -7,16 +7,14 @@ type t =
   ; x_axis : string
   ; y_axis : string
   }
-[@@deriving show, popper]
+[@@deriving show, eq, popper]
 
 let flip { x_values; y_values; x_axis; y_axis } =
   { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
 
-let comparator = Comparator.make ( = ) pp
-
 let test_flip =
-  Test.test ~count:1000 (fun () ->
+  Test.test (fun () ->
     let* s = generate in
     Test.equal comparator (flip s) s)
 
-let suite = Test.suite [ ("Flip series", test_flip) ]
+let suite = Test.suite [ ("Flip chart", test_flip) ]

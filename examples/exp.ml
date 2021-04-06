@@ -6,7 +6,7 @@ type t =
   | And of t * t
   | Or of t * t
   | Not of t
-[@@deriving show, popper]
+[@@deriving show, eq, popper]
 
 let rec eval = function
   | Lit b -> b
