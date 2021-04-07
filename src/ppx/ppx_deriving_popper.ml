@@ -9,6 +9,8 @@ let fun_name n =
   else
     Printf.sprintf "generate_%s" n
 
+let poly_fun_name n = Printf.sprintf "generate_poly_%s" n
+
 let generator_of_type ~size ~loc = function
   | "int" -> [%expr Popper.Generator.int]
   | "string" -> [%expr Popper.Generator.string]
@@ -72,6 +74,7 @@ and of_applied_type ~size ~name ts =
       Popper.Generator.result
         ~ok:[%e of_core_type ~size t1]
         ~error:[%e of_core_type ~size t2]]
+  | s, [ t ] -> [%expr [%e A.evar ~loc @@ fun_name s] [%e of_core_type ~size t]]
   | s, _ -> failwith ("Unsupported type operator: " ^ s)
 
 and of_row_field_desc = function
@@ -102,6 +105,8 @@ and of_core_type_desc ~size = function
       else
         Popper.Generator.one_of [%e A.elist ~loc exps]]
   | Ptyp_poly _ -> failwith "Unsupported Ptype_poly"
+  | Ptyp_any -> failwith "Any"
+  | Ptyp_var v -> A.evar ~loc @@ poly_fun_name v
   | _ -> failwith "Deriving popper failed for type"
 
 and of_core_type ~size { ptyp_desc; ptyp_attributes = _; _ } =
@@ -127,35 +132,32 @@ and of_label_declaration
   let type_name = of_core_type_desc ~size ptyp_desc in
   (name, [%expr [%e type_name]])
 
-let of_record ~loc ~fun_name fields =
-  let size = [%expr size / [%e A.eint ~loc @@ List.length fields]] in
-  let accum (var, value) body =
-    let name = A.pvar ~loc var in
-    [%expr
-      Popper.Generator.Syntax.(
-        let* [%p name] = [%e value] in
-        [%e body])]
-  in
-  let field_exprs = List.map (of_label_declaration ~size) fields in
-  let ident_exps =
-    List.map
-      (fun (name, _) ->
-        let exp = A.evar ~loc name in
-        ({ txt = lident name; loc }, exp))
-      field_exprs
-  in
-  let record =
-    [%expr Popper.Generator.return [%e A.pexp_record ~loc ident_exps None]]
-  in
-  let body = List.fold_right accum field_exprs record in
+let of_record ~loc ~fun_name param_types label_decls =
+  let body = of_label_declarations ~loc label_decls Fun.id in
   let pat = A.pvar ~loc fun_name in
-  let expr =
-    [%expr
-      fun size ->
-        ignore size;
-        [%e body]]
+  let poly_funs =
+    List.filter_map
+      (function
+        | { ptyp_desc = Ptyp_var n; _ } -> Some (poly_fun_name n)
+        | _ -> None)
+      param_types
   in
-  A.value_binding ~loc ~pat ~expr
+  let expr =
+    let size_fun =
+      [%expr
+        fun size ->
+          ignore size;
+          [%e body]]
+    in
+    match param_types with
+    | [] -> size_fun
+    | [ { ptyp_desc = Ptyp_var n; _ } ] ->
+      let pfn = poly_fun_name n in
+      let poly_gen = A.pvar ~loc pfn in
+      [%expr fun [%p poly_gen] -> [%e size_fun]]
+    | _ -> failwith "More than one param"
+  in
+  (A.value_binding ~loc ~pat ~expr, poly_funs)
 
 let with_loc ~loc txt = { txt; loc }
 
@@ -189,9 +191,16 @@ let of_variant ~loc ~fun_name constrs =
   in
   A.value_binding ~loc ~pat ~expr
 
+type bindings =
+  { type_name : string
+  ; sized : value_binding
+  ; alias : value_binding
+  ; num_poly : int
+  }
+
 let of_type_declaration
   { ptype_name = { txt = type_name; _ }
-  ; ptype_params = _
+  ; ptype_params
   ; ptype_cstrs = _
   ; ptype_kind
   ; ptype_loc = loc
@@ -201,10 +210,11 @@ let of_type_declaration
   }
   =
   let fun_name = fun_name type_name in
-  let fn =
+  let sized, poly_gens =
     match ptype_kind with
-    | Ptype_record fields -> of_record ~loc ~fun_name fields
-    | Ptype_variant constrs -> of_variant ~loc ~fun_name constrs
+    | Ptype_record fields ->
+      of_record ~loc ~fun_name (List.map fst ptype_params) fields
+    | Ptype_variant constrs -> (of_variant ~loc ~fun_name constrs, [])
     | Ptype_abstract ->
       (match ptype_manifest with
       | Some t ->
@@ -215,25 +225,46 @@ let of_type_declaration
               [%e of_core_type ~size:[%expr size] t]]
         in
         let pat = A.pvar ~loc fun_name in
-        A.value_binding ~loc ~pat ~expr
+        (A.value_binding ~loc ~pat ~expr, [])
       | None -> failwith "Unsupprted type kind")
     | _ -> failwith "Unsupported type kind"
   in
-  let pat = A.pvar ~loc fun_name in
-  let expr =
-    let type_constraint =
-      let li = Ldot (Ldot (Lident "Popper", "Generator"), "t") in
-      A.ptyp_constr
+  let alias =
+    let pat = A.pvar ~loc fun_name in
+    let body =
+      let type_constraint =
+        let li = Ldot (Ldot (Lident "Popper", "Generator"), "t") in
+        let type_vars =
+          match poly_gens with
+          | [] -> []
+          | [ _ ] -> [ A.ptyp_var ~loc "a" ]
+          | _ -> failwith "FOO"
+        in
+        A.ptyp_constr
+          ~loc
+          (with_loc ~loc li)
+          [ A.ptyp_constr ~loc (with_loc ~loc (Lident type_name)) type_vars ]
+      in
+      let expr =
+        match poly_gens with
+        | [] -> A.evar ~loc fun_name
+        | [ p ] -> [%expr [%e A.evar ~loc fun_name] [%e A.evar ~loc p]]
+        | _ -> failwith "Unsupported poly"
+      in
+      A.pexp_constraint
         ~loc
-        (with_loc ~loc li)
-        [ A.ptyp_constr ~loc (with_loc ~loc (Lident type_name)) [] ]
+        [%expr Popper.Generator.sized [%e expr]]
+        type_constraint
     in
-    A.pexp_constraint
-      ~loc
-      [%expr Popper.Generator.sized [%e A.evar ~loc fun_name]]
-      type_constraint
+    let expr =
+      match poly_gens with
+      | [] -> body
+      | [ p ] -> [%expr fun [%p A.pvar ~loc p] -> [%e body]]
+      | _ -> failwith "Unsupported poly"
+    in
+    A.value_binding ~loc ~pat ~expr
   in
-  (fn, A.value_binding ~loc ~pat ~expr)
+  { type_name; sized; alias; num_poly = List.length poly_gens }
 
 let of_type_declarations = List.map of_type_declaration
 
@@ -245,36 +276,52 @@ let eq_name = function
   | "t" -> "equal"
   | name -> Printf.sprintf "equal_%s" name
 
-let type_names =
-  List.map (fun { ptype_name = { txt = type_name; _ }; _ } -> type_name)
-
 let comparator_name = function
   | "t" -> "comparator"
   | name -> Printf.sprintf "%s_comparator" name
 
-let comparator name =
-  A.value_binding
-    ~loc
-    ~pat:(A.pvar ~loc @@ comparator_name name)
-    ~expr:
-      [%expr
-        Popper.Comparator.make
-          [%e A.evar ~loc @@ eq_name name]
-          [%e A.evar ~loc @@ pp_name name]]
+let comparator { type_name; num_poly; _ } =
+  match num_poly with
+  | 0 ->
+    A.value_binding
+      ~loc
+      ~pat:(A.pvar ~loc @@ comparator_name type_name)
+      ~expr:
+        [%expr
+          Popper.Comparator.make
+            [%e A.evar ~loc @@ eq_name type_name]
+            [%e A.evar ~loc @@ pp_name type_name]]
+  | 1 ->
+    A.value_binding
+      ~loc
+      ~pat:(A.pvar ~loc @@ comparator_name type_name)
+      ~expr:
+        [%expr
+          fun eq_poly pp_poly ->
+            Popper.Comparator.make
+              ([%e A.evar ~loc @@ eq_name type_name] eq_poly)
+              ([%e A.evar ~loc @@ pp_name type_name] pp_poly)]
+  | _ -> failwith "Not supported more than one type parameter"
 
-let sized ~rec_flag bindings = bindings |> A.pstr_value_list ~loc rec_flag
-let aliases bindings = bindings |> A.pstr_value_list ~loc Nonrecursive
+let sized ~rec_flag bindings =
+  bindings
+  |> List.map (fun { sized; _ } -> sized)
+  |> A.pstr_value_list ~loc rec_flag
 
-let comparators type_names =
-  List.map comparator type_names |> A.pstr_value_list ~loc Nonrecursive
+let aliases bindings =
+  bindings
+  |> List.map (fun { alias; _ } -> alias)
+  |> A.pstr_value_list ~loc Nonrecursive
+
+let comparators bindings =
+  List.map comparator bindings |> A.pstr_value_list ~loc Nonrecursive
 
 let generate_impl ~ctxt:_ (rec_flag, type_declarations) =
-  let bindings = of_type_declarations type_declarations in
   let rec_flag = really_recursive rec_flag type_declarations in
-  let sized = sized ~rec_flag @@ List.map fst bindings in
-  let aliases = aliases @@ List.map snd bindings in
-  let type_names = type_names type_declarations in
-  let comparators = comparators type_names in
+  let bindings = of_type_declarations type_declarations in
+  let sized = sized ~rec_flag bindings in
+  let aliases = aliases bindings in
+  let comparators = comparators bindings in
   sized @ aliases @ comparators
 
 let impl_generator = Deriving.Generator.V2.make_noarg generate_impl

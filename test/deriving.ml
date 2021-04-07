@@ -43,6 +43,20 @@ type t7 =
 
 type t8 = int [@@deriving show, eq, popper]
 
+type t9 =
+  | Leaf of int
+  | Node of t10
+
+and t10 =
+  { value : int
+  ; left : t9
+  ; right : t9
+  }
+[@@deriving show, eq, popper]
+
+type 'a t11 = { value : 'a } [@@deriving eq, show, popper]
+type t12 = int t11 [@@deriving eq, show]
+
 let make_test name comparator generator =
   let open Popper in
   let open Popper.Generator.Syntax in
@@ -61,4 +75,6 @@ let suite =
     ; make_test "t6" t6_comparator generate_t6
     ; make_test "t7" t7_comparator generate_t7
     ; make_test "t8" t8_comparator generate_t8
+    ; make_test "t9" t9_comparator generate_t9
+    ; make_test "t10" t10_comparator generate_t10
     ]

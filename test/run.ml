@@ -1,4 +1,5 @@
-open Popper
-
-let suite = Test.suite [ ("Deriving", Deriving.suite) ]
-let () = Popper.Test.run suite
+type ('a, 'b) value =
+  { a : 'a
+  ; b : 'b
+  }
+[@@deriving eq, show, popper]
