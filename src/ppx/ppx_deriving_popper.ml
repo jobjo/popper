@@ -74,8 +74,9 @@ and of_applied_type ~size ~name ts =
       Popper.Generator.result
         ~ok:[%e of_core_type ~size t1]
         ~error:[%e of_core_type ~size t2]]
-  | s, [ t ] -> [%expr [%e A.evar ~loc @@ fun_name s] [%e of_core_type ~size t]]
-  | s, _ -> failwith ("Unsupported type operator: " ^ s)
+  | s, ts ->
+    let accum exp t = [%expr [%e exp] [%e of_core_type ~size t]] in
+    List.fold_left accum (A.evar ~loc @@ fun_name s) ts
 
 and of_row_field_desc = function
   | Rtag (name, _, []) ->
@@ -149,13 +150,16 @@ let of_record ~loc ~fun_name param_types label_decls =
           ignore size;
           [%e body]]
     in
-    match param_types with
-    | [] -> size_fun
-    | [ { ptyp_desc = Ptyp_var n; _ } ] ->
-      let pfn = poly_fun_name n in
-      let poly_gen = A.pvar ~loc pfn in
-      [%expr fun [%p poly_gen] -> [%e size_fun]]
-    | _ -> failwith "More than one param"
+    (* fun poly_gen1 poly_gen2 size -> ...*)
+    let accum body ct =
+      match ct with
+      | { ptyp_desc = Ptyp_var n; _ } ->
+        let pfn = poly_fun_name n in
+        let poly_gen = A.pvar ~loc pfn in
+        [%expr fun [%p poly_gen] -> [%e body]]
+      | _ -> failwith "More than one param"
+    in
+    List.fold_left accum size_fun param_types
   in
   (A.value_binding ~loc ~pat ~expr, poly_funs)
 
@@ -235,10 +239,8 @@ let of_type_declaration
       let type_constraint =
         let li = Ldot (Ldot (Lident "Popper", "Generator"), "t") in
         let type_vars =
-          match poly_gens with
-          | [] -> []
-          | [ _ ] -> [ A.ptyp_var ~loc "a" ]
-          | _ -> failwith "FOO"
+          poly_gens
+          |> List.mapi (fun ix _ -> A.ptyp_var ~loc @@ Printf.sprintf "a%d" ix)
         in
         A.ptyp_constr
           ~loc
@@ -246,10 +248,8 @@ let of_type_declaration
           [ A.ptyp_constr ~loc (with_loc ~loc (Lident type_name)) type_vars ]
       in
       let expr =
-        match poly_gens with
-        | [] -> A.evar ~loc fun_name
-        | [ p ] -> [%expr [%e A.evar ~loc fun_name] [%e A.evar ~loc p]]
-        | _ -> failwith "Unsupported poly"
+        let accum exp p = [%expr [%e exp] [%e A.evar ~loc p]] in
+        List.fold_left accum [%expr [%e A.evar ~loc fun_name]] poly_gens
       in
       A.pexp_constraint
         ~loc
@@ -257,10 +257,8 @@ let of_type_declaration
         type_constraint
     in
     let expr =
-      match poly_gens with
-      | [] -> body
-      | [ p ] -> [%expr fun [%p A.pvar ~loc p] -> [%e body]]
-      | _ -> failwith "Unsupported poly"
+      let accum exp p = [%expr fun [%p A.pvar ~loc p] -> [%e exp]] in
+      List.fold_left accum body poly_gens
     in
     A.value_binding ~loc ~pat ~expr
   in
@@ -281,27 +279,27 @@ let comparator_name = function
   | name -> Printf.sprintf "%s_comparator" name
 
 let comparator { type_name; num_poly; _ } =
-  match num_poly with
-  | 0 ->
-    A.value_binding
-      ~loc
-      ~pat:(A.pvar ~loc @@ comparator_name type_name)
-      ~expr:
-        [%expr
-          Popper.Comparator.make
-            [%e A.evar ~loc @@ eq_name type_name]
-            [%e A.evar ~loc @@ pp_name type_name]]
-  | 1 ->
-    A.value_binding
-      ~loc
-      ~pat:(A.pvar ~loc @@ comparator_name type_name)
-      ~expr:
-        [%expr
-          fun eq_poly pp_poly ->
-            Popper.Comparator.make
-              ([%e A.evar ~loc @@ eq_name type_name] eq_poly)
-              ([%e A.evar ~loc @@ pp_name type_name] pp_poly)]
-  | _ -> failwith "Not supported more than one type parameter"
+  let expr =
+    let accum (e1, e2) ix =
+      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let pp_poly = Printf.sprintf "pp_poly_%d" ix in
+      ( [%expr [%e e1] [%e A.evar ~loc eq_poly]]
+      , [%expr [%e e2] [%e A.evar ~loc pp_poly]] )
+    in
+    let zero =
+      (A.evar ~loc @@ eq_name type_name, A.evar ~loc @@ pp_name type_name)
+    in
+    let ixs = List.rev @@ List.init num_poly Fun.id in
+    let peq, ppp = List.fold_left accum zero ixs in
+    let body = [%expr fun a b -> Popper.Comparator.make [%e peq] [%e ppp]] in
+    let accum exp ix =
+      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let pp_poly = Printf.sprintf "pp_poly_%d" ix in
+      [%expr fun [%p A.pvar ~loc eq_poly] [%p A.pvar ~loc pp_poly] -> [%e exp]]
+    in
+    List.fold_left accum body ixs
+  in
+  A.value_binding ~loc ~pat:(A.pvar ~loc @@ comparator_name type_name) ~expr
 
 let sized ~rec_flag bindings =
   bindings
