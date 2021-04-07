@@ -1,7 +1,4 @@
-type ('a, 'b) value =
-  { a : 'a
-  ; b : 'b
-  }
-[@@deriving eq, show, popper]
+open Popper
 
-type foo = (int, string) value [@@deriving eq, show, popper]
+let suite = Test.suite [ ("Deriving", Deriving.suite) ]
+let () = Popper.Test.run suite

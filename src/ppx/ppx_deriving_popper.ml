@@ -21,6 +21,13 @@ let generator_of_type ~size ~loc = function
     let e = A.evar ~loc @@ fun_name t in
     [%expr Popper.Generator.delayed (fun () -> [%e e] [%e size])]
 
+let one_of_exp exps =
+  [%expr
+    if size <= 0 then
+      [%e List.hd exps]
+    else
+      Popper.Generator.one_of [%e A.elist ~loc exps]]
+
 let rec of_label_declarations ~loc fields f =
   let size = [%expr size / [%e A.eint ~loc @@ List.length fields]] in
   let accum (var, value) body =
@@ -98,13 +105,7 @@ and of_core_type_desc ~size = function
     [%expr Popper.Generator.arrow [%e gen_exp]]
   | Ptyp_tuple ts -> of_tuple ~loc ts Fun.id
   | Ptyp_alias (t, _) -> of_core_type ~size t
-  | Ptyp_variant (row_fields, _, _) ->
-    let exps = of_row_fields row_fields in
-    [%expr
-      if size <= 0 then
-        [%e List.hd exps]
-      else
-        Popper.Generator.one_of [%e A.elist ~loc exps]]
+  | Ptyp_variant (row_fields, _, _) -> one_of_exp (of_row_fields row_fields)
   | Ptyp_poly _ -> failwith "Unsupported Ptype_poly"
   | Ptyp_any -> failwith "Any"
   | Ptyp_var v -> A.evar ~loc @@ poly_fun_name v
@@ -133,8 +134,7 @@ and of_label_declaration
   let type_name = of_core_type_desc ~size ptyp_desc in
   (name, [%expr [%e type_name]])
 
-let of_record ~loc ~fun_name param_types label_decls =
-  let body = of_label_declarations ~loc label_decls Fun.id in
+let sized_fun ~loc ~fun_name param_types body =
   let pat = A.pvar ~loc fun_name in
   let poly_funs =
     List.filter_map
@@ -163,6 +163,10 @@ let of_record ~loc ~fun_name param_types label_decls =
   in
   (A.value_binding ~loc ~pat ~expr, poly_funs)
 
+let of_record ~loc ~fun_name param_types label_decls =
+  of_label_declarations ~loc label_decls Fun.id
+  |> sized_fun ~loc ~fun_name param_types
+
 let with_loc ~loc txt = { txt; loc }
 
 let of_constructor_declaration
@@ -180,20 +184,12 @@ let of_constructor_declaration
   | Pcstr_tuple ts -> of_tuple ~loc ts construct
   | Pcstr_record ldl -> of_label_declarations ~loc ldl construct
 
-let of_variant ~loc ~fun_name constrs =
+let of_variant ~loc ~fun_name constrs param_types =
   let size = [%expr (size - 1) / [%e A.eint ~loc (List.length constrs)]] in
-  let exps = List.map (of_constructor_declaration ~size) constrs in
-  let pat = A.pvar ~loc fun_name in
-  let body = A.elist ~loc exps in
-  let expr =
-    [%expr
-      fun size ->
-        if size <= 0 then
-          [%e List.hd exps]
-        else
-          Popper.Generator.one_of [%e body]]
-  in
-  A.value_binding ~loc ~pat ~expr
+  constrs
+  |> List.map (of_constructor_declaration ~size)
+  |> one_of_exp
+  |> sized_fun ~loc ~fun_name param_types
 
 type bindings =
   { type_name : string
@@ -201,6 +197,11 @@ type bindings =
   ; alias : value_binding
   ; num_poly : int
   }
+
+let make_abstract ~fun_name ptype_manifest =
+  match ptype_manifest with
+  | Some t -> sized_fun ~loc ~fun_name [] (of_core_type ~size:[%expr size] t)
+  | None -> failwith "Unsupprted type kind"
 
 let of_type_declaration
   { ptype_name = { txt = type_name; _ }
@@ -214,24 +215,13 @@ let of_type_declaration
   }
   =
   let fun_name = fun_name type_name in
+  let param_types = List.map fst ptype_params in
   let sized, poly_gens =
     match ptype_kind with
-    | Ptype_record fields ->
-      of_record ~loc ~fun_name (List.map fst ptype_params) fields
-    | Ptype_variant constrs -> (of_variant ~loc ~fun_name constrs, [])
-    | Ptype_abstract ->
-      (match ptype_manifest with
-      | Some t ->
-        let expr =
-          [%expr
-            fun size ->
-              ignore size;
-              [%e of_core_type ~size:[%expr size] t]]
-        in
-        let pat = A.pvar ~loc fun_name in
-        (A.value_binding ~loc ~pat ~expr, [])
-      | None -> failwith "Unsupprted type kind")
-    | _ -> failwith "Unsupported type kind"
+    | Ptype_record fields -> of_record ~loc ~fun_name param_types fields
+    | Ptype_variant constrs -> of_variant ~loc ~fun_name constrs param_types
+    | Ptype_abstract -> make_abstract ~fun_name ptype_manifest
+    | _ -> failwith "Unsupported type-kind"
   in
   let alias =
     let pat = A.pvar ~loc fun_name in
@@ -291,7 +281,7 @@ let comparator { type_name; num_poly; _ } =
     in
     let ixs = List.rev @@ List.init num_poly Fun.id in
     let peq, ppp = List.fold_left accum zero ixs in
-    let body = [%expr fun a b -> Popper.Comparator.make [%e peq] [%e ppp]] in
+    let body = [%expr Popper.Comparator.make [%e peq] [%e ppp]] in
     let accum exp ix =
       let eq_poly = Printf.sprintf "eq_poly_%d" ix in
       let pp_poly = Printf.sprintf "pp_poly_%d" ix in
