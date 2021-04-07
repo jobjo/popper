@@ -69,6 +69,14 @@ type ('a, 'b, 'c) t15 =
 type t16 = { t16 : (int, bool, string option) t15 }
 [@@deriving eq, show, popper]
 
+type 'a t17 =
+  | Node of 'a t17 * 'a t17
+  | Leaf
+  | T18 of { t18 : t18 option }
+[@@deriving show, eq, popper]
+
+and t18 = int t17 [@@deriving show, eq, popper]
+
 let make_test name comparator generator =
   let open Popper in
   let open Popper.Generator.Syntax in
@@ -93,4 +101,5 @@ let suite =
     ; make_test "t13" t13_comparator generate_t13
     ; make_test "t14" t14_comparator generate_t14
     ; make_test "t16" t16_comparator generate_t16
+    ; make_test "t18" t18_comparator generate_t18
     ]
