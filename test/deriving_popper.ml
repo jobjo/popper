@@ -87,19 +87,19 @@ let make_test name comparator generator =
 
 let suite =
   Popper.Test.suite
-    [ make_test "t1" t1_comparator generate_t1
-    ; make_test "t2" t2_comparator generate_t2
-    ; make_test "t3" t3_comparator generate_t3
-    ; make_test "t4" t4_comparator generate_t4
-    ; make_test "t5" t5_comparator generate_t5
-    ; make_test "t6" t6_comparator generate_t6
-    ; make_test "t7" t7_comparator generate_t7
-    ; make_test "t8" t8_comparator generate_t8
-    ; make_test "t9" t9_comparator generate_t9
-    ; make_test "t10" t10_comparator generate_t10
-    ; make_test "t12" t12_comparator generate_t12
-    ; make_test "t13" t13_comparator generate_t13
-    ; make_test "t14" t14_comparator generate_t14
-    ; make_test "t16" t16_comparator generate_t16
-    ; make_test "t18" t18_comparator generate_t18
+    [ make_test "T1" t1_comparator generate_t1
+    ; make_test "T2" t2_comparator generate_t2
+    ; make_test "T3" t3_comparator generate_t3
+    ; make_test "T4" t4_comparator generate_t4
+    ; make_test "T5" t5_comparator generate_t5
+    ; make_test "T6" t6_comparator generate_t6
+    ; make_test "T7" t7_comparator generate_t7
+    ; make_test "T8" t8_comparator generate_t8
+    ; make_test "T9" t9_comparator generate_t9
+    ; make_test "T10" t10_comparator generate_t10
+    ; make_test "T12" t12_comparator generate_t12
+    ; make_test "T13" t13_comparator generate_t13
+    ; make_test "T14" t14_comparator generate_t14
+    ; make_test "T16" t16_comparator generate_t16
+    ; make_test "T18" t18_comparator generate_t18
     ]
