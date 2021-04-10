@@ -8,6 +8,7 @@ type t = private
 
 val pass : t
 val fail : ?loc:string -> (Format.formatter -> unit -> unit) -> t
+val discard : t
 val fail_with : ?loc:string -> string -> t
 val equal : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> t
 val is_true : ?loc:string -> bool -> t

@@ -6,3 +6,6 @@ test:
 
 format:
 	dune build @fmt --auto-promote || true
+
+doc:
+	dune build @doc

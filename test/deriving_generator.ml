@@ -81,11 +81,11 @@ type t19 = { fn : int -> bool } [@@deriving generator]
 
 let make_test name generator =
   let open Popper in
-  let open Popper.Generator.Syntax in
+  let open Popper.Syntax in
   ( name
-  , Test.test (fun () ->
+  , test (fun () ->
       let* _ = generator in
-      Test.is_true true) )
+      is_true true) )
 
 let suite =
   Popper.Test.suite
