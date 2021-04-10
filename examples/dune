@@ -1,9 +1,5 @@
 (test
  (name run)
- (libraries alcotest containers popper)
+ (libraries alcotest containers)
  (preprocess
-  (pps
-   ppx_deriving.make
-   ppx_deriving.show
-   ppx_deriving.eq
-   ppx_deriving_popper)))
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving_popper)))

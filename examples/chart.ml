@@ -1,6 +1,3 @@
-open Popper
-open Generator.Syntax
-
 type t =
   { x_values : int list
   ; y_values : int list
@@ -13,8 +10,9 @@ let flip { x_values; y_values; x_axis; y_axis } =
   { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
 
 let test_flip =
-  Test.test (fun () ->
+  let open Popper.Syntax in
+  Popper.test (fun () ->
     let* s = generate in
-    Test.equal comparator (flip s) s)
+    Popper.eq comparator (flip s) s)
 
-let suite = Test.suite [ ("Flip chart", test_flip) ]
+let suite = Popper.suite [ ("Flip chart", test_flip) ]

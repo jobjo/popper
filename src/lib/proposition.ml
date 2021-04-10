@@ -8,6 +8,7 @@ type t =
 
 let pass = Pass
 let fail ?loc pp = Fail { pp; location = loc }
+let discard = Discard
 let fail_with ?loc s = fail ?loc (fun out () -> Format.fprintf out "%s" s)
 
 let equal ?loc testable x y =

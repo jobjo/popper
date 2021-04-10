@@ -1,6 +1,10 @@
 open Random.Syntax
 module Seq = Containers.Seq
 
+let max_count_shrinks = 10_000
+let max_count_find_next = 1000
+let max_count_discarded = 1000
+
 type t =
   | Single of Test_result.result Random.t
   | Suite of (string * t) list
@@ -61,11 +65,8 @@ let run ?(seed = Random.Seed.make 42) ts =
 
 let single t = Single t
 let suite ts = Suite ts
-let max_count_shrinks = 10_000
-let max_count_find_next = 10_000
-let max_count_discarded = 1000
 
-let test ?(count = 200) test_fun =
+let make ?(count = 200) test_fun =
   let eval () =
     let* inputs = Input.make_seq ~max_size:100 in
     let rec aux ~num_discarded ~num_passed outputs =
@@ -129,8 +130,3 @@ let test ?(count = 200) test_fun =
     { Test_result.name = None; num_passed; status; time; log; is_unit }
   in
   single test
-
-let equal ?loc testable x y =
-  Generator.return @@ Proposition.equal ?loc testable x y
-
-let is_true ?loc b = Generator.return @@ Proposition.is_true ?loc b

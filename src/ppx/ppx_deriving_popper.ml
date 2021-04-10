@@ -157,14 +157,6 @@ and of_core_type_desc ~is_rec_type ~size = function
 and of_core_type ~is_rec_type ~size { ptyp_desc; ptyp_attributes = _; _ } =
   of_core_type_desc ~is_rec_type ~size ptyp_desc
 
-and of_core_types ~is_rec_type ~size = function
-  | [] -> failwith "Unexpected"
-  | [ ct ] -> of_core_type ~is_rec_type ~size ct
-  | ct :: cts ->
-    let e = of_core_type ~is_rec_type ~size ct in
-    let es = of_core_types ~is_rec_type ~size cts in
-    [%expr [%e e] [%e es]]
-
 and of_label_declaration
   ~is_rec_type
   ~size

@@ -6,6 +6,7 @@ let suite =
     ; ("Expression", Exp.suite)
     ; ("Chart", Chart.suite)
     ; ("Arithmetic", Arithmetic.suite)
+    ; ("Tree", Tree.suite)
     ]
 
 let () = Test.run suite

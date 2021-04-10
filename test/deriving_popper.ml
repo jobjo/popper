@@ -79,11 +79,11 @@ and t18 = int t17 [@@deriving show, eq, popper]
 
 let make_test name comparator generator =
   let open Popper in
-  let open Popper.Generator.Syntax in
+  let open Syntax in
   ( name
-  , Test.test (fun () ->
+  , test (fun () ->
       let* x = generator in
-      Test.equal comparator x x) )
+      eq comparator x x) )
 
 let suite =
   Popper.Test.suite
