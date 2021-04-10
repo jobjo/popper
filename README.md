@@ -2,9 +2,10 @@
 
 *An OCaml testing library in the spirit of Karl Popper.*
 
+
 ## Examples
 
-#### A simple test-suite
+### A simple test-suite
 
 ```ocaml
 open Popper
