@@ -8,26 +8,20 @@
 
 ```ocaml
 open Popper
-open Generator
 open Syntax
 
 let test_rev =
   test (fun () ->
-    equal
-      ~loc:__LOC__
-      Comparator.(list int)
-      (List.rev [ 1; 2; 3 ])
-      [ 2; 3; 1 ])
+    eq ~loc:__LOC__ Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ])
 
 let test_rev_twice =
+  let open Generator in
   test (fun () ->
     let* xs = list int in
     is_true ~loc:__LOC__ (List.rev (List.rev xs) = xs))
 
-let suite = suite [ "Reverse", test_rev; "Reverse twice", test_rev_twice ]
-
+let suite = suite [ ("Reverse", test_rev); ("Reverse twice", test_rev_twice) ]
 let () = run suite
-
 ```
 
 When run gives:
@@ -66,6 +60,7 @@ let test_and =
     is_true ~loc:__LOC__ condition)
 
 let () = run test_and
+
 ```
 
 Yields:
@@ -78,7 +73,7 @@ An example of using a derived comparator.
 
 ```ocaml
 open Popper
-open Generator.Syntax
+open Syntax
 
 type t =
   { x_values : int list
@@ -91,11 +86,64 @@ type t =
 let flip { x_values; y_values; x_axis; y_axis } =
   { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
 
+(* Bad test *)
 let test_flip_twice =
   test (fun () ->
     let* s = generate in
-    equal comparator (flip (flip s)) s)
+    eq comparator (flip s) s) 
 
-let suite = suite [ ("Flip chart", test_flip) ]
+let suite = suite [ ("Flip chart", test_flip_twice) ]
+
+let () = run suite
 ```
+
+Gives:
+
+![image](https://user-images.githubusercontent.com/820478/114268637-0209c300-99fa-11eb-9a67-09b2c1dedd3f.png)
+
+
+### Deriving test-data (including functions)
+
+```ocaml
+open Popper
+
+type 'a tree =
+  | Leaf of 'a
+  | Node of 'a tree * 'a tree
+[@@deriving show, eq, popper]
+
+let leaf x = Leaf x
+let node x y = Node (x, y)
+
+let rec map f = function
+  | Leaf x -> Leaf (f x)
+  | Node (a, b) -> node (map f a) (map f b)
+
+let rec to_list = function
+  | Leaf x -> [ x ]
+  | Node (a, b) -> to_list a @ to_list b
+
+type test_data =
+  { tree : int tree
+  ; f : int -> int
+  }
+[@@deriving generator]
+
+let test_map =
+  let open Syntax in
+  test (fun () ->
+    let* { tree; f } = generate_test_data in
+    let r1 = List.map f @@ to_list tree in
+    let r2 = to_list @@ map f tree in
+    eq (Comparator.list Comparator.int) r1 r2)
+
+let suite = suite [ ("Map tree", test_map) ]
+
+let () = run suite
+```
+
+Gives:
+
+![image](https://user-images.githubusercontent.com/820478/114268695-6036a600-99fa-11eb-9860-a8fd8ee7790e.png)
+
 
