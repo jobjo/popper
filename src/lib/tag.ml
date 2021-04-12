@@ -11,7 +11,7 @@ type t =
 [@@deriving show]
 
 let is_operator t = t = Operator || t = Size
-let is_value t = t <> Operator
+let is_value t = not @@ is_operator t
 
 let to_string = function
   | Sign -> "sign"

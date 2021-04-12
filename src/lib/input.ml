@@ -7,7 +7,7 @@ type t =
 
 let make ~max_size =
   let gen ix =
-    if ix <= 10_000 then
+    if ix <= 200 then
       let+ x = Random.int32 in
       (x, ix + 1)
     else
@@ -22,8 +22,12 @@ let make_seq ~max_size =
     let+ x = make ~max_size in
     (x, max_size + 1))
 
-let of_list ~max_size xs = { max_size; data = List.to_seq xs }
-let of_seq ~max_size data = { max_size; data }
+let of_seq ~max_size data =
+  let zeros = Seq.unfold (fun _ -> Some (0l, ())) () in
+  let data = Seq.append data zeros in
+  { max_size; data }
+
+let of_list ~max_size xs = of_seq ~max_size (List.to_seq xs)
 
 let head_tail { max_size; data } =
   match data () with

@@ -20,3 +20,6 @@ let is_true ?loc b = Generator.return @@ Proposition.is_true ?loc b
 let is_false ?loc b = Generator.return @@ Proposition.is_false ?loc b
 let all ps = Generator.sequence ps |> Generator.map Proposition.all
 let any ps = Generator.sequence ps |> Generator.map Proposition.any
+let with_log k pp gen = Generator.with_log k pp gen
+let pass = Generator.return Proposition.pass
+let fail ?loc s = Generator.return @@ Proposition.fail_with ?loc s

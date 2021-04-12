@@ -6,4 +6,4 @@ let suite =
     ; ("Deriving Popper", Deriving_popper.suite)
     ]
 
-let () = run suite
+(* let () = run suite *)

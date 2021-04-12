@@ -48,3 +48,11 @@ val is_true : ?loc:string -> bool -> Proposition.t Generator.t
 val is_false : ?loc:string -> bool -> Proposition.t Generator.t
 val all : Proposition.t Generator.t list -> Proposition.t Generator.t
 val any : Proposition.t Generator.t list -> Proposition.t Generator.t
+val pass : Proposition.t Generator.t
+val fail : ?loc:string -> string -> Proposition.t Generator.t
+
+val with_log
+  :  string
+  -> (Format.formatter -> 'a -> unit)
+  -> 'a Generator.t
+  -> 'a Generator.t
