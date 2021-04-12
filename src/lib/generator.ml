@@ -153,20 +153,6 @@ let sized f =
 let set_max_size max_size g =
   make (fun input -> run (Input.set_max_size max_size input) g)
 
-(* let list g =
-  let rec aux size =
-    if size <= 1 then
-      return []
-    else
-      let f () =
-        let+ x = g
-        and+ xs = aux (size - 1) in
-        x :: xs
-      in
-      choose [ (1., return []); (float size, delayed f) ]
-  in
-  sized aux *)
-
 let list g =
   let aux size =
     if size <= 0 then
