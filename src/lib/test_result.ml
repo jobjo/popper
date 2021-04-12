@@ -2,6 +2,7 @@ open Format
 
 type failure =
   { num_shrinks : int
+  ; num_attempts : int
   ; pp : Format.formatter -> unit -> unit
   ; explanation : string
   ; location : string option
@@ -193,7 +194,9 @@ let pp_failed_results out res =
     (function
       | { name
         ; num_passed
-        ; status = Fail { explanation = _; num_shrinks; location; pp }
+        ; status =
+            Fail
+              { explanation = _; num_shrinks; num_attempts = _; location; pp }
         ; time = _
         ; log
         ; is_unit
@@ -208,7 +211,7 @@ let pp_failed_results out res =
               out
               "Failed %a after %a %s and %a shrinks."
               (Util.Format.red pp_print_string)
-              name
+              (if name = "" then "Anonymous" else name)
               (Util.Format.blue pp_print_int)
               num_samples
               (if num_samples = 1 then "sample" else "samples")

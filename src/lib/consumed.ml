@@ -8,8 +8,10 @@ let tag t c = Tag (t, c)
 let make ds = Entries ds
 let empty = Entries []
 
-let is_empty = function
+let rec is_empty = function
   | Entries [] -> true
+  | Add (l, r) -> is_empty l && is_empty r
+  | Tag (_, c) -> is_empty c
   | _ -> false
 
 let to_list t =

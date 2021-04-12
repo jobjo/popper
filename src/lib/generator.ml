@@ -83,6 +83,20 @@ end
 
 open Syntax
 
+let with_log key pp gen =
+  let* value = gen in
+  let pp out () =
+    Format.fprintf
+      out
+      "@[<hv 2>%a@;=@;%a@]"
+      (Util.Format.yellow Format.pp_print_string)
+      key
+      (Util.Format.blue pp)
+      value
+  in
+  let* () = log_with pp () in
+  return value
+
 let rec sequence gs =
   match gs with
   | [] -> return []
@@ -92,14 +106,41 @@ let rec sequence gs =
     return (x :: xs)
 
 let range mn mx =
-  let+ n = tag Int int32 in
-  mn + (Int32.to_int n mod (mx - mn))
+  let n = mx - mn in
+  let n = Int32.of_int n in
+  let block = Int32.div Int32.max_int n in
+  let+ r = int32 in
+  let offset = Int32.to_int @@ Int32.div r block in
+  mn + offset
 
 let one_of gs =
   let* n = tag Tag.Operator @@ range 0 (List.length gs) in
   List.nth gs n
 
 let max_size = make (fun input -> run input (return @@ Input.max_size input))
+
+let float_range mn mx =
+  let n = mx -. mn in
+  let n = Int32.of_float n in
+  let block = Int32.div Int32.max_int n in
+  let+ r = int32 in
+  let offset = Int32.to_float r /. Int32.to_float block in
+  mn +. offset
+
+let choose opts =
+  let sum = List.fold_left (fun s (fr, _) -> s +. fr) 0. opts in
+  let* rand = float_range 0. sum in
+  let rec aux acc = function
+    | [ (_, r) ] -> r
+    | (f, r) :: frs ->
+      let acc = acc +. f in
+      if acc >= rand then
+        r
+      else
+        aux acc frs
+    | [] -> failwith "Empty"
+  in
+  aux 0. opts
 
 let sized f =
   let* n = tag Tag.Size int32 in
@@ -113,16 +154,12 @@ let set_max_size max_size g =
   make (fun input -> run (Input.set_max_size max_size input) g)
 
 let list g =
-  let rec aux size =
-    if size <= 1 then
+  let aux size =
+    if size <= 0 then
       return []
     else
-      let f () =
-        let+ x = g
-        and+ xs = aux (size - 1) in
-        x :: xs
-      in
-      one_of [ return []; delayed f ]
+      let* n = range 0 size in
+      sequence @@ List.init n (fun _ -> g)
   in
   sized aux
 
@@ -175,13 +212,6 @@ let arrow g =
   in
   promote f
 
-let int =
-  let* b = tag Sign int32 in
-  let* n = tag Int int32 in
-  let n = Int32.to_int n in
-  let b = Int32.to_int b mod 2 = 0 in
-  return (if b then Int.neg n else n)
-
 let string =
   map
     (fun input -> String.concat "" @@ List.map (String.make 1) input)
@@ -192,3 +222,24 @@ let with_consumed g =
     let output = run input g in
     let c = Output.consumed output in
     Output.map (fun x -> (x, c)) output)
+
+let small_int = range (-10) 10
+let medium_int = range (-1000) 1000
+
+let any_int =
+  let* b = tag Sign int32 in
+  let* n = tag Int int32 in
+  let n = Int32.to_int n in
+  let b = Int32.to_int b mod 2 <> 0 in
+  return (if b then Int.neg n else n)
+
+let int =
+  tag Int
+  @@ choose
+       [ (1., return 0)
+       ; (1., return 1)
+       ; (1., return (-1))
+       ; (5., small_int)
+       ; (10., medium_int)
+       ; (10., any_int)
+       ]

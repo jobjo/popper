@@ -76,20 +76,25 @@ let of_list ~columns rows =
 
 let pp out { num_rows; num_cols; cell; columns } =
   let open Format in
-  let col_widths = List.init num_cols (max_column_length ~num_rows ~cell) in
-  let cols_and_widths = List.combine columns col_widths in
-  let pp_cell ~row ~col ~column_width out alignment =
-    let cell =
-      Option.fold ~none:(fun _ _ -> ()) ~some:Fun.id @@ cell ~row ~col
+  if num_rows = 0 then
+    ()
+  else
+    let col_widths = List.init num_cols (max_column_length ~num_rows ~cell) in
+    let cols_and_widths = List.combine columns col_widths in
+    let pp_cell ~row ~col ~column_width out alignment =
+      let cell =
+        Option.fold ~none:(fun _ _ -> ()) ~some:Fun.id @@ cell ~row ~col
+      in
+      render_cell ~column_width cell alignment out
     in
-    render_cell ~column_width cell alignment out
-  in
-  let render_row out row =
-    List.iteri
-      (fun col (column, column_width) ->
-        pp_cell ~row ~col ~column_width out column)
-      cols_and_widths;
-    pp_print_cut out ()
-  in
-  let pp_rows out () = List.iter (render_row out) (List.init num_rows Fun.id) in
-  fprintf out "@[<v 0>@,%a@]" pp_rows ()
+    let render_row out row =
+      List.iteri
+        (fun col (column, column_width) ->
+          pp_cell ~row ~col ~column_width out column)
+        cols_and_widths;
+      pp_print_cut out ()
+    in
+    let pp_rows out () =
+      List.iter (render_row out) (List.init num_rows Fun.id)
+    in
+    fprintf out "@[<v 0>@,%a@]" pp_rows ()

@@ -1,8 +1,6 @@
 open Random.Syntax
 module Seq = Containers.Seq
 
-let max_count_shrinks = 10_000
-let max_count_find_next = 1000
 let max_count_discarded = 1000
 
 type t =
@@ -66,7 +64,7 @@ let run ?(seed = Random.Seed.make 42) ts =
 let single t = Single t
 let suite ts = Suite ts
 
-let make ?(count = 200) test_fun =
+let make ?(count = 400) test_fun =
   let eval () =
     let* inputs = Input.make_seq ~max_size:100 in
     let rec aux ~num_discarded ~num_passed outputs =
@@ -93,10 +91,9 @@ let make ?(count = 200) test_fun =
               , is_unit )
           else
             aux ~num_discarded:(num_discarded + 1) ~num_passed next
-        | Proposition.Fail { pp; location } ->
-          let* res =
-            Shrink.shrink ~max_count_find_next ~max_count_shrinks output
-            @@ test_fun ()
+        | Proposition.Fail { location; _ } ->
+          let* { Shrink.num_shrinks; num_attempts; pp; output } =
+            Shrink.shrink output @@ test_fun ()
           in
           let explanation =
             if is_unit then
@@ -104,19 +101,12 @@ let make ?(count = 200) test_fun =
             else
               Printf.sprintf "Failed after %d samples" (num_passed + 1)
           in
-          (match res with
-          | Some (num_shrinks, pp, output) ->
-            Random.return
-              ( num_passed
-              , Test_result.Fail { num_shrinks; explanation; pp; location }
-              , Output.log output
-              , is_unit )
-          | None ->
-            Random.return
-              ( num_passed
-              , Test_result.Fail { num_shrinks = 0; explanation; pp; location }
-              , Output.log output
-              , is_unit ))
+          Random.return
+            ( num_passed
+            , Test_result.Fail
+                { num_shrinks; num_attempts; explanation; pp; location }
+            , Output.log output
+            , is_unit )
     in
     aux
       ~num_discarded:0

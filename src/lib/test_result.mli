@@ -1,5 +1,6 @@
 type failure =
   { num_shrinks : int
+  ; num_attempts : int
   ; pp : Format.formatter -> unit -> unit
   ; explanation : string
   ; location : string option

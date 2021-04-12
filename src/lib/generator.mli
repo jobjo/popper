@@ -28,6 +28,10 @@ val log_string : string -> unit t
 val log_with : (Format.formatter -> 'a -> unit) -> 'a -> unit t
 val log_key_value : string -> string -> unit t
 val with_consumed : 'a t -> ('a * Consumed.t) t
+val with_log : string -> (Format.formatter -> 'a -> unit) -> 'a t -> 'a t
+val float_range : float -> float -> float t
+val choose : (float * 'a t) list -> 'a t
+val max_size : int t
 
 module Syntax : sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
