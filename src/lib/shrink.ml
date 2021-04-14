@@ -1,12 +1,7 @@
+module R = Random
 open Random.Syntax
 module IM = Map.Make (Int)
-
-type t =
-  { map : int32 option IM.t
-  ; operators : int array
-  ; values : int array
-  ; max_size : int
-  }
+module IS = Set.Make (Int)
 
 type result =
   { num_shrinks : int
@@ -15,177 +10,222 @@ type result =
   ; output : Proposition.t Output.t
   }
 
-let of_output output =
-  let data =
-    Consumed.to_list @@ Output.consumed output
-    |> List.mapi (fun ix (tag, d) -> (ix, tag, d))
-  in
-  let map =
-    data
-    |> List.map (fun (ix, _, d) -> (ix, Some d))
-    |> List.to_seq
-    |> IM.of_seq
-  in
-  let operators =
-    List.filter_map
-      (fun (ix, tags, _) ->
-        match List.rev tags with
-        | [] -> None
-        | tag :: _ -> if Tag.is_operator tag then Some ix else None)
-      data
-    |> Array.of_list
-  in
-  let values =
-    List.filter_map
-      (fun (ix, tags, _) ->
-        match List.rev tags with
-        | [] -> None
-        | tag :: _ -> if Tag.is_value tag then Some ix else None)
-      data
-    |> Array.of_list
-  in
-  let max_size = Output.max_size output in
-  { map; operators; values; max_size }
+type indexed =
+  | Value of int * Int32.t
+  | Empty
+  | Add of int * int * indexed * indexed
+  | Tag of int * int * Tag.t * indexed
 
-let shrink_int32 n =
-  match n with
-  | Some n ->
-    let* v =
-      Random.choose
-        [ (1, Random.return 0l)
-        ; (5, Random.return (Int32.div n 2l))
-        ; (1, Random.return (Int32.sub n Int32.one))
-        ]
+type t =
+  { indexed : indexed
+  ; nodes : indexed IM.t
+  ; overrides : Consumed.t IM.t
+  ; node_indexes : int array
+  }
+
+let zero = Consumed.value 0l
+
+let indexed_of_consumed node =
+  let rec aux ix = function
+    | Consumed.Value v -> (Value (ix, v), ix)
+    | Empty -> (Empty, ix)
+    | Add (l, r) ->
+      let l, ix1 = aux (ix + 1) l in
+      let r, ix2 = aux (ix1 + 1) r in
+      (Add (ix, ix2, l, r), ix2)
+    | Tag (t, c) ->
+      let c, ix2 = aux (ix + 1) c in
+      (Tag (ix, ix2, t, c), ix2)
+  in
+  fst @@ aux 0 node
+
+let pp out { indexed; nodes; overrides; node_indexes } =
+  let open Format in
+  let rec pp_indexed out indexed =
+    let open Format in
+    match indexed with
+    | Value (ix, v) -> fprintf out "@[- Value[%d] %ld@]" ix v
+    | Empty -> fprintf out "[@- Empty@]"
+    | Tag (ix1, ix2, tg, t) ->
+      fprintf
+        out
+        "@[<v 2>- Tag.%s[%d,%d]@,%a@]"
+        (Tag.to_string tg)
+        ix1
+        ix2
+        pp_indexed
+        t
+    | Add (ix1, ix2, l, r) ->
+      fprintf
+        out
+        "@[<v 2>- Add[%d,%d]@,%a@,%a@]"
+        ix1
+        ix2
+        pp_indexed
+        l
+        pp_indexed
+        r
+  in
+  let pp_nodes out nodes =
+    let pp out () =
+      IM.iter
+        (fun ix indexed ->
+          fprintf out "@[<v>%d: @;%a@,@]" ix pp_indexed indexed)
+        nodes
     in
-    Random.return @@ Some v
-  | None -> Random.return None
-
-let remove_operator t =
-  if Array.length t.operators = 0 then
-    Random.return t
-  else
-    let* ix = Random.range 0 @@ Array.length t.operators in
-    let ix = Array.get t.operators ix in
-    let map = IM.add ix None t.map in
-    let operators =
-      Array.to_list t.operators
-      |> List.filteri (fun i _ -> i <> ix)
-      |> Array.of_list
+    fprintf out "@[<v 2>Nodes:@,%a@]" pp ()
+  in
+  let pp_overrides out overrides =
+    let pp out () =
+      IM.iter
+        (fun ix c ->
+          let indexed = indexed_of_consumed c in
+          fprintf out "[@<v 2>Index: %d@,%a@]" ix pp_indexed indexed)
+        overrides
     in
-    Random.return { t with map; operators }
+    fprintf out "@[<v 2>Overrides:@,%a@]" pp ()
+  in
+  let pp_indexes out node_indexes =
+    fprintf
+      out
+      "@[<v 2>Node indexes:@,@[<hv>@,[%a]@]@]"
+      (pp_print_list (fun o d -> fprintf o "%d; " d))
+      (Array.to_list node_indexes)
+  in
+  fprintf
+    out
+    "@[<v 2>Shrink-structure:@,%a@,%a@,%a@,%a@]"
+    pp_indexed
+    indexed
+    pp_nodes
+    nodes
+    pp_overrides
+    overrides
+    pp_indexes
+    node_indexes
 
-let remove_value t =
-  if Array.length t.values = 0 then
-    Random.return t
-  else
-    let* ix = Random.range 0 @@ Array.length t.values in
-    let ix = Array.get t.values ix in
-    let map = IM.add ix None t.map in
-    let values =
-      Array.to_list t.values
-      |> List.filteri (fun i _ -> i <> ix)
-      |> Array.of_list
-    in
-    Random.return { t with map; values }
+let rec unindex = function
+  | Empty -> Consumed.empty
+  | Add (_, _, l, r) -> Consumed.add (unindex l) (unindex r)
+  | Tag (_, _, t, c) -> Consumed.tag t @@ unindex c
+  | Value (_, v) -> Consumed.value v
 
-let shrink_operator t =
-  if Array.length t.operators = 0 then
-    Random.return t
-  else
-    let* arr_ix = Random.range 0 @@ Array.length t.operators in
-    let ix = Array.get t.operators arr_ix in
-    let* n = shrink_int32 @@ IM.find ix t.map in
-    let map = IM.add ix n t.map in
+let of_consumed consumed =
+  let map = ref IM.empty in
+  let add_node ix1 node = map := IM.add ix1 node !map in
+  let rec aux n =
     match n with
-    | Some n when Int32.equal Int32.zero n ->
-      let operators =
-        Array.to_list t.operators
-        |> List.filteri (fun i _ -> i <> arr_ix)
-        |> Array.of_list
-      in
-      Random.return { t with map; operators }
-    | _ -> Random.return { t with map }
+    | Empty -> ()
+    | Value (ix, _) -> add_node ix n
+    | Add (ix1, _, l, r) ->
+      add_node ix1 n;
+      aux l;
+      aux r
+    | Tag (ix1, _, _, c) ->
+      add_node ix1 n;
+      aux c
+  in
+  let indexed = indexed_of_consumed consumed in
+  aux indexed;
+  let nodes = !map in
+  let overrides = IM.empty in
+  let node_indexes = IM.to_seq nodes |> Array.of_seq |> Array.map fst in
+  { indexed; nodes; overrides; node_indexes }
 
-let shrink_value t =
-  if Array.length t.values = 0 then
-    Random.return t
-  else
-    let* arr_ix = Random.range 0 @@ Array.length t.values in
-    let ix = Array.get t.values arr_ix in
-    let* n = shrink_int32 @@ IM.find ix t.map in
-    let map = IM.add ix n t.map in
-    match n with
-    | Some n when Int32.equal Int32.zero n ->
-      let values =
-        Array.to_list t.values
-        |> List.filteri (fun i _ -> i <> arr_ix)
-        |> Array.of_list
-      in
-      Random.return { t with map; values }
-    | _ -> Random.return { t with map }
+let to_consumed { indexed; overrides; _ } =
+  let rec aux = function
+    | Empty -> Consumed.empty
+    | Add (ix, _, l, r) ->
+      (match IM.find_opt ix overrides with
+      | Some n -> n
+      | None -> Consumed.add (aux l) (aux r))
+    | Tag (ix, _, t, c) ->
+      (match IM.find_opt ix overrides with
+      | Some n -> n
+      | None -> Consumed.tag t @@ aux c)
+    | Value (ix, v) ->
+      (match IM.find_opt ix overrides with
+      | Some n -> n
+      | None -> Consumed.value v)
+  in
+  aux indexed
 
-let modify t =
-  if Array.length t.values = 0 then
-    shrink_operator t
-  else if Array.length t.operators = 0 then
-    shrink_value t
-  else
-    let modify t =
-      Random.choose
-        [ (5, shrink_value t)
-        ; (2, shrink_operator t)
-        ; (1, remove_operator t)
-        ; (1, remove_value t)
-        ]
-    in
-    let modify_twice t =
-      let open Random.Syntax in
-      let* t = modify t in
-      modify t
-    in
-    Random.choose [ (5, modify t); (1, modify_twice t) ]
+let shrink_value n =
+  Random.choose_value
+    [ (10., zero)
+    ; (10., Consumed.value @@ Int32.div n 2l)
+    ; (0.1, Consumed.value @@ Int32.sub n Int32.one)
+    ]
 
-let to_input { map; max_size; _ } =
-  let map = IM.filter_map (fun _ o -> o) map in
-  Input.of_seq
-    ~max_size
-    (Seq.unfold
-       (fun ix ->
-         let v =
-           match IM.find_opt ix map with
-           | Some v -> v
-           | None -> 0l
-         in
-         Some (v, ix + 1))
-       0)
+let shrink_node c =
+  match c with
+  | Consumed.Tag (Tag.Sub_list, Tag (Tag.Choice, Value 0l)) -> R.return None
+  | Tag (Tag.Sub_list, _) -> R.return (Some zero)
+  | Tag (Tag.List, _) -> R.return (Some zero)
+  | Tag (Tag.Bool, _) -> R.return (Some zero)
+  | Add (l, r) ->
+    R.choose_value [ (2., Some zero); (1., Some (Consumed.add r l)) ]
+  | Value v -> R.map Option.some (shrink_value v)
+  | _ -> R.return None
 
-type stream = t
+let try_shrink { indexed; nodes; overrides; node_indexes } =
+  let* arr_ix = R.range 0 @@ Array.length node_indexes in
+  let node_ix = Array.get node_indexes arr_ix in
+  let+ override = shrink_node @@ unindex @@ IM.find node_ix nodes in
+  match override with
+  | Some override ->
+    let overrides = IM.add node_ix override overrides in
+    let t = { indexed; nodes; overrides; node_indexes } in
+    Some t
+  | None -> None
 
-let shrink output (gen : Proposition.t Generator.t) =
+let modify data =
   let open Random.Syntax in
+  let+ r =
+    Random.until_some
+      ~max_tries:100
+      (Random.delayed @@ fun () -> try_shrink data)
+  in
+  match r with
+  | Some x -> x
+  | None -> data
+
+let to_input ~max_size c =
+  c
+  |> to_consumed
+  |> Consumed.to_list
+  |> List.map snd
+  |> Input.of_list ~max_size
+
+let shrink ~max_size consumed (gen : Proposition.t Generator.t) =
+  let data = of_consumed consumed in
   let module Config = struct
-    type t = stream
+    type nonrec t = t
 
-    let compare { map = m1; _ } { map = m2; _ } =
-      IM.compare (Option.compare Int32.compare) m1 m2
+    let max_tries = 100
 
-    let modify = modify
-    let max_tries = 10_000
+    let compare t1 t2 =
+      compare
+        (Consumed.to_list @@ to_consumed t1)
+        (Consumed.to_list @@ to_consumed t2)
 
-    let keep n =
-      let output = Generator.run (to_input n) gen in
+    let keep c =
+      let input = to_input ~max_size c in
+      let output = Generator.run input gen in
       match Output.value output with
-      | Proposition.Fail _ -> true
-      | _ -> false
+      | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
+      | _ -> None
+
+    let modify t = modify t
   end
   in
   let module S = Search.Make (Config) in
-  let* { Search.node; num_attempts; num_explored = num_shrinks } =
-    S.search @@ of_output output
+  let* { Search.num_attempts; num_explored = num_shrinks; node } =
+    S.search data
   in
-  let input = to_input node in
+  let input = to_input ~max_size node in
+  let output = Generator.run input gen in
   Random.return
-    (let output = Generator.run input gen in
-     match Output.value output with
-     | Proposition.Fail { pp; _ } -> { num_shrinks; num_attempts; pp; output }
-     | _ -> failwith "Should not return a non-failure")
+    (match Output.value output with
+    | Proposition.Fail { pp; _ } -> { num_shrinks; num_attempts; pp; output }
+    | _ -> failwith "Should not return a non-failure")

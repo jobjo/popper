@@ -5,7 +5,7 @@ module type Config = sig
 
   val max_tries : int
   val compare : t -> t -> int
-  val keep : t -> bool
+  val keep : t -> t option
   val modify : t -> t Random.t
 end
 
@@ -48,10 +48,9 @@ module Make (C : Config) = struct
           aux (ix + 1)
         else
           let () = visit node in
-          if keep node then
-            Random.return (Some node)
-          else
-            aux (ix + 1)
+          match keep node with
+          | Some node -> Random.return (Some node)
+          | None -> aux (ix + 1)
     in
     aux 0
 

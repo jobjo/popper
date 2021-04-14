@@ -17,10 +17,8 @@ let rec eval = function
 let test_and =
   let open Generator in
   test (fun () ->
-    let* e1 = generate in
-    let* e2 = generate in
-    let* () = log_key_value "e1" (show e1) in
-    let* () = log_key_value "e2" (show e2) in
+    let* e1 = with_log "e1" pp generate in
+    let* e2 = with_log "e2" pp generate in
     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
     is_true ~loc:__LOC__ condition)
 
@@ -28,6 +26,6 @@ let test_or =
   test (fun () ->
     let* e1 = generate
     and* e2 = generate in
-    is_true ((eval e1 || eval e2) = eval (Or (e1, e2))))
+    eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
 
 let suite = Test.suite [ ("Exp and", test_and); ("Exp or", test_or) ]

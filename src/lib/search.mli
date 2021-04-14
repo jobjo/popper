@@ -9,7 +9,7 @@ module type Config = sig
 
   val max_tries : int
   val compare : t -> t -> int
-  val keep : t -> bool
+  val keep : t -> t option
   val modify : t -> t Random.t
 end
 

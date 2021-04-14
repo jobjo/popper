@@ -1,3 +1,5 @@
 (library
  (public_name popper)
- (libraries containers pringo str))
+ (libraries containers pringo str)
+ (preprocess
+  (pps ppx_deriving.show)))

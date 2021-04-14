@@ -91,22 +91,41 @@ let make ?(count = 400) test_fun =
               , is_unit )
           else
             aux ~num_discarded:(num_discarded + 1) ~num_passed next
-        | Proposition.Fail { location; _ } ->
-          let* { Shrink.num_shrinks; num_attempts; pp; output } =
-            Shrink.shrink output @@ test_fun ()
-          in
-          let explanation =
-            if is_unit then
-              "Failed"
-            else
-              Printf.sprintf "Failed after %d samples" (num_passed + 1)
-          in
-          Random.return
-            ( num_passed
-            , Test_result.Fail
-                { num_shrinks; num_attempts; explanation; pp; location }
-            , Output.log output
-            , is_unit )
+        | Proposition.Fail { location; pp } ->
+          if is_unit then
+            Random.return
+              ( num_passed
+              , Test_result.Fail
+                  { num_shrinks = 1
+                  ; num_attempts = 1
+                  ; explanation = "Failed"
+                  ; pp
+                  ; location
+                  }
+              , Output.log output
+              , is_unit )
+          else
+            let* { Shrink.num_shrinks; num_attempts; pp; output } =
+              Shrink.shrink
+                ~max_size:(Output.max_size output)
+                (Output.consumed output)
+              @@ test_fun ()
+            in
+            let explanation =
+              if is_unit then
+                "Failed"
+              else
+                Printf.sprintf
+                  "Failed after %d %s"
+                  (num_passed + 1)
+                  (if num_passed = 0 then "sample" else "samples")
+            in
+            Random.return
+              ( num_passed
+              , Test_result.Fail
+                  { num_shrinks; num_attempts; explanation; pp; location }
+              , Output.log output
+              , is_unit )
     in
     aux
       ~num_discarded:0

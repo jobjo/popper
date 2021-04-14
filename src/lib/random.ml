@@ -52,9 +52,13 @@ let timed { run } =
     let (x, s), t = time run seed in
     ((x, t), s))
 
+let pair r1 r2 = bind r1 (fun x -> bind r2 (fun y -> return (x, y)))
+
 module Syntax = struct
   let ( let* ) = bind
   let ( let+ ) x f = map f x
+  let ( and+ ) x y = pair x y
+  let ( and* ) x y = pair x y
 end
 
 let range mn mx =
@@ -75,19 +79,53 @@ let rec sequence rs =
     let* xs = sequence rs in
     return (x :: xs)
 
-let choose opts =
+let until_some ~max_tries f =
+  let open Syntax in
+  let rec aux ix =
+    if ix >= max_tries then
+      return None
+    else
+      let* x = f in
+      match x with
+      | Some x -> return (Some x)
+      | None -> aux (ix + 1)
+  in
+  aux 0
+
+(* let choose opts =
   let sum = List.fold_left (fun s (fr, _) -> s + fr) 0 opts in
   make
   @@ fun s ->
-  let rand_float, s = R.int sum s in
+  let rand_int, s = R.int sum s in
+  (* Printf.printf "Random [0 - %d]: %d\n" sum rand_int; *)
   let rec aux acc = function
     | [ (_, r) ] -> r
     | (f, r) :: frs ->
       let acc = acc + f in
-      if acc >= rand_float then
+      if acc > rand_int then
         r
       else
         aux acc frs
     | [] -> failwith "Empty"
   in
-  run s @@ aux 0 opts
+  run s @@ aux 0 opts *)
+
+let choose opts =
+  let sum = List.fold_left (fun s (fr, _) -> s +. fr) 0. opts in
+  make
+  @@ fun s ->
+  let rf, s = R.float sum s in
+  (* Printf.printf "Random [0 - %d]: %d\n" sum rand_int; *)
+  let rec aux acc = function
+    | [ (_, r) ] -> r
+    | (f, r) :: frs ->
+      let acc = acc +. f in
+      if acc > rf then
+        r
+      else
+        aux acc frs
+    | [] -> failwith "Empty"
+  in
+  run s @@ aux 0. opts
+
+let choose_value cs = choose @@ List.map (fun (f, v) -> (f, return v)) cs

@@ -8,6 +8,10 @@ type t =
   | Bool
   | Value
   | Operator
+  | List
+  | Choice
+  | Name of string
+  | Sub_list
 [@@deriving show]
 
 val is_operator : t -> bool

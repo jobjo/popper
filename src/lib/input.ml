@@ -7,7 +7,7 @@ type t =
 
 let make ~max_size =
   let gen ix =
-    if ix <= 200 then
+    if ix <= 10_000 then
       let+ x = Random.int32 in
       (x, ix + 1)
     else
