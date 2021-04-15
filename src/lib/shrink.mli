@@ -10,7 +10,7 @@ type result =
 val pp : Format.formatter -> t -> unit
 
 val shrink
-  :  max_size:int
+  :  size:int
   -> Consumed.t
   -> Proposition.t Generator.t
   -> result Random.t

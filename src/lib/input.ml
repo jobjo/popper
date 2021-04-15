@@ -2,10 +2,10 @@ open Random.Syntax
 
 type t =
   { data : int32 Seq.t
-  ; max_size : int
+  ; size : int
   }
 
-let make ~max_size =
+let make ~size =
   let gen ix =
     if ix <= 10_000 then
       let+ x = Random.int32 in
@@ -14,29 +14,29 @@ let make ~max_size =
       Random.return (0l, ix + 1)
   in
   let+ data = Random.generate ~init:0 gen in
-  { data; max_size }
+  { data; size }
 
-let make_seq ~max_size =
-  Random.generate ~init:2 (fun size ->
-    let max_size = min size max_size in
-    let+ x = make ~max_size in
-    (x, max_size + 1))
+let make_seq ~size =
+  Random.generate ~init:2 (fun s ->
+    let size = min size s in
+    let+ x = make ~size in
+    (x, size + 1))
 
-let of_seq ~max_size data =
+let of_seq ~size data =
   let zeros = Seq.unfold (fun _ -> Some (0l, ())) () in
   let data = Seq.append data zeros in
-  { max_size; data }
+  { size; data }
 
-let of_list ~max_size xs = of_seq ~max_size (List.to_seq xs)
+let of_list ~size xs = of_seq ~size (List.to_seq xs)
 
-let head_tail { max_size; data } =
+let head_tail { size; data } =
   match data () with
   | Seq.Nil -> None
-  | Cons (n, data) -> Some (n, { max_size; data })
+  | Cons (n, data) -> Some (n, { size; data })
 
 let head input = Option.map fst @@ head_tail input
 let take n { data; _ } = List.of_seq @@ Containers.Seq.take n data
-let drop n { max_size; data } = { max_size; data = Containers.Seq.drop n data }
-let map f { max_size; data } = { max_size; data = Seq.map f data }
-let max_size { max_size; _ } = max_size
-let set_max_size max_size { data; _ } = { data; max_size }
+let drop n { size; data } = { size; data = Containers.Seq.drop n data }
+let map f { size; data } = { size; data = Seq.map f data }
+let size { size; _ } = size
+let set_size size { data; _ } = { data; size }

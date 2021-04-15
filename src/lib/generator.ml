@@ -7,10 +7,10 @@ let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
   make (fun input ->
-    let max_size = Input.max_size input in
+    let size = Input.size input in
     Output.make
       ~value
-      ~max_size
+      ~size
       ~consumed:Consumed.empty
       ~remaining:input
       ~log:Log.empty)
@@ -33,13 +33,8 @@ let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
-    let max_size = Input.max_size input in
-    Output.make
-      ~value:()
-      ~max_size
-      ~consumed:Consumed.empty
-      ~remaining:input
-      ~log)
+    let size = Input.size input in
+    Output.make ~value:() ~size ~consumed:Consumed.empty ~remaining:input ~log)
 
 let log_string s =
   let pp out = Format.pp_print_string out s in
@@ -69,7 +64,7 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
-        ~max_size:(Input.max_size input)
+        ~size:(Input.size input)
         ~consumed:(Consumed.value value)
         ~remaining
         ~log:Log.empty)
@@ -117,7 +112,7 @@ let one_of gs =
   let* n = range 0 (List.length gs) in
   List.nth gs n
 
-let max_size = make (fun input -> run input (return @@ Input.max_size input))
+let size = make (fun input -> run input (return @@ Input.size input))
 
 let float_range mn mx =
   let n = mx -. mn in
@@ -143,11 +138,10 @@ let choose opts =
   aux 0. opts
 
 let sized f =
-  let* max_size = max_size in
-  f max_size
+  let* size = size in
+  f size
 
-let set_max_size max_size g =
-  make (fun input -> run (Input.set_max_size max_size input) g)
+let set_size size g = make (fun input -> run (Input.set_size size input) g)
 
 let list g =
   let rec aux size =
@@ -186,7 +180,7 @@ let promote f =
     let remaining = Input.drop 1 input in
     Output.make
       ~value
-      ~max_size:(Input.max_size input)
+      ~size:(Input.size input)
       ~consumed
       ~remaining
       ~log:Log.empty)

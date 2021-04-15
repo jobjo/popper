@@ -66,7 +66,7 @@ let suite ts = Suite ts
 
 let make ?(count = 400) test_fun =
   let eval () =
-    let* inputs = Input.make_seq ~max_size:100 in
+    let* inputs = Input.make_seq ~size:100 in
     let rec aux ~num_discarded ~num_passed outputs =
       if num_passed >= count then
         Random.return (num_passed, Test_result.Pass, Log.empty, false)
@@ -106,9 +106,7 @@ let make ?(count = 400) test_fun =
               , is_unit )
           else
             let* { Shrink.num_shrinks; num_attempts; pp; output } =
-              Shrink.shrink
-                ~max_size:(Output.max_size output)
-                (Output.consumed output)
+              Shrink.shrink ~size:(Output.size output) (Output.consumed output)
               @@ test_fun ()
             in
             let explanation =

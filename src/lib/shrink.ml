@@ -190,14 +190,10 @@ let modify data =
   | Some x -> x
   | None -> data
 
-let to_input ~max_size c =
-  c
-  |> to_consumed
-  |> Consumed.to_list
-  |> List.map snd
-  |> Input.of_list ~max_size
+let to_input ~size c =
+  c |> to_consumed |> Consumed.to_list |> List.map snd |> Input.of_list ~size
 
-let shrink ~max_size consumed (gen : Proposition.t Generator.t) =
+let shrink ~size consumed (gen : Proposition.t Generator.t) =
   let data = of_consumed consumed in
   let module Config = struct
     type nonrec t = t
@@ -210,7 +206,7 @@ let shrink ~max_size consumed (gen : Proposition.t Generator.t) =
         (Consumed.to_list @@ to_consumed t2)
 
     let keep c =
-      let input = to_input ~max_size c in
+      let input = to_input ~size c in
       let output = Generator.run input gen in
       match Output.value output with
       | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
@@ -223,7 +219,7 @@ let shrink ~max_size consumed (gen : Proposition.t Generator.t) =
   let* { Search.num_attempts; num_explored = num_shrinks; node } =
     S.search data
   in
-  let input = to_input ~max_size node in
+  let input = to_input ~size node in
   let output = Generator.run input gen in
   Random.return
     (match Output.value output with
