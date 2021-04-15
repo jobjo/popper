@@ -7,6 +7,7 @@ let suite =
     ; ("Chart", Chart.suite)
     ; ("Arithmetic", Arithmetic.suite)
     ; ("Tree", Tree.suite)
+    ; ("Equal", Equal.suite)
     ]
 
 let () = Test.run suite

@@ -7,10 +7,10 @@ let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
   make (fun input ->
-    let max_size = Input.max_size input in
+    let size = Input.size input in
     Output.make
       ~value
-      ~max_size
+      ~size
       ~consumed:Consumed.empty
       ~remaining:input
       ~log:Log.empty)
@@ -33,13 +33,8 @@ let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
-    let max_size = Input.max_size input in
-    Output.make
-      ~value:()
-      ~max_size
-      ~consumed:Consumed.empty
-      ~remaining:input
-      ~log)
+    let size = Input.size input in
+    Output.make ~value:() ~size ~consumed:Consumed.empty ~remaining:input ~log)
 
 let log_string s =
   let pp out = Format.pp_print_string out s in
@@ -69,8 +64,8 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
-        ~max_size:(Input.max_size input)
-        ~consumed:(Consumed.make [ value ])
+        ~size:(Input.size input)
+        ~consumed:(Consumed.value value)
         ~remaining
         ~log:Log.empty)
 
@@ -114,10 +109,10 @@ let range mn mx =
   mn + offset
 
 let one_of gs =
-  let* n = tag Tag.Operator @@ range 0 (List.length gs) in
+  let* n = range 0 (List.length gs) in
   List.nth gs n
 
-let max_size = make (fun input -> run input (return @@ Input.max_size input))
+let size = make (fun input -> run input (return @@ Input.size input))
 
 let float_range mn mx =
   let n = mx -. mn in
@@ -129,7 +124,7 @@ let float_range mn mx =
 
 let choose opts =
   let sum = List.fold_left (fun s (fr, _) -> s +. fr) 0. opts in
-  let* rand = float_range 0. sum in
+  let* rand = tag Tag.Choice @@ float_range 0. sum in
   let rec aux acc = function
     | [ (_, r) ] -> r
     | (f, r) :: frs ->
@@ -143,25 +138,23 @@ let choose opts =
   aux 0. opts
 
 let sized f =
-  let* n = tag Tag.Size int32 in
-  let* max_size = max_size in
-  let max_size = Int32.of_int max_size in
-  let block = Int32.div Int32.max_int max_size in
-  let n = Int32.to_int @@ Int32.div n block in
-  f n
+  let* size = size in
+  f size
 
-let set_max_size max_size g =
-  make (fun input -> run (Input.set_max_size max_size input) g)
+let set_size size g = make (fun input -> run (Input.set_size size input) g)
 
 let list g =
-  let aux size =
-    if size <= 0 then
-      return []
-    else
-      let* n = range 0 size in
-      sequence @@ List.init n (fun _ -> g)
+  let rec aux size =
+    let list () =
+      let size = (size - 1) / 2 in
+      let* x = tag (Tag.Name "element") g in
+      let* xs = aux size in
+      let* ys = aux size in
+      return (x :: xs @ ys)
+    in
+    tag Tag.Sub_list @@ choose [ (1., return []); (float size, delayed list) ]
   in
-  sized aux
+  tag Tag.List @@ sized aux
 
 let option g =
   sized (fun size ->
@@ -182,12 +175,12 @@ let promote f =
   make (fun input ->
     let value x = Output.value @@ run input @@ f x in
     let consumed =
-      Consumed.tag Tag.Function @@ Consumed.make (Input.take 1 input)
+      Consumed.tag Tag.Function @@ Consumed.value (List.hd @@ Input.take 1 input)
     in
     let remaining = Input.drop 1 input in
     Output.make
       ~value
-      ~max_size:(Input.max_size input)
+      ~size:(Input.size input)
       ~consumed
       ~remaining
       ~log:Log.empty)
@@ -201,7 +194,7 @@ let int64 =
   let+ f = float in
   Int64.of_float f
 
-let bool = one_value_of [ false; true ]
+let bool = tag Tag.Bool @@ one_value_of [ false; true ]
 
 let arrow g =
   let f x =
@@ -243,3 +236,5 @@ let int =
        ; (10., medium_int)
        ; (10., any_int)
        ]
+
+let tag_name name = tag (Tag.Name name)

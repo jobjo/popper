@@ -63,7 +63,9 @@ let rec of_label_declarations ~is_rec_type ~loc fields f =
     let name = A.pvar ~loc var in
     [%expr
       Popper.Generator.Syntax.(
-        let* [%p name] = [%e value] in
+        let* [%p name] =
+          Popper.Generator.tag_name [%e A.estring ~loc var] [%e value]
+        in
         [%e body])]
   in
   let field_exprs = List.map (of_label_declaration ~is_rec_type ~size) fields in
@@ -84,7 +86,9 @@ and of_tuple ~is_rec_type ~loc ~size types f =
   let accum (name, value) body =
     [%expr
       Popper.Generator.Syntax.(
-        let* [%p A.pvar ~loc name] = [%e value] in
+        let* [%p A.pvar ~loc name] =
+          Popper.Generator.tag_name [%e A.estring ~loc name] [%e value]
+        in
         [%e body])]
   in
   let exprs = List.map (of_core_type ~is_rec_type ~size) types in

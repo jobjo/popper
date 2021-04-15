@@ -10,7 +10,7 @@ val sequence : 'a t list -> 'a list t
 val option : 'a t -> 'a option t
 val result : ok:'a t -> error:'b t -> ('a, 'b) result t
 val sized : (int -> 'a t) -> 'a t
-val set_max_size : int -> 'a t -> 'a t
+val set_size : int -> 'a t -> 'a t
 val list : 'a t -> 'a list t
 val int32 : int32 t
 val range : int -> int -> int t
@@ -31,7 +31,8 @@ val with_consumed : 'a t -> ('a * Consumed.t) t
 val with_log : string -> (Format.formatter -> 'a -> unit) -> 'a t -> 'a t
 val float_range : float -> float -> float t
 val choose : (float * 'a t) list -> 'a t
-val max_size : int t
+val size : int t
+val tag_name : string -> 'a t -> 'a t
 
 module Syntax : sig
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
