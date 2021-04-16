@@ -21,13 +21,25 @@ let bind gen f =
     let o2 = run (Output.remaining o1) (f @@ Output.value o1) in
     let consumed = Consumed.add (Output.consumed o1) (Output.consumed o2) in
     let log = Log.add (Output.log o1) (Output.log o2) in
-    o2 |> Output.set_consumed consumed |> Output.set_log log)
+    o2
+    |> Output.set_consumed consumed
+    |> Output.set_log log
+    |> Output.set_size (Input.size input))
 
 let both g1 g2 =
   let ( let* ) = bind in
   let* x = g1 in
   let* y = g2 in
   return (x, y)
+
+module Syntax = struct
+  let ( let* ) = bind
+  let ( let+ ) x f = map f x
+  let ( and* ) = both
+  let ( and+ ) = both
+end
+
+open Syntax
 
 let delayed f = make (fun input -> run input @@ f ())
 
@@ -44,18 +56,29 @@ let log_with pp x =
   let pp out = Format.fprintf out "%a" pp x in
   log @@ Log.of_pp pp
 
+let pp_key_value pp_value out (key, value) =
+  Format.fprintf
+    out
+    "@[<hv 2>%a@;=@;%a@]"
+    (Util.Format.yellow Format.pp_print_string)
+    key
+    (Util.Format.blue pp_value)
+    value
+
 let log_key_value key value =
   let lines = String.split_on_char '\n' value in
-  let pp out () =
-    Format.fprintf
-      out
-      "@[<hv 2>%a@;=@;%a@]"
-      (Util.Format.yellow Format.pp_print_string)
-      key
-      (Util.Format.blue (Format.pp_print_list Format.pp_print_string))
-      lines
+  let pp_value =
+    Util.Format.blue (Format.pp_print_list Format.pp_print_string)
   in
-  log_with pp ()
+  let pp out = pp_key_value pp_value out in
+  log_with pp (key, lines)
+
+let with_log key pp gen =
+  let* value = gen in
+  let* () = log_with (pp_key_value pp) (key, value) in
+  return value
+
+let resize size g = make @@ fun input -> run (Input.set_size size input) g
 
 let int32 =
   make (fun input ->
@@ -68,29 +91,6 @@ let int32 =
         ~consumed:(Consumed.value value)
         ~remaining
         ~log:Log.empty)
-
-module Syntax = struct
-  let ( let* ) = bind
-  let ( let+ ) x f = map f x
-  let ( and* ) = both
-  let ( and+ ) = both
-end
-
-open Syntax
-
-let with_log key pp gen =
-  let* value = gen in
-  let pp out () =
-    Format.fprintf
-      out
-      "@[<hv 2>%a@;=@;%a@]"
-      (Util.Format.yellow Format.pp_print_string)
-      key
-      (Util.Format.blue pp)
-      value
-  in
-  let* () = log_with pp () in
-  return value
 
 let rec sequence gs =
   match gs with
@@ -112,7 +112,7 @@ let one_of gs =
   let* n = range 0 (List.length gs) in
   List.nth gs n
 
-let size = make (fun input -> run input (return @@ Input.size input))
+(* let size = make (fun input -> run input (return @@ Input.size input)) *)
 
 let float_range mn mx =
   let n = mx -. mn in
@@ -137,17 +137,13 @@ let choose opts =
   in
   aux 0. opts
 
-let sized f =
-  let* size = size in
-  f size
-
-let set_size size g = make (fun input -> run (Input.set_size size input) g)
+let sized f = make @@ fun input -> run input @@ f @@ Input.size input
 
 let list g =
   let rec aux size =
     let list () =
-      let size = (size - 1) / 2 in
-      let* x = tag (Tag.Name "element") g in
+      let size = size / 2 in
+      let* x = tag (Tag.Name "element") @@ resize size g in
       let* xs = aux size in
       let* ys = aux size in
       return (x :: xs @ ys)

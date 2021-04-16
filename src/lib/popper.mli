@@ -39,7 +39,11 @@ module Syntax : sig
 end
 
 (** [test ?count f] creates a test that when run evaluates the given function on a number of arbitrary inputs. *)
-val test : ?count:int -> (unit -> Proposition.t Generator.t) -> Test.t
+val test
+  :  ?count:int
+  -> ?verbose:unit
+  -> (unit -> Proposition.t Generator.t)
+  -> Test.t
 
 val suite : (string * Test.t) list -> Test.t
 val run : ?seed:Random.Seed.t -> Test.t -> unit
@@ -50,6 +54,7 @@ val all : Proposition.t Generator.t list -> Proposition.t Generator.t
 val any : Proposition.t Generator.t list -> Proposition.t Generator.t
 val pass : Proposition.t Generator.t
 val fail : ?loc:string -> string -> Proposition.t Generator.t
+val run_test : (unit -> Proposition.t Generator.t) -> unit
 
 val with_log
   :  string

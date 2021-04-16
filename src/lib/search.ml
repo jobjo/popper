@@ -56,15 +56,12 @@ module Make (C : Config) = struct
 
   let search node =
     reset ();
-    let rec aux node =
+    let rec aux ix node =
       let* no = find_next node in
       match no with
-      | Some n -> aux n
-      | None -> Random.return node
+      | Some n -> aux (ix + 1) n
+      | None -> Random.return (node, ix)
     in
-    let+ node = aux node in
-    { num_attempts = !num_attempts
-    ; num_explored = S.cardinal !visited - 1
-    ; node
-    }
+    let+ node, num_explored = aux 0 node in
+    { num_attempts = !num_attempts; num_explored; node }
 end

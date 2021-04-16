@@ -130,8 +130,8 @@ and of_row_field_desc ~is_rec_type = function
   | Rtag (name, _, []) ->
     [%expr Popper.Generator.return [%e A.pexp_variant ~loc name.txt None]]
   | Rtag (name, _, cts) ->
-    of_tuple ~is_rec_type ~loc ~size:[%expr size] cts
-    @@ fun expr -> [%expr [%e A.pexp_variant ~loc name.txt (Some expr)]]
+    of_tuple ~is_rec_type ~loc ~size:[%expr size] cts @@ fun expr ->
+    [%expr [%e A.pexp_variant ~loc name.txt (Some expr)]]
   | Rinherit _ -> failwith "Rinherit"
 
 and of_row_field ~is_rec_type { prf_desc; _ } =

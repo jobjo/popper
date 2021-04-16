@@ -80,10 +80,10 @@ let pp out { indexed; nodes; overrides; node_indexes } =
       IM.iter
         (fun ix c ->
           let indexed = indexed_of_consumed c in
-          fprintf out "[@<v 2>Index: %d@,%a@]" ix pp_indexed indexed)
+          fprintf out "@[<v 2>Index: %d@,%a@]" ix pp_indexed indexed)
         overrides
     in
-    fprintf out "@[<v 2>Overrides:@,%a@]" pp ()
+    fprintf out "@[<v>Overrides:@,%a@]" pp ()
   in
   let pp_indexes out node_indexes =
     fprintf
@@ -154,7 +154,7 @@ let shrink_value n =
   Random.choose_value
     [ (10., zero)
     ; (10., Consumed.value @@ Int32.div n 2l)
-    ; (0.1, Consumed.value @@ Int32.sub n Int32.one)
+    ; (1., Consumed.value @@ Int32.sub n Int32.one)
     ]
 
 let shrink_node c =
@@ -165,7 +165,9 @@ let shrink_node c =
   | Tag (Tag.Bool, _) -> R.return (Some zero)
   | Add (l, r) ->
     R.choose_value [ (2., Some zero); (1., Some (Consumed.add r l)) ]
-  | Value v -> R.map Option.some (shrink_value v)
+  | Value v ->
+    let+ v = shrink_value v in
+    Some v
   | _ -> R.return None
 
 let try_shrink { indexed; nodes; overrides; node_indexes } =
@@ -193,8 +195,16 @@ let modify data =
 let to_input ~size c =
   c |> to_consumed |> Consumed.to_list |> List.map snd |> Input.of_list ~size
 
-let shrink ~size consumed (gen : Proposition.t Generator.t) =
-  let data = of_consumed consumed in
+let shrink output (gen : Proposition.t Generator.t) =
+  let size = Output.size output in
+  let node = of_consumed @@ Output.consumed output in
+  let keep t =
+    let input = to_input ~size t in
+    let output = Generator.run input gen in
+    match Output.value output with
+    | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
+    | _ -> None
+  in
   let module Config = struct
     type nonrec t = t
 
@@ -202,22 +212,19 @@ let shrink ~size consumed (gen : Proposition.t Generator.t) =
 
     let compare t1 t2 =
       compare
-        (Consumed.to_list @@ to_consumed t1)
-        (Consumed.to_list @@ to_consumed t2)
-
-    let keep c =
-      let input = to_input ~size c in
-      let output = Generator.run input gen in
-      match Output.value output with
-      | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
-      | _ -> None
+        (List.map snd @@ Consumed.to_list @@ to_consumed t1)
+        (List.map snd @@ Consumed.to_list @@ to_consumed t2)
 
     let modify t = modify t
+    let keep = keep
   end
   in
   let module S = Search.Make (Config) in
   let* { Search.num_attempts; num_explored = num_shrinks; node } =
-    S.search data
+    let f { Search.node; _ } =
+      node |> to_consumed |> Consumed.to_list |> List.length
+    in
+    R.best_of ~num_tries:10 f (S.search node)
   in
   let input = to_input ~size node in
   let output = Generator.run input gen in

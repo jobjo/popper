@@ -21,6 +21,7 @@ type result =
   ; status : status
   ; time : float
   ; log : Log.t
+  ; verbose_log : Log.t option
   ; is_unit : bool
   }
 
@@ -114,7 +115,9 @@ let pp_header
 
 let pp_results out res =
   let open Util.Format in
-  let to_row { name; num_passed; status; time; is_unit; log = _ } =
+  let to_row
+    { name; num_passed; status; time; is_unit; log = _; verbose_log = _ }
+    =
     let status_cell =
       let bracket color icon =
         Table.cell (fun out () -> fprintf out "%a" (color pp_print_string) icon)
@@ -130,8 +133,7 @@ let pp_results out res =
         | Fail _ -> red
         | _ -> Util.Format.blue
       in
-      Table.cell
-      @@ fun out () ->
+      Table.cell @@ fun out () ->
       fprintf
         out
         "%a"
@@ -153,8 +155,7 @@ let pp_results out res =
       Table.cell @@ fun out () -> fprintf out "%a" (faint pp_print_string) msg
     in
     let time =
-      Table.cell
-      @@ fun out () ->
+      Table.cell @@ fun out () ->
       let msg = Printf.sprintf "%.0fms" (time *. 1000.) in
       fprintf out "%a" (blue pp_print_string) msg
     in
@@ -199,6 +200,7 @@ let pp_failed_results out res =
               { explanation = _; num_shrinks; num_attempts = _; location; pp }
         ; time = _
         ; log
+        ; verbose_log = _
         ; is_unit
         } ->
         let num_samples = num_passed + 1 in
@@ -251,13 +253,30 @@ let pp_failed_results out res =
       | _ -> ())
     res
 
+let pp_verbose out results =
+  results
+  |> List.iter (fun { name; verbose_log; _ } ->
+       match verbose_log with
+       | Some log ->
+         let name = Option.fold ~none:"Anonymous" ~some:Fun.id name in
+         fprintf
+           out
+           "@[<v 2>%a@,@,@[<v 2>%a@]@]"
+           pp_print_string
+           name
+           Log.pp
+           log
+       | None -> ())
+
 let pp out ({ results; _ } as res) =
   if num_tests res = 0 then
     fprintf out "No tests run."
   else
     fprintf
       out
-      "@.@[<v 2>%a@,%a@]@;%a"
+      "@.@[<v 2>%a@]@.@[<v 2>%a@,%a@]@;%a"
+      pp_verbose
+      results
       pp_header
       res
       pp_results
