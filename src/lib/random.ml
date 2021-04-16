@@ -92,30 +92,10 @@ let until_some ~max_tries f =
   in
   aux 0
 
-(* let choose opts =
-  let sum = List.fold_left (fun s (fr, _) -> s + fr) 0 opts in
-  make
-  @@ fun s ->
-  let rand_int, s = R.int sum s in
-  (* Printf.printf "Random [0 - %d]: %d\n" sum rand_int; *)
-  let rec aux acc = function
-    | [ (_, r) ] -> r
-    | (f, r) :: frs ->
-      let acc = acc + f in
-      if acc > rand_int then
-        r
-      else
-        aux acc frs
-    | [] -> failwith "Empty"
-  in
-  run s @@ aux 0 opts *)
-
 let choose opts =
   let sum = List.fold_left (fun s (fr, _) -> s +. fr) 0. opts in
-  make
-  @@ fun s ->
+  make @@ fun s ->
   let rf, s = R.float sum s in
-  (* Printf.printf "Random [0 - %d]: %d\n" sum rand_int; *)
   let rec aux acc = function
     | [ (_, r) ] -> r
     | (f, r) :: frs ->
@@ -129,3 +109,17 @@ let choose opts =
   run s @@ aux 0. opts
 
 let choose_value cs = choose @@ List.map (fun (f, v) -> (f, return v)) cs
+
+let best_of ~num_tries f r =
+  let open Syntax in
+  let+ xs = sequence @@ List.init num_tries (Fun.const r) in
+  let min (b, s) x =
+    let s' = f x in
+    if s' < s then
+      (x, s')
+    else
+      (b, s)
+  in
+  match xs with
+  | [] -> failwith "No result"
+  | x :: xs -> fst @@ List.fold_left min (x, f x) xs

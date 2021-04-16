@@ -16,7 +16,7 @@ let rec eval = function
 
 let test_and =
   let open Generator in
-  test (fun () ->
+  test ~verbose:() (fun () ->
     let* e1 = with_log "e1" pp generate in
     let* e2 = with_log "e2" pp generate in
     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
@@ -24,8 +24,8 @@ let test_and =
 
 let test_or =
   test (fun () ->
-    let* e1 = generate
-    and* e2 = generate in
+    let* e1 = with_log "e1" pp generate
+    and* e2 = with_log "e2" pp generate in
     eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
 
 let suite = Test.suite [ ("Exp and", test_and); ("Exp or", test_or) ]

@@ -9,7 +9,7 @@ module Output = Output
 module Tag = Tag
 module Syntax = Generator.Syntax
 
-let test ?count = Test.make ?count
+let test ?count ?verbose = Test.make ?count ?verbose
 let suite ts = Test.suite ts
 let run ?seed t = Test.run ?seed t
 
@@ -23,3 +23,4 @@ let any ps = Generator.sequence ps |> Generator.map Proposition.any
 let with_log k pp gen = Generator.with_log k pp gen
 let pass = Generator.return Proposition.pass
 let fail ?loc s = Generator.return @@ Proposition.fail_with ?loc s
+let run_test f = run (Test.make f)

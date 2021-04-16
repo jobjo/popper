@@ -24,6 +24,7 @@ val delayed : (unit -> 'a t) -> 'a t
 val choose : (float * 'a t) list -> 'a t
 val choose_value : (float * 'a) list -> 'a t
 val until_some : max_tries:int -> 'a option t -> 'a option t
+val best_of : num_tries:int -> ('a -> 'b) -> 'a t -> 'a t
 
 module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t

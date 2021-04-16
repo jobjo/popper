@@ -64,33 +64,54 @@ let run ?(seed = Random.Seed.make 42) ts =
 let single t = Single t
 let suite ts = Suite ts
 
-let make ?(count = 400) test_fun =
+let log_verbose ~index output out =
+  let log = Output.log output in
+  Format.fprintf
+    out
+    "@[<v 2>%a@,@,%a@]@,"
+    (Util.Format.faint Format.pp_print_string)
+    (Printf.sprintf "Sample %d:" (index + 1))
+    Log.pp
+    log
+
+let make ?(count = 400) ?verbose test_fun =
   let eval () =
     let* inputs = Input.make_seq ~size:100 in
-    let rec aux ~num_discarded ~num_passed outputs =
+    let rec aux ~num_discarded ~num_passed ~verbose_log outputs =
       if num_passed >= count then
-        Random.return (num_passed, Test_result.Pass, Log.empty, false)
+        Random.return
+          (num_passed, Test_result.Pass, Log.empty, verbose_log, false)
       else if num_discarded > max_count_discarded then
         Random.return
-          (num_passed, Test_result.Discarded { num_discarded }, Log.empty, false)
+          ( num_passed
+          , Test_result.Discarded { num_discarded }
+          , Log.empty
+          , verbose_log
+          , false )
       else
         let output, next = Util.Seq.head_tail_exn outputs in
+        let verbose_log =
+          verbose_log
+          |> Option.map (fun log ->
+               Log.add log (Log.of_pp @@ log_verbose ~index:num_passed output))
+        in
         let is_unit = Consumed.is_empty @@ Output.consumed output in
         match Output.value output with
         | Proposition.Pass ->
           if is_unit then
-            Random.return (1, Test_result.Pass, Log.empty, is_unit)
+            Random.return (1, Test_result.Pass, Log.empty, verbose_log, is_unit)
           else
-            aux ~num_discarded ~num_passed:(num_passed + 1) next
+            aux ~num_discarded ~num_passed:(num_passed + 1) next ~verbose_log
         | Proposition.Discard ->
           if is_unit then
             Random.return
               ( 1
               , Test_result.Discarded { num_discarded = 1 }
               , Log.empty
+              , verbose_log
               , is_unit )
           else
-            aux ~num_discarded:(num_discarded + 1) ~num_passed next
+            aux ~num_discarded:(num_discarded + 1) ~num_passed next ~verbose_log
         | Proposition.Fail { location; pp } ->
           if is_unit then
             Random.return
@@ -103,11 +124,11 @@ let make ?(count = 400) test_fun =
                   ; location
                   }
               , Output.log output
+              , verbose_log
               , is_unit )
           else
             let* { Shrink.num_shrinks; num_attempts; pp; output } =
-              Shrink.shrink ~size:(Output.size output) (Output.consumed output)
-              @@ test_fun ()
+              Shrink.shrink output @@ test_fun ()
             in
             let explanation =
               if is_unit then
@@ -123,17 +144,26 @@ let make ?(count = 400) test_fun =
               , Test_result.Fail
                   { num_shrinks; num_attempts; explanation; pp; location }
               , Output.log output
+              , verbose_log
               , is_unit )
     in
     aux
       ~num_discarded:0
       ~num_passed:0
+      ~verbose_log:(Option.map (Fun.const Log.empty) verbose)
       (Seq.map (fun x -> Generator.run x @@ test_fun ()) inputs)
   in
   let test =
-    let+ (num_passed, status, log, is_unit), time =
+    let+ (num_passed, status, log, verbose_log, is_unit), time =
       Random.timed @@ Random.delayed eval
     in
-    { Test_result.name = None; num_passed; status; time; log; is_unit }
+    { Test_result.name = None
+    ; num_passed
+    ; status
+    ; time
+    ; log
+    ; verbose_log
+    ; is_unit
+    }
   in
   single test

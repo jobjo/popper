@@ -19,6 +19,7 @@ type result =
   ; status : status
   ; time : float
   ; log : Log.t
+  ; verbose_log : Log.t option
   ; is_unit : bool
   }
 
