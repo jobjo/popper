@@ -4,6 +4,7 @@ let suite =
   suite
     [ ("Deriving Generator", Deriving_generator.suite)
     ; ("Deriving Popper", Deriving_popper.suite)
+    ; ("Generator", Generators.suite)
     ]
 
 let () = run suite

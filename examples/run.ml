@@ -10,4 +10,4 @@ let suite =
     ; ("Equal", Equal.suite)
     ]
 
-let () = Test.run suite
+(* let () = Test.run suite *)

@@ -13,7 +13,6 @@ val sized : (int -> 'a t) -> 'a t
 val resize : int -> 'a t -> 'a t
 val list : 'a t -> 'a list t
 val int32 : int32 t
-val range : int -> int -> int t
 val one_of : 'a t list -> 'a t
 val one_value_of : 'a list -> 'a t
 val char : char t
@@ -40,4 +39,11 @@ module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
   val ( and* ) : 'a t -> 'b t -> ('a * 'b) t
   val ( and+ ) : 'a t -> 'b t -> ('a * 'b) t
+end
+
+module Int : sig
+  val range : int -> int -> int t
+  val small : int t
+  val medium : int t
+  val positive : int t
 end

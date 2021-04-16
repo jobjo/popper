@@ -50,8 +50,8 @@ let test_point_sum =
 
 let test_division =
   test (fun () ->
-    let* x = range (-10) 10 in
-    let* y = range (-10) 10 in
+    let* x = Int.range (-10) 10 in
+    let* y = Int.range (-10) 10 in
     let expected = if y = 0 then None else Some (x / y) in
     let actual = simple_div x y in
     let comparator = Comparator.option Comparator.int in

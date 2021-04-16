@@ -32,6 +32,9 @@ let both g1 g2 =
   let* y = g2 in
   return (x, y)
 
+let resize size g = make @@ fun input -> run (Input.set_size size input) g
+let delayed f = make (fun input -> run input @@ f ())
+
 module Syntax = struct
   let ( let* ) = bind
   let ( let+ ) x f = map f x
@@ -40,8 +43,6 @@ module Syntax = struct
 end
 
 open Syntax
-
-let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
@@ -78,8 +79,6 @@ let with_log key pp gen =
   let* () = log_with (pp_key_value pp) (key, value) in
   return value
 
-let resize size g = make @@ fun input -> run (Input.set_size size input) g
-
 let int32 =
   make (fun input ->
     match Input.head_tail input with
@@ -101,12 +100,16 @@ let rec sequence gs =
     return (x :: xs)
 
 let range mn mx =
-  let n = mx - mn in
-  let n = Int32.of_int n in
-  let block = Int32.div Int32.max_int n in
+  (* Always read one value *)
   let+ r = int32 in
-  let offset = Int32.to_int @@ Int32.div r block in
-  mn + offset
+  if mx <= mn then
+    mn
+  else
+    let n = mx - mn in
+    let n = Int32.of_int n in
+    let block = Int32.div Int32.max_int n in
+    let offset = Int32.to_int @@ Int32.div r block in
+    mn + offset
 
 let one_of gs =
   let* n = range 0 (List.length gs) in
@@ -212,25 +215,34 @@ let with_consumed g =
     let c = Output.consumed output in
     Output.map (fun x -> (x, c)) output)
 
-let small_int = range (-10) 10
-let medium_int = range (-1000) 1000
-
-let any_int =
-  let* b = tag Sign int32 in
-  let* n = tag Int int32 in
-  let n = Int32.to_int n in
-  let b = Int32.to_int b mod 2 <> 0 in
-  return (if b then Int.neg n else n)
-
-let int =
-  tag Int
-  @@ choose
-       [ (1., return 0)
-       ; (1., return 1)
-       ; (1., return (-1))
-       ; (5., small_int)
-       ; (10., medium_int)
-       ; (10., any_int)
-       ]
-
 let tag_name name = tag (Tag.Name name)
+
+module Int = struct
+  let range = range
+  let small = range (-10) 10
+  let medium = range (-1000) 1000
+
+  let any_int =
+    let* b = tag Sign int32 in
+    let* n = tag Int int32 in
+    let n = Int32.to_int n in
+    let b = Int32.to_int b mod 2 <> 0 in
+    return (if b then Stdlib.Int.neg n else n)
+
+  let int =
+    tag Int
+    @@ choose
+         [ (10., return 0)
+         ; (10., return 1)
+         ; (10., return (-1))
+         ; (50., small)
+         ; (100., medium)
+         ; (100., any_int)
+         ; (2., return Int.max_int)
+         ; (2., return Int.min_int)
+         ]
+
+  let positive = map abs int
+end
+
+let int = Int.int
