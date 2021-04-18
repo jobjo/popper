@@ -3,7 +3,7 @@ open Popper
 type 'a tree =
   | Leaf of 'a
   | Node of 'a tree * 'a tree
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let leaf x = Leaf x
 let node x y = Node (x, y)

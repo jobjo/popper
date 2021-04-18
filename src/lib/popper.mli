@@ -48,6 +48,23 @@ val test
 val suite : (string * Test.t) list -> Test.t
 val run : ?seed:Random.Seed.t -> Test.t -> unit
 val eq : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Generator.t
+val lt : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Generator.t
+val gt : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Generator.t
+
+val gte
+  :  ?loc:string
+  -> 'a Comparator.t
+  -> 'a
+  -> 'a
+  -> Proposition.t Generator.t
+
+val lte
+  :  ?loc:string
+  -> 'a Comparator.t
+  -> 'a
+  -> 'a
+  -> Proposition.t Generator.t
+
 val is_true : ?loc:string -> bool -> Proposition.t Generator.t
 val is_false : ?loc:string -> bool -> Proposition.t Generator.t
 val all : Proposition.t Generator.t list -> Proposition.t Generator.t

@@ -11,7 +11,7 @@ type point =
   { x : int
   ; y : int
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let point_sum p1 p2 : point =
   { x = simple_sum p1.x p2.x; y = simple_sum p1.y p2.y }
@@ -24,9 +24,8 @@ let test_sum =
     let expected = left + right in
     let actual = simple_sum left right in
     (* Comparator and pretty printer *)
-    let int_comparator x y = x = y in
     let int_pretty_printer = pp_print_int in
-    let comparator = Comparator.make int_comparator int_pretty_printer in
+    let comparator = Comparator.make Stdlib.Int.compare int_pretty_printer in
     eq comparator actual expected)
 
 let test_diff =

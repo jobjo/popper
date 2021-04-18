@@ -232,7 +232,7 @@ module Int = struct
   let int =
     tag Int
     @@ choose
-         [ (10., return 0)
+         [ (5., return 0)
          ; (10., return 1)
          ; (10., return (-1))
          ; (50., small)

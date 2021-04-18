@@ -5,13 +5,13 @@ type foo =
   [ `Foo
   | `Bar of float
   ]
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type person =
   { name : string
   ; age : foo option list
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let test =
   Popper.test (fun () ->

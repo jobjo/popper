@@ -12,9 +12,15 @@ module Syntax = Generator.Syntax
 let test ?count ?verbose = Test.make ?count ?verbose
 let suite ts = Test.suite ts
 let run ?seed t = Test.run ?seed t
+let eq ?loc testable x y = Generator.return @@ Proposition.eq ?loc testable x y
+let lt ?loc testable x y = Generator.return @@ Proposition.lt ?loc testable x y
+let gt ?loc testable x y = Generator.return @@ Proposition.gt ?loc testable x y
 
-let eq ?loc testable x y =
-  Generator.return @@ Proposition.equal ?loc testable x y
+let gte ?loc testable x y =
+  Generator.return @@ Proposition.gte ?loc testable x y
+
+let lte ?loc testable x y =
+  Generator.return @@ Proposition.lte ?loc testable x y
 
 let is_true ?loc b = Generator.return @@ Proposition.is_true ?loc b
 let is_false ?loc b = Generator.return @@ Proposition.is_false ?loc b

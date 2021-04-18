@@ -42,7 +42,7 @@ type t =
   | And of t * t
   | Or of t * t
   | Not of t
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let rec eval = function
   | Lit b -> b
@@ -82,7 +82,7 @@ type t =
   ; x_axis : string
   ; y_axis : string
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let flip { x_values; y_values; x_axis; y_axis } =
   { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
@@ -111,7 +111,7 @@ open Popper
 type 'a tree =
   | Leaf of 'a
   | Node of 'a tree * 'a tree
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 let leaf x = Leaf x
 let node x y = Node (x, y)

@@ -1,37 +1,37 @@
 type t1 =
   | A
   | B
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t2 =
   | A of int
   | B of t2
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t3 =
   [ `True
   | `False
   ]
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t4 =
   [ `Text of string list
   | `Div of t4
   ]
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t5 =
   { s : string
   ; i : int
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t6 =
   { x : string option list
   ; y : int
   ; z : (bool list, string) result list
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
 type t7 =
   | A7 of
@@ -39,9 +39,9 @@ type t7 =
       ; i : int
       }
   | B7
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
-type t8 = int [@@deriving show, eq, popper]
+type t8 = int [@@deriving show, ord, popper]
 
 type t9 =
   | Leaf of int
@@ -52,30 +52,30 @@ and t10 =
   ; left : t9
   ; right : t9
   }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
-type 'a t11 = { value : 'a } [@@deriving eq, show, popper]
-type t12 = int t11 [@@deriving eq, show, popper]
-type t13 = T13 of int t11 [@@deriving eq, show, popper]
-type t14 = { t14 : int t11 } [@@deriving eq, show, popper]
+type 'a t11 = { value : 'a } [@@deriving ord, show, popper]
+type t12 = int t11 [@@deriving ord, show, popper]
+type t13 = T13 of int t11 [@@deriving ord, show, popper]
+type t14 = { t14 : int t11 } [@@deriving ord, show, popper]
 
 type ('a, 'b, 'c) t15 =
   | T15A of { a : 'a }
   | T15B of { b : 'b }
   | T15C of 'c
   | T15D of 'a * 'b * 'c
-[@@deriving eq, show, popper]
+[@@deriving ord, show, popper]
 
 type t16 = { t16 : (int, bool, string option) t15 }
-[@@deriving eq, show, popper]
+[@@deriving ord, show, popper]
 
 type 'a t17 =
   | Node of 'a t17 * 'a t17
   | Leaf
   | T18 of { t18 : t18 option }
-[@@deriving show, eq, popper]
+[@@deriving show, ord, popper]
 
-and t18 = int t17 [@@deriving show, eq, popper]
+and t18 = int t17 [@@deriving show, ord, popper]
 
 let make_test name comparator generator =
   let open Popper in

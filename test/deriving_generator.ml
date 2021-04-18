@@ -54,20 +54,20 @@ and t10 =
   }
 [@@deriving generator]
 
-type 'a t11 = { value : 'a } [@@deriving eq, show, popper]
-type t12 = int t11 [@@deriving eq, show, popper]
-type t13 = T13 of int t11 [@@deriving eq, show, popper]
-type t14 = { t14 : int t11 } [@@deriving eq, show, popper]
+type 'a t11 = { value : 'a } [@@deriving ord, show, popper]
+type t12 = int t11 [@@deriving ord, show, popper]
+type t13 = T13 of int t11 [@@deriving ord, show, popper]
+type t14 = { t14 : int t11 } [@@deriving ord, show, popper]
 
 type ('a, 'b, 'c) t15 =
   | T15A of { a : 'a }
   | T15B of { b : 'b }
   | T15C of 'c
   | T15D of 'a * 'b * 'c
-[@@deriving eq, show, popper]
+[@@deriving ord, show, popper]
 
 type t16 = { t16 : (int, bool, string option) t15 }
-[@@deriving eq, show, popper]
+[@@deriving ord, show, popper]
 
 type 'a t17 =
   | Node of 'a t17 * 'a t17

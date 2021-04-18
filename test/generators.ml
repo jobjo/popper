@@ -37,9 +37,11 @@ let neg_pos_ratio =
   let* () = Generator.log_key_value "Non-negative" (string_of_float nneg) in
   let* () = Generator.log_key_value "Zero" (string_of_float zero) in
   all
-    [ is_true (0.45 < neg && neg < 0.5)
-    ; is_true (0.45 < nneg && nneg < 0.5)
-    ; is_true (0.01 <= zero)
+    [ lt Comparator.float 0.45 neg
+    ; lt Comparator.float neg 0.5
+    ; lt Comparator.float 0.45 nneg
+    ; lt Comparator.float nneg 0.5
+    ; lt Comparator.float zero 0.05
     ]
 
 let int_range =

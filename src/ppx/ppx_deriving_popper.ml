@@ -20,9 +20,9 @@ let pp_name = function
   | "t" -> "pp"
   | name -> Printf.sprintf "pp_%s" name
 
-let eq_name = function
-  | "t" -> "equal"
-  | name -> Printf.sprintf "equal_%s" name
+let compare_name = function
+  | "t" -> "compare"
+  | name -> Printf.sprintf "compare_%s" name
 
 let comparator_name = function
   | "t" -> "comparator"
@@ -322,21 +322,22 @@ let of_type_declarations ~is_rec_type =
 let comparator { type_name; num_poly; _ } =
   let expr =
     let accum (e1, e2) ix =
-      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let compare_poly = Printf.sprintf "compare_poly_%d" ix in
       let pp_poly = Printf.sprintf "pp_poly_%d" ix in
-      ( [%expr [%e e1] [%e A.evar ~loc eq_poly]]
+      ( [%expr [%e e1] [%e A.evar ~loc compare_poly]]
       , [%expr [%e e2] [%e A.evar ~loc pp_poly]] )
     in
     let zero =
-      (A.evar ~loc @@ eq_name type_name, A.evar ~loc @@ pp_name type_name)
+      (A.evar ~loc @@ compare_name type_name, A.evar ~loc @@ pp_name type_name)
     in
     let ixs = List.rev @@ List.init num_poly Fun.id in
-    let peq, ppp = List.fold_left accum zero ixs in
-    let body = [%expr Popper.Comparator.make [%e peq] [%e ppp]] in
+    let pcompare, ppp = List.fold_left accum zero ixs in
+    let body = [%expr Popper.Comparator.make [%e pcompare] [%e ppp]] in
     let accum exp ix =
-      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let compare_poly = Printf.sprintf "compare_poly_%d" ix in
       let pp_poly = Printf.sprintf "pp_poly_%d" ix in
-      [%expr fun [%p A.pvar ~loc eq_poly] [%p A.pvar ~loc pp_poly] -> [%e exp]]
+      [%expr
+        fun [%p A.pvar ~loc compare_poly] [%p A.pvar ~loc pp_poly] -> [%e exp]]
     in
     List.fold_left accum body ixs
   in
