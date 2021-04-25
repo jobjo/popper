@@ -8,9 +8,9 @@ type person =
 
 let suite =
   suite
-    [ ("Deriving Generator", Deriving_generator.suite)
+    [ ("Deriving Sample", Deriving_sample.suite)
     ; ("Deriving Popper", Deriving_popper.suite)
-    ; ("Generator", Generators.suite)
+    ; ("Sample", Samples.suite)
     ]
 
 let () = run suite

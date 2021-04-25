@@ -15,17 +15,17 @@ let rec eval = function
   | Not b -> not @@ eval b
 
 let test_and =
-  let open Generator in
+  let open Sample in
   test ~verbose:() (fun () ->
-    let* e1 = with_log "e1" pp generate in
-    let* e2 = with_log "e2" pp generate in
+    let* e1 = with_log "e1" pp sample in
+    let* e2 = with_log "e2" pp sample in
     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
     is_true ~loc:__LOC__ condition)
 
 let test_or =
   test (fun () ->
-    let* e1 = with_log "e1" pp generate
-    and* e2 = with_log "e2" pp generate in
+    let* e1 = with_log "e1" pp sample
+    and* e2 = with_log "e2" pp sample in
     eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
 
 let suite = Test.suite [ ("Exp and", test_and); ("Exp or", test_or) ]

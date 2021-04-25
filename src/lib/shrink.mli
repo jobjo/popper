@@ -8,8 +8,4 @@ type result =
   }
 
 val pp : Format.formatter -> t -> unit
-
-val shrink
-  :  Proposition.t Output.t
-  -> Proposition.t Generator.t
-  -> result Random.t
+val shrink : Proposition.t Output.t -> Proposition.t Sample.t -> result Random.t

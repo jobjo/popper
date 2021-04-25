@@ -16,7 +16,7 @@ let test_rev =
     eq ~loc:__LOC__ Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ])
 
 let test_rev_twice =
-  let open Generator in
+  let open Sample in
   test (fun () ->
     let* xs = list int in
     is_true ~loc:__LOC__ (List.rev (List.rev xs) = xs))
@@ -30,7 +30,7 @@ When run gives:
 ![image](https://user-images.githubusercontent.com/820478/113290657-dc8a0480-92e9-11eb-9b18-5bbe30e731c9.png)
 
 
-### Deriving generators
+### Deriving samples
 
 
 ```ocaml
@@ -51,10 +51,10 @@ let rec eval = function
   | Not b -> not @@ eval b
 
 let test_and =
-  let open Generator in
+  let open Sample in
   test (fun () ->
-    let* e1 = generate in
-    let* e2 = generate in
+    let* e1 = sample in
+    let* e2 = sample in
     let* () = log_key_value "e1" (show e1) in
     let* () = log_key_value "e2" (show e2) in
     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
@@ -90,7 +90,7 @@ let flip { x_values; y_values; x_axis; y_axis } =
 (* Bad test *)
 let test_flip_twice =
   test (fun () ->
-    let* s = generate in
+    let* s = sample in
     eq comparator (flip s) s) 
 
 let suite = suite [ ("Flip chart", test_flip_twice) ]
@@ -128,12 +128,12 @@ type test_data =
   { tree : int tree
   ; f : int -> int
   }
-[@@deriving generator]
+[@@deriving sample]
 
 let test_map =
   let open Syntax in
   test (fun () ->
-    let* { tree; f } = generate_test_data in
+    let* { tree; f } = sample_test_data in
     let r1 = List.map f @@ to_list tree in
     let r2 = to_list @@ map f tree in
     eq (Comparator.list Comparator.int) r1 r2)

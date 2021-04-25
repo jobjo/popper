@@ -12,7 +12,7 @@ let flip { x_values; y_values; x_axis; y_axis } =
 let test_flip =
   let open Popper.Syntax in
   Popper.test (fun () ->
-    let* s = generate in
+    let* s = sample in
     Popper.eq comparator (flip s) s)
 
 let suite = Popper.suite [ ("Flip chart", test_flip) ]

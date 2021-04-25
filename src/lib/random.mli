@@ -17,14 +17,14 @@ val int32 : Int32.t t
 val range : int -> int -> int t
 val bind : 'a t -> ('a -> 'b t) -> 'b t
 val map : ('a -> 'b) -> 'a t -> 'b t
-val generate : init:'s -> ('s -> ('a * 's) t) -> 'a Seq.t t
+val sample : init:'s -> ('s -> ('a * 's) t) -> 'a Seq.t t
 val sequence : 'a t list -> 'a list t
 val timed : 'a t -> ('a * float) t
 val delayed : (unit -> 'a t) -> 'a t
 val choose : (float * 'a t) list -> 'a t
 val choose_value : (float * 'a) list -> 'a t
 val until_some : max_tries:int -> 'a option t -> 'a option t
-val best_of : num_tries:int -> ('a -> 'b) -> 'a t -> 'a t
+val best_of : num_tries:int -> ('a -> int) -> 'a t -> 'a t
 
 module Syntax : sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t

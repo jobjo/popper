@@ -13,11 +13,11 @@ let make ~size =
     else
       Random.return (0l, ix + 1)
   in
-  let+ data = Random.generate ~init:0 gen in
+  let+ data = Random.sample ~init:0 gen in
   { data; size }
 
 let make_seq ~size =
-  Random.generate ~init:2 (fun s ->
+  Random.sample ~init:2 (fun s ->
     let size = min size s in
     let+ x = make ~size in
     (x, size + 1))

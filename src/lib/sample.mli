@@ -30,6 +30,7 @@ val with_consumed : 'a t -> ('a * Consumed.t) t
 val with_log : string -> (Format.formatter -> 'a -> unit) -> 'a t -> 'a t
 val float_range : float -> float -> float t
 val choose : (float * 'a t) list -> 'a t
+val unit : unit t
 
 (* val size : int t *)
 val tag_name : string -> 'a t -> 'a t
@@ -46,4 +47,40 @@ module Int : sig
   val small : int t
   val medium : int t
   val positive : int t
+  val negative : int t
+end
+
+module Float : sig
+  val range : float -> float -> float t
+  val small : float t
+  val medium : float t
+  val positive : float t
+  val negative : float t
+end
+
+module List : sig
+  val of_length : int -> 'a t -> 'a list t
+  val range : int -> int -> 'a t -> 'a list t
+  val non_empty : 'a t -> 'a list t
+end
+
+module Array : sig
+  val of_length : int -> 'a t -> 'a array t
+  val range : int -> int -> 'a t -> 'a array t
+end
+
+module String : sig
+  val of_length : int -> string t
+  val range : int -> int -> string t
+  val alpha_numeric : string t
+  val numeric : string t
+  val alpha : string t
+  val upper : string t
+  val lower : string t
+end
+
+module Tuple : sig
+  val pair : 'a t -> 'b t -> ('a * 'b) t
+  val tripple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+  val quad : 'a t -> 'b t -> 'c t -> 'd t -> ('a * 'b * 'c * 'd) t
 end

@@ -151,7 +151,7 @@ let make ?(count = 400) ?verbose test_fun =
       ~num_discarded:0
       ~num_passed:0
       ~verbose_log:(Option.map (Fun.const Log.empty) verbose)
-      (Seq.map (fun x -> Generator.run x @@ test_fun ()) inputs)
+      (Seq.map (fun x -> Sample.run x @@ test_fun ()) inputs)
   in
   let test =
     let+ (num_passed, status, log, verbose_log, is_unit), time =

@@ -1,7 +1,6 @@
 open Popper
-open Generator
+open Sample
 open Syntax
-open Format
 
 let simple_sum x y = x + y
 let simple_diff x y = x - y
@@ -18,31 +17,28 @@ let point_sum p1 p2 : point =
 
 let test_sum =
   test (fun () ->
-    (* Getting two built-in generators *)
+    (* Getting two built-in samples *)
     let* left = int in
     let* right = int in
     let expected = left + right in
     let actual = simple_sum left right in
-    (* Comparator and pretty printer *)
-    let int_pretty_printer = pp_print_int in
-    let comparator = Comparator.make Stdlib.Int.compare int_pretty_printer in
-    eq comparator actual expected)
+    eq Comparator.int actual expected)
 
 let test_diff =
   test (fun () ->
-    (* Getting two built-in generators *)
+    (* Getting two built-in samples *)
     let* left = int in
     let* right = int in
     let expected = left - right in
     let actual = simple_diff left right in
-    (* Use built in generator and comparator *)
+    (* Use built in sample and comparator *)
     let comparator = Comparator.int in
     eq comparator actual expected)
 
 let test_point_sum =
   test (fun () ->
-    let* left = generate_point in
-    let* right = generate_point in
+    let* left = sample_point in
+    let* right = sample_point in
     let expected = { x = left.x + right.x; y = left.y + right.y } in
     let actual = point_sum left right in
     eq ~loc:__LOC__ point_comparator expected actual)
