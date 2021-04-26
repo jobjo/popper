@@ -6,6 +6,7 @@ type config =
   ; max_size : int
   ; seed : Random.Seed.t
   ; verbose : bool
+  ; max_input_length : int
   }
 
 type t = config -> config
@@ -18,17 +19,21 @@ let default =
   ; max_size = 100
   ; seed = Random.Seed.make 42
   ; verbose = false
+  ; max_input_length = 10_000
   }
 
 let num_samples num_samples c = { c with num_samples }
 let max_shrinks max_shrinks c = { c with max_shrinks }
 let seed seed c = { c with seed }
 let verbose c = { c with verbose = true }
-let set cs c = List.fold_left (fun c f -> f c) c cs
+let max_size max_size c = { c with max_size }
+let max_input_length max_input_length c = { c with max_input_length }
+let all cs c = List.fold_left (fun c f -> f c) c cs
 let get_num_samples f = (f default).num_samples
 let get_max_shrinks f = (f default).max_shrinks
 let get_max_shrink_modify_attempts f = (f default).max_shrink_modify_attempts
 let get_max_size f = (f default).max_size
 let get_seed f = (f default).seed
 let get_verbose f = (f default).verbose
+let get_max_input_length f = (f default).max_input_length
 let default = Fun.id

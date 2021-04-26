@@ -1,21 +1,23 @@
 open Popper
 open Syntax
 
-type foo =
+type tag =
   [ `Foo
-  | `Bar of float
+  | `Bar of float * bool
   ]
 [@@deriving show, ord, popper]
 
-type person =
+type t =
   { name : string
-  ; age : foo option list
+  ; tags : tag list
   }
 [@@deriving show, ord, popper]
 
 let test =
-  Popper.test (fun () ->
-    let* p = sample_person in
-    eq person_comparator p p)
+  Popper.test
+    ~configs:[ Config.verbose; Config.max_size 400; Config.num_samples 50 ]
+    (fun () ->
+    let* p = with_log "p" pp sample in
+    eq comparator p p)
 
-let suite = suite [ ("Person json", test) ]
+let suite = suite [ ("Equal itself", test) ]

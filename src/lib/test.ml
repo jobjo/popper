@@ -78,13 +78,16 @@ let log_verbose ~index output out =
 let make ?(config = Config.default) test_fun =
   let max_count_discarded = 100 in
   let eval override =
-    let config = Config.set [ override; config ] in
+    let config = Config.all [ override; config ] in
     let count = Config.get_num_samples config in
     let verbose_log =
       if Config.get_verbose config then Some Log.empty else None
     in
     let size = Config.get_max_size config in
-    let* inputs = Input.make_seq ~max_length:10_000 ~size in
+    let max_length = Config.get_max_input_length config in
+    let max_tries = Config.get_max_shrinks config in
+    let max_tries_modify = Config.get_max_shrink_modify_attempts config in
+    let* inputs = Input.make_seq ~max_length ~size in
     let rec aux ~num_discarded ~num_passed ~verbose_log outputs =
       if num_passed >= count then
         Random.return
@@ -137,8 +140,8 @@ let make ?(config = Config.default) test_fun =
           else
             let* { Shrink.num_shrinks; num_attempts; pp; output } =
               Shrink.shrink
-                ~max_tries:100
-                ~max_tries_modify:100
+                ~max_tries
+                ~max_tries_modify
                 ~num_shrink_rounds:10
                 output
                 (test_fun ())
