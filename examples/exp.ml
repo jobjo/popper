@@ -28,4 +28,4 @@ let test_or =
     and* e2 = with_log "e2" pp sample in
     eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
 
-let suite = Test.suite [ ("Exp and", test_and); ("Exp or", test_or) ]
+let suite = suite [ ("Exp and", test_and); ("Exp or", test_or) ]

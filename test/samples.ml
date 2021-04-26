@@ -71,7 +71,7 @@ let int_positive =
   gt Comparator.int n1 0
 
 let float_classes =
-  test ~verbose:() @@ fun () ->
+  test @@ fun () ->
   let lookup = dist Float.classify_float Sample.float in
   let inf = lookup Float.FP_infinite in
   let zero = lookup Float.FP_zero in

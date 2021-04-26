@@ -88,7 +88,7 @@ let make_test name sample =
       is_true true) )
 
 let suite =
-  Popper.Test.suite
+  Popper.suite
     [ make_test "T1" sample_t1
     ; make_test "T2" sample_t2
     ; make_test "T3" sample_t3

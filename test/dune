@@ -1,6 +1,6 @@
 (test
  (name run)
- (libraries alcotest containers popper)
+ (libraries alcotest containers)
  (preprocess
   (pps
    ppx_deriving.make
