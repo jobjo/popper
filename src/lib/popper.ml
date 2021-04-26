@@ -9,9 +9,10 @@ module Output = Output
 module Tag = Tag
 module Syntax = Sample.Syntax
 
+exception Popper_error
+
 let test ?count ?verbose = Test.make ?count ?verbose
 let suite ts = Test.suite ts
-let run ?seed t = Test.run ?seed t
 let eq ?loc testable x y = Sample.return @@ Proposition.eq ?loc testable x y
 let lt ?loc testable x y = Sample.return @@ Proposition.lt ?loc testable x y
 let gt ?loc testable x y = Sample.return @@ Proposition.gt ?loc testable x y
@@ -24,4 +25,11 @@ let any ps = Sample.sequence ps |> Sample.map Proposition.any
 let with_log k pp gen = Sample.with_log k pp gen
 let pass = Sample.return Proposition.pass
 let fail ?loc s = Sample.return @@ Proposition.fail_with ?loc s
+
+let run ?seed t =
+  if Test.run ?seed t then
+    ()
+  else
+    raise Popper_error
+
 let run_test f = run (Test.make f)

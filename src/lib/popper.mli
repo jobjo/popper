@@ -10,10 +10,6 @@ module Proposition : sig
   include module type of Proposition (** @inline*)
 end
 
-module Test : sig
-  include module type of Test (** @inline*)
-end
-
 module Random : sig
   include module type of Random (** @inline*)
 end
@@ -38,6 +34,8 @@ module Syntax : sig
   include module type of Sample.Syntax (** @inline*)
 end
 
+exception Popper_error
+
 (** [test ?count f] creates a test that when run evaluates the given function on a number of arbitrary inputs. *)
 val test
   :  ?count:int
@@ -46,7 +44,6 @@ val test
   -> Test.t
 
 val suite : (string * Test.t) list -> Test.t
-val run : ?seed:Random.Seed.t -> Test.t -> unit
 val eq : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Sample.t
 val lt : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Sample.t
 val gt : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Sample.t
@@ -58,6 +55,7 @@ val all : Proposition.t Sample.t list -> Proposition.t Sample.t
 val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 val pass : Proposition.t Sample.t
 val fail : ?loc:string -> string -> Proposition.t Sample.t
+val run : ?seed:Random.Seed.t -> Test.t -> unit
 val run_test : (unit -> Proposition.t Sample.t) -> unit
 
 val with_log
@@ -65,3 +63,8 @@ val with_log
   -> (Format.formatter -> 'a -> unit)
   -> 'a Sample.t
   -> 'a Sample.t
+
+module Test : sig
+  (* include module type of Test *)
+  type t = Test.t
+end

@@ -86,7 +86,7 @@ let make_test name comparator sample =
       eq comparator x x) )
 
 let suite =
-  Popper.Test.suite
+  Popper.suite
     [ make_test "T1" t1_comparator sample_t1
     ; make_test "T2" t2_comparator sample_t2
     ; make_test "T3" t3_comparator sample_t3

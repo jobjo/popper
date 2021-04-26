@@ -1,7 +1,7 @@
 open Popper
 
 let suite =
-  Test.suite
+  suite
     [ ("Hello World", Hello_world.suite)
     ; ("Expression", Exp.suite)
     ; ("Chart", Chart.suite)
@@ -10,4 +10,4 @@ let suite =
     ; ("Equal", Equal.suite)
     ]
 
-let () = Test.run suite
+let () = run suite

@@ -59,7 +59,9 @@ let run ?(seed = Random.Seed.make 42) ts =
     in
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  Random.eval seed random |> Test_result.pp Format.std_formatter
+  let res = Random.eval seed random in
+  Test_result.pp Format.std_formatter res;
+  res.Test_result.num_failed = 0
 
 let single t = Single t
 let suite ts = Suite ts
