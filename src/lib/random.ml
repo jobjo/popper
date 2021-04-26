@@ -17,7 +17,7 @@ let int32 = make @@ fun s -> R.int32 Int32.max_int s
 let seed = make Seed.split
 let return x = { run = (fun s -> (x, s)) }
 
-let sample ~init f =
+let generate ~init f =
   make (fun seed ->
     let s1, s2 = Seed.split seed in
     let accum (seed, t) =
