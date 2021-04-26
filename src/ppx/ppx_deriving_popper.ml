@@ -90,7 +90,9 @@ and of_tuple ~is_rec_type ~loc ~size types f =
     [%expr
       Popper.Sample.Syntax.(
         let* [%p A.pvar name] =
-          Popper.Sample.tag_name [%e A.estring name] [%e value]
+          Popper.Sample.resize
+            [%e size]
+            (Popper.Sample.tag_name [%e A.estring name] [%e value])
         in
         [%e body])]
   in

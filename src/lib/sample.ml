@@ -323,22 +323,26 @@ end
 
 module Tuple = struct
   let pair g1 g2 =
-    let+ x = g1
-    and+ y = g2 in
-    (x, y)
+    let* size = size in
+    let size = size / 2 in
+    let* x = resize size g1 in
+    let* y = resize size g2 in
+    return (x, y)
 
   let tripple g1 g2 g3 =
-    let+ x = g1
-    and+ y = g2
-    and+ z = g3 in
-    (x, y, z)
+    let* size = map (fun s -> s / 3) size in
+    let* x = resize size g1 in
+    let* y = resize size g2 in
+    let* z = resize size g3 in
+    return (x, y, z)
 
   let quad g1 g2 g3 g4 =
-    let+ x = g1
-    and+ y = g2
-    and+ z = g3
-    and+ u = g4 in
-    (x, y, z, u)
+    let* size = map (fun s -> s / 4) size in
+    let* x = resize size g1 in
+    let* y = resize size g2 in
+    let* z = resize size g3 in
+    let* u = resize size g4 in
+    return (x, y, z, u)
 end
 
 let int = Int.int

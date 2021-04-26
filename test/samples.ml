@@ -141,6 +141,66 @@ let string_num =
   let* s = with_log "s" Format.pp_print_string @@ Sample.String.alpha_numeric in
   String.to_seq s |> List.of_seq |> List.for_all is_alpha_numeric |> is_true
 
+type t1 =
+  { xs : int list
+  ; ys : int list
+  ; zs : string list
+  }
+[@@deriving ord, show, popper]
+
+type t2 = int list * int list * string list [@@deriving ord, show, popper]
+
+let gen_dist_test get_xs get_ys get_zs gen =
+  let num_xs = ref 0 in
+  let num_ys = ref 0 in
+  let num_zs = ref 0 in
+  let accum t =
+    num_xs := !num_xs + (List.length @@ get_xs t);
+    num_ys := !num_ys + (List.length @@ get_ys t);
+    num_zs := !num_zs + (List.length @@ get_zs t)
+  in
+  test @@ fun () ->
+  let _ = dist accum gen () in
+  let* () = Sample.log_key_value "num-xs" (string_of_int !num_xs) in
+  let* () = Sample.log_key_value "num-ys" (string_of_int !num_ys) in
+  let* () = Sample.log_key_value "num-zs" (string_of_int !num_zs) in
+  let avg = (!num_xs + !num_ys + !num_zs) / 3 in
+  let diff_xs = float (abs (!num_xs - avg)) /. float avg in
+  let diff_ys = float (abs (!num_ys - avg)) /. float avg in
+  let diff_zs = float (abs (!num_zs - avg)) /. float avg in
+  let* () = Sample.log_key_value "diff_xs" (string_of_float diff_xs) in
+  let* () = Sample.log_key_value "diff_ys" (string_of_float diff_ys) in
+  let* () = Sample.log_key_value "diff_zs" (string_of_float diff_zs) in
+  all
+    [ lt Comparator.float diff_xs 0.05
+    ; lt Comparator.float diff_ys 0.05
+    ; lt Comparator.float diff_zs 0.05
+    ]
+
+let tuple_with_list_length_dist =
+  gen_dist_test
+    (fun (xs, _, _) -> xs)
+    (fun (_, ys, _) -> ys)
+    (fun (_, _, zs) -> zs)
+    (Sample.Tuple.tripple
+       (Sample.list Sample.int)
+       (Sample.list Sample.int)
+       (Sample.list Sample.string))
+
+let derived_tuple_with_list_length_dist =
+  gen_dist_test
+    (fun (xs, _, _) -> xs)
+    (fun (_, ys, _) -> ys)
+    (fun (_, _, zs) -> zs)
+    sample_t2
+
+let record_with_list_length_dist =
+  gen_dist_test
+    (fun { xs; _ } -> xs)
+    (fun { ys; _ } -> ys)
+    (fun { zs; _ } -> zs)
+    sample_t1
+
 let suite =
   suite
     [ ("Int range", int_range)
@@ -155,4 +215,7 @@ let suite =
     ; ("String alpha", string_alpha)
     ; ("String num", string_num)
     ; ("String alpha-numeric", string_alpha_numeric)
+    ; ("Record list length dist", record_with_list_length_dist)
+    ; ("Derived list length dist", derived_tuple_with_list_length_dist)
+    ; ("Tuple list length dist", tuple_with_list_length_dist)
     ]
