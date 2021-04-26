@@ -1,10 +1,8 @@
 open Random.Syntax
 module Seq = Containers.Seq
 
-let max_count_discarded = 1000
-
 type t =
-  | Single of Test_result.result Random.t
+  | Single of (Config.t -> Test_result.result Random.t)
   | Suite of (string * t) list
 
 let is_result_passed { Test_result.status; _ } =
@@ -22,7 +20,7 @@ let is_result_discarded { Test_result.status; _ } =
   | Discarded _ -> true
   | _ -> false
 
-let run ?(seed = Random.Seed.make 42) ts =
+let run ?(config = Config.default) ts =
   let rec flatten = function
     | Single res -> [ (None, res) ]
     | Suite ts ->
@@ -42,7 +40,8 @@ let run ?(seed = Random.Seed.make 42) ts =
   let results =
     let+ results =
       flatten ts
-      |> List.map (fun (name, res) ->
+      |> List.map (fun (name, f) ->
+           let res = f config in
            Random.map (fun x -> { x with Test_result.name }) res)
       |> Random.sequence
     in
@@ -59,7 +58,7 @@ let run ?(seed = Random.Seed.make 42) ts =
     in
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  let res = Random.eval seed random in
+  let res = Random.eval (Config.get_seed config) random in
   Test_result.pp Format.std_formatter res;
   res.Test_result.num_failed = 0
 
@@ -76,9 +75,16 @@ let log_verbose ~index output out =
     Log.pp
     log
 
-let make ?(count = 400) ?verbose test_fun =
-  let eval () =
-    let* inputs = Input.make_seq ~size:100 in
+let make ?(config = Config.default) test_fun =
+  let max_count_discarded = 100 in
+  let eval override =
+    let config = Config.set [ override; config ] in
+    let count = Config.get_num_samples config in
+    let verbose_log =
+      if Config.get_verbose config then Some Log.empty else None
+    in
+    let size = Config.get_max_size config in
+    let* inputs = Input.make_seq ~max_length:10_000 ~size in
     let rec aux ~num_discarded ~num_passed ~verbose_log outputs =
       if num_passed >= count then
         Random.return
@@ -130,7 +136,12 @@ let make ?(count = 400) ?verbose test_fun =
               , is_unit )
           else
             let* { Shrink.num_shrinks; num_attempts; pp; output } =
-              Shrink.shrink output @@ test_fun ()
+              Shrink.shrink
+                ~max_tries:100
+                ~max_tries_modify:100
+                ~num_shrink_rounds:10
+                output
+                (test_fun ())
             in
             let explanation =
               if is_unit then
@@ -152,12 +163,12 @@ let make ?(count = 400) ?verbose test_fun =
     aux
       ~num_discarded:0
       ~num_passed:0
-      ~verbose_log:(Option.map (Fun.const Log.empty) verbose)
+      ~verbose_log
       (Seq.map (fun x -> Sample.run x @@ test_fun ()) inputs)
   in
-  let test =
+  let test config =
     let+ (num_passed, status, log, verbose_log, is_unit), time =
-      Random.timed @@ Random.delayed eval
+      Random.timed @@ Random.delayed (fun () -> eval config)
     in
     { Test_result.name = None
     ; num_passed

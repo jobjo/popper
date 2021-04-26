@@ -181,12 +181,10 @@ let try_shrink { indexed; nodes; overrides; node_indexes } =
     Some t
   | None -> None
 
-let modify data =
+let modify ~max_tries data =
   let open Random.Syntax in
   let+ r =
-    Random.until_some
-      ~max_tries:100
-      (Random.delayed @@ fun () -> try_shrink data)
+    Random.until_some ~max_tries (Random.delayed @@ fun () -> try_shrink data)
   in
   match r with
   | Some x -> x
@@ -195,7 +193,13 @@ let modify data =
 let to_input ~size c =
   c |> to_consumed |> Consumed.to_list |> List.map snd |> Input.of_list ~size
 
-let shrink output (gen : Proposition.t Sample.t) =
+let shrink
+  ~max_tries
+  ~max_tries_modify
+  ~num_shrink_rounds
+  output
+  (gen : Proposition.t Sample.t)
+  =
   let size = Output.size output in
   let node = of_consumed @@ Output.consumed output in
   let keep t =
@@ -208,14 +212,14 @@ let shrink output (gen : Proposition.t Sample.t) =
   let module Config = struct
     type nonrec t = t
 
-    let max_tries = 100
+    let max_tries = max_tries
 
     let compare t1 t2 =
       compare
         (List.map snd @@ Consumed.to_list @@ to_consumed t1)
         (List.map snd @@ Consumed.to_list @@ to_consumed t2)
 
-    let modify t = modify t
+    let modify t = modify ~max_tries:max_tries_modify t
     let keep = keep
   end
   in
@@ -224,7 +228,7 @@ let shrink output (gen : Proposition.t Sample.t) =
     let f { Search.node; _ } =
       node |> to_consumed |> Consumed.to_list |> List.length
     in
-    R.best_of ~num_tries:10 f (S.search node)
+    R.best_of ~num_tries:num_shrink_rounds f (S.search node)
   in
   let input = to_input ~size node in
   let output = Sample.run input gen in

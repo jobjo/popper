@@ -8,4 +8,11 @@ type result =
   }
 
 val pp : Format.formatter -> t -> unit
-val shrink : Proposition.t Output.t -> Proposition.t Sample.t -> result Random.t
+
+val shrink
+  :  max_tries:int
+  -> max_tries_modify:int
+  -> num_shrink_rounds:int
+  -> Proposition.t Output.t
+  -> Proposition.t Sample.t
+  -> result Random.t

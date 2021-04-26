@@ -54,10 +54,10 @@ and t10 =
   }
 [@@deriving sample]
 
-type 'a t11 = { value : 'a } [@@deriving ord, show, popper]
-type t12 = int t11 [@@deriving ord, show, popper]
-type t13 = T13 of int t11 [@@deriving ord, show, popper]
-type t14 = { t14 : int t11 } [@@deriving ord, show, popper]
+type 'a t11 = { value : 'a } [@@deriving sample]
+type t12 = int t11 [@@deriving sample]
+type t13 = T13 of int t11 [@@deriving sample]
+type t14 = { t14 : int t11 } [@@deriving sample]
 
 type ('a, 'b, 'c) t15 =
   | T15A of { a : 'a }
@@ -66,8 +66,7 @@ type ('a, 'b, 'c) t15 =
   | T15D of 'a * 'b * 'c
 [@@deriving ord, show, popper]
 
-type t16 = { t16 : (int, bool, string option) t15 }
-[@@deriving ord, show, popper]
+type t16 = { t16 : (int, bool, string option) t15 } [@@deriving sample]
 
 type 'a t17 =
   | Node of 'a t17 * 'a t17

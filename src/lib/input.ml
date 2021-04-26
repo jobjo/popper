@@ -5,9 +5,9 @@ type t =
   ; size : int
   }
 
-let make ~size =
+let make ~max_length ~size =
   let gen ix =
-    if ix <= 10_000 then
+    if ix <= max_length then
       let+ x = Random.int32 in
       (x, ix + 1)
     else
@@ -16,10 +16,10 @@ let make ~size =
   let+ data = Random.generate ~init:0 gen in
   { data; size }
 
-let make_seq ~size =
+let make_seq ~max_length ~size =
   Random.generate ~init:2 (fun s ->
     let size = min size s in
-    let+ x = make ~size in
+    let+ x = make ~max_length ~size in
     (x, size + 1))
 
 let of_seq ~size data =
