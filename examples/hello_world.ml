@@ -13,7 +13,7 @@ let test_rev =
 
 let test_rev_twice =
   test (fun () ->
-    let* xs = Generator.list Generator.int in
+    let* xs = Sample.list Sample.int in
     eq_list (List.rev (List.rev xs)) xs)
 
 let suite = suite [ ("Reverse", test_rev); ("Reverse twice", test_rev_twice) ]

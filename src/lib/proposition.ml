@@ -11,15 +11,21 @@ let fail ?loc pp = Fail { pp; location = loc }
 let discard = Discard
 let fail_with ?loc s = fail ?loc (fun out () -> Format.fprintf out "%s" s)
 
-let equal ?loc testable x y =
-  if Comparator.equal testable x y then
+let comp symbol cond ?loc comparator x y =
+  if cond (Comparator.compare comparator x y) 0 then
     pass
   else
     let pp out () =
-      let pp = Comparator.pp testable in
-      Format.fprintf out "@[<hv>%a @,<>@;%a@]" pp x pp y
+      let pp = Comparator.pp comparator in
+      Format.fprintf out "@[<hv>%a @,%s@;%a@]" pp x symbol pp y
     in
     fail ?loc (Util.Format.red pp)
+
+let eq ?loc = comp ?loc "<>" ( = )
+let lt ?loc = comp ?loc ">=" ( < )
+let lte ?loc = comp ?loc ">=" ( <= )
+let gt ?loc = comp ?loc "<=" ( > )
+let gte ?loc = comp ?loc "<" ( >= )
 
 let fail_expected ?loc e v =
   let pp out () =

@@ -10,41 +10,41 @@ type bindings =
 
 let loc = Location.none
 
-let generator_name n =
+let sample_name n =
   if String.equal n "t" then
-    "generate"
+    "sample"
   else
-    Printf.sprintf "generate_%s" n
+    Printf.sprintf "sample_%s" n
 
 let pp_name = function
   | "t" -> "pp"
   | name -> Printf.sprintf "pp_%s" name
 
-let eq_name = function
-  | "t" -> "equal"
-  | name -> Printf.sprintf "equal_%s" name
+let compare_name = function
+  | "t" -> "compare"
+  | name -> Printf.sprintf "compare_%s" name
 
 let comparator_name = function
   | "t" -> "comparator"
   | name -> Printf.sprintf "%s_comparator" name
 
-let poly_fun_name n = Printf.sprintf "generate_poly_%s" n
+let poly_fun_name n = Printf.sprintf "sample_poly_%s" n
 
-let generator_of_type ~is_rec_type ~size ~loc = function
-  | "int" -> [%expr Popper.Generator.int]
-  | "string" -> [%expr Popper.Generator.string]
-  | "bool" -> [%expr Popper.Generator.bool]
-  | "float" -> [%expr Popper.Generator.float]
-  | "int32" -> [%expr Popper.Generator.int32]
+let sample_of_type ~is_rec_type ~size ~loc = function
+  | "int" -> [%expr Popper.Sample.int]
+  | "string" -> [%expr Popper.Sample.string]
+  | "bool" -> [%expr Popper.Sample.bool]
+  | "float" -> [%expr Popper.Sample.float]
+  | "int32" -> [%expr Popper.Sample.int32]
   | t ->
     let body =
-      let generator = A.evar ~loc (generator_name t) in
+      let sample = A.evar ~loc (sample_name t) in
       if is_rec_type t then
-        [%expr [%e generator] [%e size]]
+        [%expr [%e sample] [%e size]]
       else
-        generator
+        sample
     in
-    [%expr Popper.Generator.delayed (fun () -> [%e body])]
+    [%expr Popper.Sample.delayed (fun () -> [%e body])]
 
 let one_of_exp exps =
   let exps =
@@ -55,16 +55,16 @@ let one_of_exp exps =
     if size <= 0 then
       [%e List.hd exps]
     else
-      Popper.Generator.one_of [%e A.elist ~loc exps]]
+      Popper.Sample.one_of [%e A.elist ~loc exps]]
 
 let rec of_label_declarations ~is_rec_type ~loc fields f =
   let size = [%expr size / [%e A.eint ~loc @@ List.length fields]] in
   let accum (var, value) body =
     let name = A.pvar ~loc var in
     [%expr
-      Popper.Generator.Syntax.(
+      Popper.Sample.Syntax.(
         let* [%p name] =
-          Popper.Generator.tag_name [%e A.estring ~loc var] [%e value]
+          Popper.Sample.tag_name [%e A.estring ~loc var] [%e value]
         in
         [%e body])]
   in
@@ -77,7 +77,7 @@ let rec of_label_declarations ~is_rec_type ~loc fields f =
       field_exprs
   in
   let record =
-    [%expr Popper.Generator.return [%e f @@ A.pexp_record ~loc ident_exps None]]
+    [%expr Popper.Sample.return [%e f @@ A.pexp_record ~loc ident_exps None]]
   in
   List.fold_right accum field_exprs record
 
@@ -85,9 +85,9 @@ and of_tuple ~is_rec_type ~loc ~size types f =
   let size = [%expr [%e size] / [%e A.eint ~loc @@ List.length types]] in
   let accum (name, value) body =
     [%expr
-      Popper.Generator.Syntax.(
+      Popper.Sample.Syntax.(
         let* [%p A.pvar ~loc name] =
-          Popper.Generator.tag_name [%e A.estring ~loc name] [%e value]
+          Popper.Sample.tag_name [%e A.estring ~loc name] [%e value]
         in
         [%e body])]
   in
@@ -100,26 +100,24 @@ and of_tuple ~is_rec_type ~loc ~size types f =
       exprs
   in
   let evars = List.map (fun (n, _) -> A.evar ~loc n) name_exp_list in
-  let tuple =
-    [%expr Popper.Generator.return [%e f @@ A.pexp_tuple ~loc evars]]
-  in
+  let tuple = [%expr Popper.Sample.return [%e f @@ A.pexp_tuple ~loc evars]] in
   List.fold_right accum name_exp_list tuple
 
 and of_applied_type ~is_rec_type ~size ~name ts =
   match (name, ts) with
   | "option", [ t ] ->
-    [%expr Popper.Generator.option [%e of_core_type ~is_rec_type ~size t]]
+    [%expr Popper.Sample.option [%e of_core_type ~is_rec_type ~size t]]
   | "list", [ t ] ->
-    [%expr Popper.Generator.list [%e of_core_type ~is_rec_type ~size t]]
+    [%expr Popper.Sample.list [%e of_core_type ~is_rec_type ~size t]]
   | "result", [ t1; t2 ] ->
     [%expr
-      Popper.Generator.result
+      Popper.Sample.result
         ~ok:[%e of_core_type ~is_rec_type ~size t1]
         ~error:[%e of_core_type ~is_rec_type ~size t2]]
   | name, ts ->
     let accum exp t = [%expr [%e exp] [%e of_core_type ~is_rec_type ~size t]] in
     let is_rec_type = is_rec_type name in
-    let name = A.evar ~loc (generator_name name) in
+    let name = A.evar ~loc (sample_name name) in
     let exp = List.fold_left accum name ts in
     if is_rec_type then
       [%expr [%e exp] [%e size]]
@@ -128,7 +126,7 @@ and of_applied_type ~is_rec_type ~size ~name ts =
 
 and of_row_field_desc ~is_rec_type = function
   | Rtag (name, _, []) ->
-    [%expr Popper.Generator.return [%e A.pexp_variant ~loc name.txt None]]
+    [%expr Popper.Sample.return [%e A.pexp_variant ~loc name.txt None]]
   | Rtag (name, _, cts) ->
     of_tuple ~is_rec_type ~loc ~size:[%expr size] cts @@ fun expr ->
     [%expr [%e A.pexp_variant ~loc name.txt (Some expr)]]
@@ -141,12 +139,12 @@ and of_row_fields ~is_rec_type rfs = List.map (of_row_field ~is_rec_type) rfs
 
 and of_core_type_desc ~is_rec_type ~size = function
   | Ptyp_constr ({ txt = Lident name; loc }, []) ->
-    generator_of_type ~is_rec_type ~size ~loc name
+    sample_of_type ~is_rec_type ~size ~loc name
   | Ptyp_constr ({ txt = Lident name; _ }, ts) ->
     of_applied_type ~is_rec_type ~size ~name ts
   | Ptyp_arrow (_, _, t) ->
     let gen_exp = of_core_type ~is_rec_type ~size:[%expr size] t in
-    [%expr Popper.Generator.arrow [%e gen_exp]]
+    [%expr Popper.Sample.arrow [%e gen_exp]]
   | Ptyp_tuple ts -> of_tuple ~is_rec_type ~loc ~size:[%expr size] ts Fun.id
   | Ptyp_alias (t, _) -> of_core_type ~is_rec_type ~size t
   | Ptyp_variant (row_fields, _, _) ->
@@ -239,7 +237,7 @@ let of_constructor_declaration
   let exp =
     match pcd_args with
     | Pcstr_tuple [] ->
-      [%expr Popper.Generator.return [%e A.econstruct constr_decl None]]
+      [%expr Popper.Sample.return [%e A.econstruct constr_decl None]]
     | Pcstr_tuple ts -> of_tuple ~is_rec_type ~loc ~size ts construct
     | Pcstr_record ldl -> of_label_declarations ~is_rec_type ~loc ldl construct
   in
@@ -274,7 +272,7 @@ let of_type_declaration
   ; ptype_attributes = _
   }
   =
-  let fun_name = generator_name type_name in
+  let fun_name = sample_name type_name in
   let param_types = List.map fst ptype_params in
   let sized, poly_gens =
     match ptype_kind with
@@ -289,7 +287,7 @@ let of_type_declaration
     let pat = A.pvar ~loc fun_name in
     let body =
       let type_constraint =
-        let li = Ldot (Ldot (Lident "Popper", "Generator"), "t") in
+        let li = Ldot (Ldot (Lident "Popper", "Sample"), "t") in
         let type_vars =
           poly_gens
           |> List.mapi (fun ix _ -> A.ptyp_var ~loc @@ Printf.sprintf "a%d" ix)
@@ -305,7 +303,7 @@ let of_type_declaration
       in
       A.pexp_constraint
         ~loc
-        [%expr Popper.Generator.sized [%e expr]]
+        [%expr Popper.Sample.sized [%e expr]]
         type_constraint
     in
     let expr =
@@ -322,21 +320,22 @@ let of_type_declarations ~is_rec_type =
 let comparator { type_name; num_poly; _ } =
   let expr =
     let accum (e1, e2) ix =
-      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let compare_poly = Printf.sprintf "compare_poly_%d" ix in
       let pp_poly = Printf.sprintf "pp_poly_%d" ix in
-      ( [%expr [%e e1] [%e A.evar ~loc eq_poly]]
+      ( [%expr [%e e1] [%e A.evar ~loc compare_poly]]
       , [%expr [%e e2] [%e A.evar ~loc pp_poly]] )
     in
     let zero =
-      (A.evar ~loc @@ eq_name type_name, A.evar ~loc @@ pp_name type_name)
+      (A.evar ~loc @@ compare_name type_name, A.evar ~loc @@ pp_name type_name)
     in
     let ixs = List.rev @@ List.init num_poly Fun.id in
-    let peq, ppp = List.fold_left accum zero ixs in
-    let body = [%expr Popper.Comparator.make [%e peq] [%e ppp]] in
+    let pcompare, ppp = List.fold_left accum zero ixs in
+    let body = [%expr Popper.Comparator.make [%e pcompare] [%e ppp]] in
     let accum exp ix =
-      let eq_poly = Printf.sprintf "eq_poly_%d" ix in
+      let compare_poly = Printf.sprintf "compare_poly_%d" ix in
       let pp_poly = Printf.sprintf "pp_poly_%d" ix in
-      [%expr fun [%p A.pvar ~loc eq_poly] [%p A.pvar ~loc pp_poly] -> [%e exp]]
+      [%expr
+        fun [%p A.pvar ~loc compare_poly] [%p A.pvar ~loc pp_poly] -> [%e exp]]
     in
     List.fold_left accum body ixs
   in
@@ -348,7 +347,7 @@ let aliases bindings = bindings |> List.map (fun { alias; _ } -> alias)
 let comparators bindings =
   List.map comparator bindings |> A.pstr_value_list ~loc Nonrecursive
 
-let generators_and_comparators (rec_flag, type_declarations) =
+let samples_and_comparators (rec_flag, type_declarations) =
   let rec_flag = really_recursive rec_flag type_declarations in
   let is_rec_type =
     let ts =
@@ -357,22 +356,22 @@ let generators_and_comparators (rec_flag, type_declarations) =
     fun t -> rec_flag = Recursive && List.exists (String.equal t) ts
   in
   let bindings = of_type_declarations ~is_rec_type type_declarations in
-  let generators =
+  let samples =
     A.pstr_value_list ~loc rec_flag (sized bindings)
     @ A.pstr_value_list ~loc Nonrecursive (aliases bindings)
   in
   let comparators = comparators bindings in
-  (generators, comparators)
+  (samples, comparators)
 
-let generate_popper ~ctxt:_ decls =
-  let gs, cs = generators_and_comparators decls in
+let sample_popper ~ctxt:_ decls =
+  let gs, cs = samples_and_comparators decls in
   gs @ cs
 
-let generate_generators ~ctxt:_ decls = fst @@ generators_and_comparators decls
-let generate_comparators ~ctxt:_ decls = snd @@ generators_and_comparators decls
-let popper = Deriving.Generator.V2.make_noarg generate_popper
-let generator = Deriving.Generator.V2.make_noarg generate_generators
-let comparator = Deriving.Generator.V2.make_noarg generate_comparators
-let _ = Deriving.add "generator" ~str_type_decl:generator
+let sample_samples ~ctxt:_ decls = fst @@ samples_and_comparators decls
+let sample_comparators ~ctxt:_ decls = snd @@ samples_and_comparators decls
+let popper = Deriving.Generator.V2.make_noarg sample_popper
+let sample = Deriving.Generator.V2.make_noarg sample_samples
+let comparator = Deriving.Generator.V2.make_noarg sample_comparators
+let _ = Deriving.add "sample" ~str_type_decl:sample
 let _ = Deriving.add "comparator" ~str_type_decl:comparator
 let _ = Deriving.add "popper" ~str_type_decl:popper

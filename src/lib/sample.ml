@@ -32,6 +32,10 @@ let both g1 g2 =
   let* y = g2 in
   return (x, y)
 
+let size = make @@ fun input -> run input (return @@ Input.size input)
+let resize size g = make @@ fun input -> run (Input.set_size size input) g
+let delayed f = make (fun input -> run input @@ f ())
+
 module Syntax = struct
   let ( let* ) = bind
   let ( let+ ) x f = map f x
@@ -40,8 +44,6 @@ module Syntax = struct
 end
 
 open Syntax
-
-let delayed f = make (fun input -> run input @@ f ())
 
 let log log =
   make (fun input ->
@@ -78,8 +80,6 @@ let with_log key pp gen =
   let* () = log_with (pp_key_value pp) (key, value) in
   return value
 
-let resize size g = make @@ fun input -> run (Input.set_size size input) g
-
 let int32 =
   make (fun input ->
     match Input.head_tail input with
@@ -101,26 +101,29 @@ let rec sequence gs =
     return (x :: xs)
 
 let range mn mx =
-  let n = mx - mn in
-  let n = Int32.of_int n in
-  let block = Int32.div Int32.max_int n in
+  (* Always read one value *)
   let+ r = int32 in
-  let offset = Int32.to_int @@ Int32.div r block in
-  mn + offset
+  if mx <= mn then
+    mn
+  else
+    let n = mx - mn in
+    let n = Int32.of_int n in
+    let block = Int32.div Int32.max_int n in
+    let offset = Int32.to_int @@ Int32.div r block in
+    mn + offset
 
 let one_of gs =
   let* n = range 0 (List.length gs) in
   List.nth gs n
 
-(* let size = make (fun input -> run input (return @@ Input.size input)) *)
+let tot_float_range = Int32.to_float Int32.max_int -. Int32.to_float 0l
 
 let float_range mn mx =
-  let n = mx -. mn in
-  let n = Int32.of_float n in
-  let block = Int32.div Int32.max_int n in
   let+ r = int32 in
-  let offset = Int32.to_float r /. Int32.to_float block in
-  mn +. offset
+  let f = Int32.to_float r in
+  let range = mx -. mn in
+  let g = f /. tot_float_range in
+  mn +. (g *. range)
 
 let choose opts =
   let sum = List.fold_left (fun s (fr, _) -> s +. fr) 0. opts in
@@ -165,6 +168,7 @@ let char =
   let+ n = tag Char @@ map Int32.to_int int32 in
   Char.chr (48 + (n mod (122 - 48)))
 
+let unit = return ()
 let one_value_of vs = one_of @@ List.map return vs
 
 let promote f =
@@ -180,15 +184,6 @@ let promote f =
       ~consumed
       ~remaining
       ~log:Log.empty)
-
-let float =
-  tag Tag.Float
-  @@ let+ n = tag Float int32 in
-     Int32.float_of_bits n
-
-let int64 =
-  let+ f = float in
-  Int64.of_float f
 
 let bool = tag Tag.Bool @@ one_value_of [ false; true ]
 
@@ -212,25 +207,143 @@ let with_consumed g =
     let c = Output.consumed output in
     Output.map (fun x -> (x, c)) output)
 
-let small_int = range (-10) 10
-let medium_int = range (-1000) 1000
-
-let any_int =
-  let* b = tag Sign int32 in
-  let* n = tag Int int32 in
-  let n = Int32.to_int n in
-  let b = Int32.to_int b mod 2 <> 0 in
-  return (if b then Int.neg n else n)
-
-let int =
-  tag Int
-  @@ choose
-       [ (1., return 0)
-       ; (1., return 1)
-       ; (1., return (-1))
-       ; (5., small_int)
-       ; (10., medium_int)
-       ; (10., any_int)
-       ]
-
 let tag_name name = tag (Tag.Name name)
+
+module Int = struct
+  let range = range
+  let small = range (-10) 10
+  let medium = range (-1000) 1000
+
+  let any_int =
+    let* b = tag Sign int32 in
+    let* n = tag Int int32 in
+    let n = Int32.to_int n in
+    let b = Int32.to_int b mod 2 <> 0 in
+    return (if b then Stdlib.Int.neg n else n)
+
+  let int =
+    tag Int
+    @@ choose
+         [ (5., return 0)
+         ; (10., return 1)
+         ; (10., return (-1))
+         ; (50., small)
+         ; (100., medium)
+         ; (100., any_int)
+         ; (2., return Int.max_int)
+         ; (2., return Int.min_int)
+         ]
+
+  let positive =
+    let to_pos n =
+      if n <= 0 then
+        let an = abs n in
+        if an > 0 then
+          an
+        else
+          1
+      else
+        n
+    in
+    map to_pos int
+
+  let negative = map (fun n -> 0 - n) positive
+end
+
+module Float = struct
+  let range mn mx = float_range mn mx
+  let sub_normal = range (-0.000001) 0.000001
+  let small = range (-10.) 10.
+  let medium = range (-1000.) 1000.
+  let positive = float_range 0. Float.max_float
+  let negative = map Float.neg positive
+
+  let any =
+    tag Tag.Float
+    @@ let+ n = tag Float int32 in
+       Int32.float_of_bits n
+
+  let float =
+    choose
+      [ (5., return 0.)
+      ; (5., sub_normal)
+      ; (200., small)
+      ; (200., medium)
+      ; (100., any)
+      ; (2., return Float.nan)
+      ; (2., return Float.infinity)
+      ; (2., return Float.neg_infinity)
+      ]
+end
+
+module List = struct
+  let of_length n g =
+    let* size = size in
+    let g =
+      if n <= 0 then
+        g
+      else
+        resize (size / n) g
+    in
+    sequence @@ List.init n (fun _ -> g)
+
+  let range mn mx g =
+    let* n = Int.range mn mx in
+    of_length n g
+
+  let non_empty g =
+    let+ x = g
+    and+ xs = list g in
+    x :: xs
+end
+
+module Array = struct
+  let of_length n g = map Array.of_list @@ List.of_length n g
+  let range mn mx g = map Array.of_list @@ List.range mn mx g
+end
+
+module Char = struct
+  let upper = map Char.chr @@ Int.range 65 91
+  let lower = map Char.chr @@ Int.range 97 123
+  let numeric = map Char.chr @@ Int.range 48 58
+  let alpha = choose [ (3., lower); (1., upper) ]
+  let alpha_numeric = choose [ (5., lower); (2., upper); (1., numeric) ]
+end
+
+module String = struct
+  let of_list cs = String.of_seq @@ Stdlib.List.to_seq cs
+  let of_length n = map (String.concat "") @@ List.of_length n string
+  let range mn mx = map (String.concat "") @@ List.range mn mx string
+  let numeric = map of_list @@ list Char.numeric
+  let alpha_numeric = map of_list @@ list Char.alpha_numeric
+  let alpha = map of_list @@ list Char.alpha
+  let upper = map of_list @@ list Char.upper
+  let lower = map of_list @@ list Char.lower
+end
+
+module Tuple = struct
+  let pair g1 g2 =
+    let+ x = g1
+    and+ y = g2 in
+    (x, y)
+
+  let tripple g1 g2 g3 =
+    let+ x = g1
+    and+ y = g2
+    and+ z = g3 in
+    (x, y, z)
+
+  let quad g1 g2 g3 g4 =
+    let+ x = g1
+    and+ y = g2
+    and+ z = g3
+    and+ u = g4 in
+    (x, y, z, u)
+end
+
+let int = Int.int
+let float = Float.float
+
+let int64 =
+  let+ f = float in
+  Int64.of_float f

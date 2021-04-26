@@ -195,12 +195,12 @@ let modify data =
 let to_input ~size c =
   c |> to_consumed |> Consumed.to_list |> List.map snd |> Input.of_list ~size
 
-let shrink output (gen : Proposition.t Generator.t) =
+let shrink output (gen : Proposition.t Sample.t) =
   let size = Output.size output in
   let node = of_consumed @@ Output.consumed output in
   let keep t =
     let input = to_input ~size t in
-    let output = Generator.run input gen in
+    let output = Sample.run input gen in
     match Output.value output with
     | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
     | _ -> None
@@ -227,7 +227,7 @@ let shrink output (gen : Proposition.t Generator.t) =
     R.best_of ~num_tries:10 f (S.search node)
   in
   let input = to_input ~size node in
-  let output = Generator.run input gen in
+  let output = Sample.run input gen in
   Random.return
     (match Output.value output with
     | Proposition.Fail { pp; _ } -> { num_shrinks; num_attempts; pp; output }
