@@ -45,7 +45,7 @@ end
 exception Popper_error
 
 (** [test ?count f] creates a test that when run evaluates the given function on a number of arbitrary inputs. *)
-val test : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> Test.t
+val test : ?configs:Config.t list -> (unit -> Proposition.t Sample.t) -> Test.t
 
 val suite : (string * Test.t) list -> Test.t
 val eq : ?loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Sample.t
@@ -59,7 +59,7 @@ val all : Proposition.t Sample.t list -> Proposition.t Sample.t
 val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 val pass : Proposition.t Sample.t
 val fail : ?loc:string -> string -> Proposition.t Sample.t
-val run : ?config:Config.t -> Test.t -> unit
+val run : ?configs:Config.t list -> Test.t -> unit
 val run_test : (unit -> Proposition.t Sample.t) -> unit
 
 val with_log

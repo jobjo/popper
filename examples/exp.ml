@@ -16,14 +16,16 @@ let rec eval = function
 
 let test_and =
   let open Sample in
-  test ~config:Config.verbose (fun () ->
+  test ~configs:[ Config.verbose ] (fun () ->
     let* e1 = with_log "e1" pp sample in
     let* e2 = with_log "e2" pp sample in
     let condition = (eval e1 && eval e2) = eval (And (e1, e2)) in
     is_true ~loc:__LOC__ condition)
 
 let test_or =
-  test ~config:(Config.num_samples 300) (fun () ->
+  test
+    ~configs:[ Config.num_samples 50; Config.verbose; Config.max_size 100 ]
+    (fun () ->
     let* e1 = with_log "e1" pp sample
     and* e2 = with_log "e2" pp sample in
     eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))

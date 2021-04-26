@@ -63,7 +63,11 @@ let rec of_label_declarations ~is_rec_type ~loc fields f =
     let name = A.pvar var in
     [%expr
       Popper.Sample.Syntax.(
-        let* [%p name] = Popper.Sample.tag_name [%e A.estring var] [%e value] in
+        let* [%p name] =
+          Popper.Sample.resize
+            [%e size]
+            (Popper.Sample.tag_name [%e A.estring var] [%e value])
+        in
         [%e body])]
   in
   let field_exprs = List.map (of_label_declaration ~is_rec_type ~size) fields in
