@@ -23,7 +23,7 @@ let comp symbol cond ?loc comparator x y =
 
 let eq ?loc = comp ?loc "<>" ( = )
 let lt ?loc = comp ?loc ">=" ( < )
-let lte ?loc = comp ?loc ">=" ( <= )
+let lte ?loc = comp ?loc ">" ( <= )
 let gt ?loc = comp ?loc "<=" ( > )
 let gte ?loc = comp ?loc "<" ( >= )
 

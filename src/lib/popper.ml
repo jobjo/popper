@@ -8,10 +8,11 @@ module Consumed = Consumed
 module Output = Output
 module Tag = Tag
 module Syntax = Sample.Syntax
+module Config = Config
 
 exception Popper_error
 
-let test ?count ?verbose = Test.make ?count ?verbose
+let test ?config = Test.make ?config
 let suite ts = Test.suite ts
 let eq ?loc testable x y = Sample.return @@ Proposition.eq ?loc testable x y
 let lt ?loc testable x y = Sample.return @@ Proposition.lt ?loc testable x y
@@ -26,8 +27,8 @@ let with_log k pp gen = Sample.with_log k pp gen
 let pass = Sample.return Proposition.pass
 let fail ?loc s = Sample.return @@ Proposition.fail_with ?loc s
 
-let run ?seed t =
-  if Test.run ?seed t then
+let run ?config t =
+  if Test.run ?config t then
     ()
   else
     raise Popper_error

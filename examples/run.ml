@@ -10,4 +10,4 @@ let suite =
     ; ("Equal", Equal.suite)
     ]
 
-let () = run suite
+let () = run ~config:(Config.num_samples 10) suite

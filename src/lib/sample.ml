@@ -265,14 +265,14 @@ module Float = struct
 
   let float =
     choose
-      [ (5., return 0.)
-      ; (5., sub_normal)
-      ; (200., small)
-      ; (200., medium)
-      ; (100., any)
-      ; (2., return Float.nan)
-      ; (2., return Float.infinity)
-      ; (2., return Float.neg_infinity)
+      [ (1., return 0.)
+      ; (1., sub_normal)
+      ; (40., small)
+      ; (40., medium)
+      ; (15., any)
+      ; (1., return Float.nan)
+      ; (1., return Float.infinity)
+      ; (1., return Float.neg_infinity)
       ]
 end
 

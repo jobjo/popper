@@ -77,14 +77,16 @@ let float_classes =
   let zero = lookup Float.FP_zero in
   let normal = lookup Float.FP_normal in
   let nan = lookup Float.FP_nan in
+  let sub_normal = lookup Float.FP_subnormal in
   let* () = Sample.log_key_value "inf" (string_of_float inf) in
   let* () = Sample.log_key_value "normal" (string_of_float normal) in
   let* () = Sample.log_key_value "zero" (string_of_float zero) in
   let* () = Sample.log_key_value "nan" (string_of_float nan) in
+  let* () = Sample.log_key_value "sub_normal" (string_of_float sub_normal) in
   all
     [ lt Comparator.float 0. inf
-    ; lt Comparator.float inf 0.02
-    ; lt Comparator.float 0.95 normal
+    ; lt Comparator.float inf 0.03
+    ; lt Comparator.float 0.9 normal
     ; lt Comparator.float 0.0 nan
     ; lt Comparator.float nan 0.1
     ]

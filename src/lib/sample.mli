@@ -31,8 +31,6 @@ val with_log : string -> (Format.formatter -> 'a -> unit) -> 'a t -> 'a t
 val float_range : float -> float -> float t
 val choose : (float * 'a t) list -> 'a t
 val unit : unit t
-
-(* val size : int t *)
 val tag_name : string -> 'a t -> 'a t
 
 module Syntax : sig
