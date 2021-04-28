@@ -4,7 +4,6 @@ module Output = Output
 module Sample = Sample
 module Proposition = Proposition
 module Test = Test
-module Random = Random
 module Consumed = Consumed
 module Config = Config
 

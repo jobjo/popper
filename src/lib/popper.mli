@@ -54,18 +54,6 @@ module Comparator : sig
   val result : ok:'a t -> error:'e t -> ('a, 'e) result t
 end
 
-module Random : sig
-  type 'a t
-end
-
-module Input : sig
-  type t
-end
-
-module Output : sig
-  type 'a t
-end
-
 module Sample : sig
   (** {1 Types }*)
 
@@ -74,10 +62,6 @@ module Sample : sig
   type 'a t
 
   (** {1 Basic Combinators } *)
-
-  (** [run input s] runs the sample [s] with input [input] producing some
-      output.*)
-  val run : Input.t -> 'a t -> 'a Output.t
 
   (** [map f s] creates a sample that when run maps its output value using the
       function [f]. *)
@@ -149,7 +133,7 @@ module Sample : sig
   (** [bool] is a sample that produces [bool] values. *)
   val bool : bool t
 
-  (** [arrow] is a sample that produces [arrow] values. *)
+  (** [arrow s] is a sample that produces a function value. *)
   val arrow : 'a t -> ('b -> 'a) t
 
   (** [char] is a sample that produces [char] values. *)
@@ -189,9 +173,18 @@ module Sample : sig
   val tag_name : string -> 'a t -> 'a t
 
   module Syntax : sig
+    (** [let* x = s in body] is the same as [bind s (fun x -> body)]. *)
     val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
+
+    (** [let+ x = s in body] is the same as [map (fun x -> body) s]. *)
     val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
+
+    (** [let* x = s1 and* y = s2 in body] is the same as [bind s1 (fun x -> bind
+        s2 (fun y -> body)] *)
     val ( and* ) : 'a t -> 'b t -> ('a * 'b) t
+
+    (** [let+ x = s1 and+ y = s2 in body] is the same as [map (fun (x,y) ->
+        body) (both s1 s2)]. *)
     val ( and+ ) : 'a t -> 'b t -> ('a * 'b) t
   end
 
@@ -239,8 +232,8 @@ module Sample : sig
         where [min <= n < max], using the given sample [s]. *)
     val range : int -> int -> 'a t -> 'a list t
 
-    (*** [non_empty s] produces a non-empty list using the sample [s] to draw
-      the elements. *)
+    (** [non_empty s] produces a non-empty list using the sample [s] to draw the
+        elements. *)
     val non_empty : 'a t -> 'a list t
   end
 
@@ -253,8 +246,8 @@ module Sample : sig
         where [min <= n < max], using the given sample [s]. *)
     val range : int -> int -> 'a t -> 'a array t
 
-    (*** [non_empty s] produces a non-empty array using the sample [s] to draw
-      the elements. *)
+    (** [non_empty s] produces a non-empty array using the sample [s] to draw
+        the elements. *)
     val non_empty : 'a t -> 'a array t
   end
 
@@ -387,11 +380,26 @@ module Config : sig
 
   (** {1 Options }*)
 
+  (** [num_samples n] is a configuration that specifies the number of samples to
+      explore for property based tests. *)
   val num_samples : int -> t
-  val max_shrinks : int -> t
+
+  (** [seed s] is a configuration that sets the seed to be used when running
+      tests. *)
   val seed : int -> t
+
+  (** [verbose] is a configuration that turns on verbose mode. That means that
+      all logged values will be displayed for each test. *)
   val verbose : t
+
+  (** [max_input_length n] is a configuration that specifies the maximum length
+      of consumed input. Once a sample is run that exceed that length, only
+      zeros are produced. *)
   val max_input_length : int -> t
+
+  (** [max_size n] sets the maximum size parameter to be used when running
+      tests. The default value is 100. With a large size paratmer, larger values
+      are typically sampled. *)
   val max_size : int -> t
 end
 
