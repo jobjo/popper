@@ -1,6 +1,6 @@
 open Popper
 open Sample
-open Syntax
+open Sample.Syntax
 
 let simple_sum x y = x + y
 let simple_diff x y = x - y
@@ -22,7 +22,7 @@ let test_sum =
     let* right = int in
     let expected = left + right in
     let actual = simple_sum left right in
-    eq Comparator.int actual expected)
+    equal Comparator.int actual expected)
 
 let test_diff =
   test (fun () ->
@@ -33,7 +33,7 @@ let test_diff =
     let actual = simple_diff left right in
     (* Use built in sample and comparator *)
     let comparator = Comparator.int in
-    eq comparator actual expected)
+    equal comparator actual expected)
 
 let test_point_sum =
   test (fun () ->
@@ -41,7 +41,7 @@ let test_point_sum =
     let* right = sample_point in
     let expected = { x = left.x + right.x; y = left.y + right.y } in
     let actual = point_sum left right in
-    eq ~loc:__LOC__ point_comparator expected actual)
+    equal ~loc:__LOC__ point_comparator expected actual)
 
 let test_division =
   test (fun () ->
@@ -50,7 +50,7 @@ let test_division =
     let expected = if y = 0 then None else Some (x / y) in
     let actual = simple_div x y in
     let comparator = Comparator.option Comparator.int in
-    eq comparator actual expected)
+    equal comparator actual expected)
 
 let suite =
   suite

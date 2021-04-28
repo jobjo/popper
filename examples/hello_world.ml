@@ -1,7 +1,7 @@
 open Popper
-open Syntax
+open Sample.Syntax
 
-let eq_list = eq Comparator.(list int)
+let eq_list = equal Comparator.(list int)
 
 let test_rev =
   test (fun () ->

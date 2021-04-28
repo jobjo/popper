@@ -13,3 +13,4 @@ let-binding-spacing=compact
 parens-ite=false
 parens-tuple=always
 break-infix-before-func=false
+wrap-comments=true

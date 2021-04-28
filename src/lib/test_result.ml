@@ -164,8 +164,8 @@ let pp_results out res =
   let columns = [ Table.left; Table.left; Table.left; Table.right ] in
   Table.of_list ~columns @@ List.map to_row res |> Table.pp out
 
-(* Inspired by Alcotest: 
-https://github.com/mirage/alcotest/blob/a5d3c0e498a8706427e6337d49a1cbf235b4231d/src/alcotest-engine/pp.ml#L184 *)
+(* Inspired by Alcotest:
+   https://github.com/mirage/alcotest/blob/a5d3c0e498a8706427e6337d49a1cbf235b4231d/src/alcotest-engine/pp.ml#L184 *)
 let with_box (type a) f out (a : a) =
   let text_width = Util.Format.rendered_length f a + 4 in
   let width =

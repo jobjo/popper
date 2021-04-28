@@ -4,7 +4,7 @@ type config =
   ; max_shrink_modify_attempts : int
   ; num_samples : int
   ; max_size : int
-  ; seed : Random.Seed.t
+  ; seed : int
   ; verbose : bool
   ; max_input_length : int
   }
@@ -17,7 +17,7 @@ let default =
   ; max_shrink_modify_attempts = 100
   ; num_samples = 300
   ; max_size = 100
-  ; seed = Random.Seed.make 42
+  ; seed = 42
   ; verbose = false
   ; max_input_length = 10_000
   }

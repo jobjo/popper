@@ -1,5 +1,5 @@
 open Popper
-open Syntax
+open Sample.Syntax
 
 type tag =
   [ `Foo
@@ -17,7 +17,7 @@ let test =
   Popper.test
     ~configs:[ Config.verbose; Config.max_size 400; Config.num_samples 50 ]
     (fun () ->
-    let* p = with_log "p" pp sample in
-    eq comparator p p)
+    let* p = Sample.with_log "p" pp sample in
+    equal comparator p p)
 
 let suite = suite [ ("Equal itself", test) ]

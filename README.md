@@ -9,7 +9,7 @@
 
 ```ocaml
 open Popper
-open Syntax
+open Sample.Syntax
 
 let test_rev =
   test (fun () ->
@@ -35,7 +35,7 @@ When run gives:
 
 ```ocaml
 open Popper
-open Syntax
+open Sample.Syntax
 
 type t =
   | Lit of bool
@@ -74,7 +74,7 @@ An example of using a derived comparator.
 
 ```ocaml
 open Popper
-open Syntax
+open Sample.Syntax
 
 type t =
   { x_values : int list
@@ -131,7 +131,7 @@ type test_data =
 [@@deriving sample]
 
 let test_map =
-  let open Syntax in
+  let open Sample.Syntax in
   test (fun () ->
     let* { tree; f } = sample_test_data in
     let r1 = List.map f @@ to_list tree in

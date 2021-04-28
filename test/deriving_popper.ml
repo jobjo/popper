@@ -79,11 +79,11 @@ and t18 = int t17 [@@deriving show, ord, popper]
 
 let make_test name comparator sample =
   let open Popper in
-  let open Syntax in
+  let open Sample.Syntax in
   ( name
   , test (fun () ->
       let* x = sample in
-      eq comparator x x) )
+      equal comparator x x) )
 
 let suite =
   Popper.suite

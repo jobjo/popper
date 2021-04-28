@@ -17,8 +17,8 @@ let left = Left
 let right = Right
 let center = Center
 
-(* let text ?color value =
-  { color; value = (fun out () -> Format.fprintf out "%s" value) } *)
+(* let text ?color value = { color; value = (fun out () -> Format.fprintf out
+   "%s" value) } *)
 
 let cell = Fun.id
 

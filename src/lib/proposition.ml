@@ -21,11 +21,11 @@ let comp symbol cond ?loc comparator x y =
     in
     fail ?loc (Util.Format.red pp)
 
-let eq ?loc = comp ?loc "<>" ( = )
-let lt ?loc = comp ?loc ">=" ( < )
-let lte ?loc = comp ?loc ">" ( <= )
-let gt ?loc = comp ?loc "<=" ( > )
-let gte ?loc = comp ?loc "<" ( >= )
+let equal ?loc = comp ?loc "<>" ( = )
+let less_than ?loc = comp ?loc ">=" ( < )
+let less_equal_than ?loc = comp ?loc ">" ( <= )
+let greater_than ?loc = comp ?loc "<=" ( > )
+let greater_equal_than ?loc = comp ?loc "<" ( >= )
 
 let fail_expected ?loc e v =
   let pp out () =

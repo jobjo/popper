@@ -10,5 +10,5 @@ examples:
 format:
 	dune build @fmt --auto-promote || true
 
-doc:
+doc: test
 	dune build @doc

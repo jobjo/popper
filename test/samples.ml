@@ -1,7 +1,7 @@
 open Popper
-open Syntax
+open Sample.Syntax
 
-let seed = Random.Seed.make 42
+let seed = 45
 
 let dist f gen =
   let map = Hashtbl.create 32 in
@@ -18,7 +18,7 @@ let dist f gen =
     Hashtbl.add map key count;
     pass
   in
-  let () = run_test test in
+  let () = check test in
   fun key ->
     match Hashtbl.find_opt map key with
     | Some n -> float n /. float !count
@@ -38,11 +38,11 @@ let neg_pos_ratio =
   let* () = Sample.log_key_value "Non-negative" (string_of_float nneg) in
   let* () = Sample.log_key_value "Zero" (string_of_float zero) in
   all
-    [ lt Comparator.float 0.45 neg
-    ; lt Comparator.float neg 0.5
-    ; lt Comparator.float 0.45 nneg
-    ; lt Comparator.float nneg 0.5
-    ; lt Comparator.float zero 0.05
+    [ less_than Comparator.float 0.45 neg
+    ; less_than Comparator.float neg 0.5
+    ; less_than Comparator.float 0.45 nneg
+    ; less_than Comparator.float nneg 0.5
+    ; less_than Comparator.float zero 0.05
     ]
 
 let int_range =
@@ -52,7 +52,7 @@ let int_range =
   let* n2 = Int.range (-10) 10 in
   let* n3 = Int.range 0 0 in
   all
-    [ eq Comparator.int 0 n3
+    [ equal Comparator.int 0 n3
     ; is_true (n1 >= 0)
     ; is_true (n1 < 10)
     ; is_true (n2 >= -10 && n2 < 10)
@@ -62,13 +62,13 @@ let int_negative =
   let open Sample in
   test @@ fun () ->
   let* n1 = Int.negative in
-  lt Comparator.int n1 0
+  less_than Comparator.int n1 0
 
 let int_positive =
   let open Sample in
   test @@ fun () ->
   let* n1 = Int.positive in
-  gt Comparator.int n1 0
+  greater_than Comparator.int n1 0
 
 let float_classes =
   test @@ fun () ->
@@ -84,11 +84,11 @@ let float_classes =
   let* () = Sample.log_key_value "nan" (string_of_float nan) in
   let* () = Sample.log_key_value "sub_normal" (string_of_float sub_normal) in
   all
-    [ lt Comparator.float 0. inf
-    ; lt Comparator.float inf 0.03
-    ; lt Comparator.float 0.9 normal
-    ; lt Comparator.float 0.0 nan
-    ; lt Comparator.float nan 0.1
+    [ less_than Comparator.float 0. inf
+    ; less_than Comparator.float inf 0.03
+    ; less_than Comparator.float 0.9 normal
+    ; less_than Comparator.float 0.0 nan
+    ; less_than Comparator.float nan 0.1
     ]
 
 let list_length =
@@ -96,14 +96,14 @@ let list_length =
   test @@ fun () ->
   let* n = Int.range 0 10 in
   let* xs = List.of_length n int in
-  eq Comparator.int (Stdlib.List.length xs) n
+  equal Comparator.int (Stdlib.List.length xs) n
 
 let list_range =
   let open Sample in
   test @@ fun () ->
   let* n = Int.range 0 10 in
   let* xs = List.range 0 n int in
-  lte Comparator.int (Stdlib.List.length xs) n
+  less_equal_than Comparator.int (Stdlib.List.length xs) n
 
 let is_lower c = 'a' <= c && c <= 'z'
 let is_upper c = 'A' <= c && c <= 'Z'
@@ -120,12 +120,12 @@ let string_lower =
 
 let string_upper =
   test @@ fun () ->
-  let* s = with_log "s" Format.pp_print_string @@ Sample.String.upper in
+  let* s = Sample.with_log "s" Format.pp_print_string @@ Sample.String.upper in
   String.to_seq s |> List.of_seq |> List.for_all is_upper |> is_true
 
 let string_alpha =
   test @@ fun () ->
-  let* s = with_log "s" Format.pp_print_string @@ Sample.String.upper in
+  let* s = Sample.with_log "s" Format.pp_print_string @@ Sample.String.upper in
   String.to_seq s
   |> List.of_seq
   |> List.for_all (fun c -> is_upper c || is_lower c)
@@ -133,12 +133,16 @@ let string_alpha =
 
 let string_alpha_numeric =
   test @@ fun () ->
-  let* s = with_log "s" Format.pp_print_string @@ Sample.String.alpha_numeric in
+  let* s =
+    Sample.with_log "s" Format.pp_print_string @@ Sample.String.alpha_numeric
+  in
   String.to_seq s |> List.of_seq |> List.for_all is_alpha_numeric |> is_true
 
 let string_num =
   test @@ fun () ->
-  let* s = with_log "s" Format.pp_print_string @@ Sample.String.alpha_numeric in
+  let* s =
+    Sample.with_log "s" Format.pp_print_string @@ Sample.String.alpha_numeric
+  in
   String.to_seq s |> List.of_seq |> List.for_all is_alpha_numeric |> is_true
 
 type t1 =
@@ -172,9 +176,9 @@ let gen_dist_test get_xs get_ys get_zs gen =
   let* () = Sample.log_key_value "diff_ys" (string_of_float diff_ys) in
   let* () = Sample.log_key_value "diff_zs" (string_of_float diff_zs) in
   all
-    [ lt Comparator.float diff_xs 0.05
-    ; lt Comparator.float diff_ys 0.05
-    ; lt Comparator.float diff_zs 0.05
+    [ less_than Comparator.float diff_xs 0.05
+    ; less_than Comparator.float diff_ys 0.05
+    ; less_than Comparator.float diff_zs 0.05
     ]
 
 let tuple_with_list_length_dist =

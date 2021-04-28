@@ -12,7 +12,6 @@ type t =
   | Choice
   | Name of string
   | Sub_list
-[@@deriving show]
 
 let is_operator t = t = Operator || t = Size
 let is_value t = not @@ is_operator t

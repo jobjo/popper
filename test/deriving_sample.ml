@@ -80,7 +80,7 @@ type t19 = { fn : int -> bool } [@@deriving sample]
 
 let make_test name sample =
   let open Popper in
-  let open Popper.Syntax in
+  let open Sample.Syntax in
   ( name
   , test (fun () ->
       let* _ = sample in
