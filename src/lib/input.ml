@@ -35,8 +35,8 @@ let head_tail { size; data } =
   | Cons (n, data) -> Some (n, { size; data })
 
 let head input = Option.map fst @@ head_tail input
-let take n { data; _ } = List.of_seq @@ Containers.Seq.take n data
-let drop n { size; data } = { size; data = Containers.Seq.drop n data }
+let take n { data; _ } = List.of_seq @@ Util.Seq.take n data
+let drop n { size; data } = { size; data = Util.Seq.drop n data }
 let map f { size; data } = { size; data = Seq.map f data }
 let size { size; _ } = size
 let set_size size { data; _ } = { data; size }
