@@ -403,6 +403,12 @@ module Config : sig
       tests. The default value is 100. With a large size paratmer, larger values
       are typically sampled. *)
   val max_size : int -> t
+
+  (** {2 Combinators }*)
+
+  (** [all cs] combines all configuration options [cs]. In case there are
+      overlaps, the values at the end of the list take precedence. *)
+  val all : t list -> t
 end
 
 (** {1 Types and exceptions } *)
@@ -411,13 +417,13 @@ exception Popper_error
 
 (** {2 Constructing tests } *)
 
-(** [test ?configs f] creates a test that when run evaluates [f] that produces a
+(** [test ?config f] creates a test that when run evaluates [f] that produces a
     [Proposition.t Sample.t] value. If the the sample consumes any input, it is
     run a number of times until it either finds some input value that causes the
     sample to yield a failing proposition, or until it passes specified number
-    of runs (default is 300). If [configs] is given it takes all the specified
+    of runs (default is 300). If [config] is given it takes all the specified
     overrides into account.*)
-val test : ?configs:Config.t list -> (unit -> Proposition.t Sample.t) -> Test.t
+val test : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> Test.t
 
 (** [suite ts] packs the list of name and test pairs, [ts], into a single test
     suite. *)
@@ -495,12 +501,12 @@ val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 
 (** {2 Running tests } *)
 
-(** [check ?config f] Runs a single anonymous test using the [configs] settings
+(** [check ?config f] Runs a single anonymous test using the [config] settings
     if given. In case the test fails, an exception of type [Popper_error] is
     raised. *)
-val check : ?configs:Config.t list -> (unit -> Proposition.t Sample.t) -> unit
+val check : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
 
-(** [test ?config t] Runs the given test [t] using the [configs] settings if
+(** [test ?config t] Runs the given test [t] using the [config] settings if
     given. In case the test fails, an exception of type [Popper_error] is
     raised. *)
-val run : ?configs:Config.t list -> Test.t -> unit
+val run : ?config:Config.t -> Test.t -> unit

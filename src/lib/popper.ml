@@ -32,16 +32,12 @@ let all ps = Sample.sequence ps |> Sample.map Proposition.all
 let any ps = Sample.sequence ps |> Sample.map Proposition.any
 let pass = Sample.return Proposition.pass
 let fail ?loc s = Sample.return @@ Proposition.fail_with ?loc s
+let test ?(config = Config.default) = Test.make ~config
 
-let test ?(configs = []) =
-  let config = Config.all configs in
-  Test.make ~config
-
-let run ?(configs = []) t =
-  let config = Config.all configs in
+let run ?(config = Config.default) t =
   if Test.run ~config t then
     ()
   else
     raise Popper_error
 
-let check ?configs f = run ?configs (Test.make f)
+let check ?config f = run ?config (Test.make f)

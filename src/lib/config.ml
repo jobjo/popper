@@ -17,7 +17,7 @@ let default =
   ; max_shrink_modify_attempts = 100
   ; num_samples = 300
   ; max_size = 100
-  ; seed = 42
+  ; seed = 12345
   ; verbose = false
   ; max_input_length = 10_000
   }
