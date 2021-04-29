@@ -12,6 +12,3 @@ format:
 
 doc: test
 	dune build @doc
-
-tutorial: 
-	dune exec docs/tutorial.exe
