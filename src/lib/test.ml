@@ -1,5 +1,4 @@
 open Random.Syntax
-module Seq = Containers.Seq
 
 type t =
   | Single of (Config.t -> Test_result.result Random.t)

@@ -47,9 +47,29 @@ module Format = struct
   let faint pp = pp_color faint pp
 end
 
+module List = struct
+  let head_opt = function
+    | [] -> None
+    | x :: _ -> Some x
+end
+
 module Seq = struct
   let head_tail_exn s =
     match s () with
     | Seq.Nil -> failwith "Unexpected"
     | Cons (a, f) -> (a, f)
+
+  let rec take n xs () =
+    if n = 0 then
+      Seq.Nil
+    else
+      match xs () with
+      | Seq.Nil -> Nil
+      | Cons (x, xs) -> Cons (x, take (n - 1) xs)
+
+  let rec drop n xs () =
+    match xs () with
+    | xs when n = 0 -> xs
+    | Seq.Nil -> Nil
+    | Cons (_, xs) -> drop (n - 1) xs ()
 end

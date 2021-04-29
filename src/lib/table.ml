@@ -70,7 +70,7 @@ let of_list ~columns rows =
   in
   let num_rows = List.length rows in
   let num_cols =
-    Option.fold ~none:0 ~some:List.length (Containers.List.head_opt rows)
+    Option.fold ~none:0 ~some:List.length (Util.List.head_opt rows)
   in
   { cell; num_rows; num_cols; columns }
 

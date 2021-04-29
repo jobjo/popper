@@ -1,16 +1,8 @@
-open Popper
-
-type person =
-  { name : string
-  ; age : int
-  }
-[@@deriving show, ord, popper]
-
 let suite =
-  suite
+  Popper.suite
     [ ("Deriving Sample", Deriving_sample.suite)
     ; ("Deriving Popper", Deriving_popper.suite)
-    ; ("Sample", Samples.suite)
+    ; ("Samples", Samples.suite)
     ]
 
-let () = run suite
+let () = Popper.run suite

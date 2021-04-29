@@ -1,5 +1,7 @@
 (** A library for unit and property-based testing. *)
 
+(** {1 Modules } *)
+
 module Comparator : sig
   (** {1 Types } *)
 
@@ -260,15 +262,15 @@ module Sample : sig
         where [min <= n < max], using the given sample [s]. *)
     val range : int -> int -> string t
 
-    (** [alpha_numeric] a sample that produces strings containing alhpa-numeric
-        characthers. *)
+    (** [alpha_numeric] is a sample that produces strings containing
+        alhpa-numeric characthers. *)
     val alpha_numeric : string t
 
-    (** [alpha_numeric] a sample that produces strings containing numbers *)
+    (** [numeric] is a sample that produces strings containing numbers *)
     val numeric : string t
 
-    (** [alpha_numeric] a sample that produces strings containing characters
-        a-z, both upper and lower case. *)
+    (** [alpha] a sample that produces strings containing characters a-z, both
+        upper and lower case. *)
     val alpha : string t
 
     (** [upper] is sample that always produces upper-case characters. *)
