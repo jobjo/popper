@@ -5,3 +5,4 @@
 
 (package
  (name ppx_deriving_popper))
+(using mdx 0.1)
