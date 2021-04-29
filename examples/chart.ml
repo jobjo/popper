@@ -1,3 +1,5 @@
+open Popper
+
 type t =
   { x_values : int list
   ; y_values : int list
@@ -10,9 +12,9 @@ let flip { x_values; y_values; x_axis; y_axis } =
   { x_values = y_values; y_values = x_values; x_axis = y_axis; y_axis = x_axis }
 
 let test_flip =
-  let open Popper.Syntax in
-  Popper.test (fun () ->
+  let open Sample.Syntax in
+  test (fun () ->
     let* s = sample in
-    Popper.eq comparator (flip s) s)
+    Popper.equal comparator (flip s) s)
 
 let suite = Popper.suite [ ("Flip chart", test_flip) ]

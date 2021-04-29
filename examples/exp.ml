@@ -1,5 +1,5 @@
 open Popper
-open Syntax
+open Sample.Syntax
 
 type t =
   | Lit of bool
@@ -26,8 +26,8 @@ let test_or =
   test
     ~configs:[ Config.num_samples 50; Config.verbose; Config.max_size 100 ]
     (fun () ->
-    let* e1 = with_log "e1" pp sample
-    and* e2 = with_log "e2" pp sample in
-    eq Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
+    let* e1 = Sample.with_log "e1" pp sample
+    and* e2 = Sample.with_log "e2" pp sample in
+    equal Comparator.bool (eval e1 || eval e2) (eval (Or (e1, e2))))
 
 let suite = suite [ ("Exp and", test_and); ("Exp or", test_or) ]

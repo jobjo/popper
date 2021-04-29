@@ -7,7 +7,6 @@ type 'a t =
 
 let make compare pp = { compare; pp }
 let compare { compare; _ } = compare
-let eq { compare; _ } x y = compare x y = 0
 let pp { pp; _ } out t = pp out t
 
 let pp_tuple pp1 pp2 out (x, y) =
@@ -19,6 +18,13 @@ let pp_list pp out xs =
     "@[<hv 2>[@,%a]@]"
     (pp_print_list ~pp_sep:(fun out () -> pp_print_string out ",") pp)
     xs
+
+let pp_array pp out xs =
+  fprintf
+    out
+    "@[<hv 2>[|@,%a|]@]"
+    (pp_print_list ~pp_sep:(fun out () -> pp_print_string out ",") pp)
+    (Array.to_list xs)
 
 let tuple t1 t2 =
   make
@@ -32,20 +38,24 @@ let tuple t1 t2 =
         1)
     (pp_tuple (pp t1) (pp t2))
 
-let list t =
-  let rec comp_list xs ys =
-    match (xs, ys) with
-    | [], [] -> 0
-    | [], _ -> -1
-    | _, [] -> 1
-    | x :: xs, y :: ys ->
-      let r = compare t x y in
-      if r = 0 then
-        comp_list xs ys
-      else
-        r
-  in
-  make comp_list (pp_list @@ pp t)
+let rec comp_list t xs ys =
+  match (xs, ys) with
+  | [], [] -> 0
+  | [], _ -> -1
+  | _, [] -> 1
+  | x :: xs, y :: ys ->
+    let r = compare t x y in
+    if r = 0 then
+      comp_list t xs ys
+    else
+      r
+
+let list t = make (comp_list t) (pp_list @@ pp t)
+
+let array t =
+  make
+    (fun x y -> comp_list t (Array.to_list x) (Array.to_list y))
+    (pp_array @@ pp t)
 
 let int = make Int.compare pp_print_int
 let float = make Float.compare pp_print_float
@@ -58,3 +68,7 @@ let option t =
     pp_print_option ~none:(fun formatter () -> fprintf formatter "None") @@ pp t
   in
   make (Option.compare compare) printer
+
+let result ~ok ~error =
+  let printer = pp_print_result ~ok:(pp ok) ~error:(pp error) in
+  make (Result.compare ~ok:(compare ok) ~error:(compare error)) printer

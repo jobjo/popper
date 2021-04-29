@@ -58,7 +58,7 @@ let run ?(config = Config.default) ts =
     in
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  let res = Random.eval (Config.get_seed config) random in
+  let res = Random.eval (Random.Seed.make @@ Config.get_seed config) random in
   Test_result.pp Format.std_formatter res;
   res.Test_result.num_failed = 0
 

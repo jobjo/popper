@@ -23,11 +23,11 @@ type test_data =
 [@@deriving sample]
 
 let test_map =
-  let open Syntax in
+  let open Sample.Syntax in
   test (fun () ->
     let* { tree; f } = sample_test_data in
     let r1 = List.map f @@ to_list tree in
     let r2 = to_list @@ map f tree in
-    eq (Comparator.list Comparator.int) r1 r2)
+    equal (Comparator.list Comparator.int) r1 r2)
 
 let suite = suite [ ("Map tree", test_map) ]

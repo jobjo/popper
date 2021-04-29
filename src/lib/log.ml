@@ -1,7 +1,4 @@
-(* type t =
-  | Empty
-  | Print of (Format.formatter -> unit -> unit)
-  | Add of t * t *)
+(* type t = | Empty | Print of (Format.formatter -> unit -> unit) | Add of t * t *)
 
 type t = Format.formatter -> unit -> unit
 

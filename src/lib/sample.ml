@@ -50,10 +50,6 @@ let log log =
     let size = Input.size input in
     Output.make ~value:() ~size ~consumed:Consumed.empty ~remaining:input ~log)
 
-let log_string s =
-  let pp out = Format.pp_print_string out s in
-  log @@ Log.of_pp pp
-
 let log_with pp x =
   let pp out = Format.fprintf out "%a" pp x in
   log @@ Log.of_pp pp
@@ -300,6 +296,7 @@ end
 module Array = struct
   let of_length n g = map Array.of_list @@ List.of_length n g
   let range mn mx g = map Array.of_list @@ List.range mn mx g
+  let non_empty g = map Array.of_list @@ List.non_empty g
 end
 
 module Char = struct
