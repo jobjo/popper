@@ -38,10 +38,10 @@ let neg_pos_ratio =
   let* () = Sample.log_key_value "Non-negative" (string_of_float nneg) in
   let* () = Sample.log_key_value "Zero" (string_of_float zero) in
   all
-    [ less_than Comparator.float 0.45 neg
+    [ less_than Comparator.float 0.4 neg
     ; less_than Comparator.float neg 0.5
-    ; less_than Comparator.float 0.45 nneg
-    ; less_than Comparator.float nneg 0.5
+    ; less_than Comparator.float 0.5 nneg
+    ; less_than Comparator.float nneg 0.6
     ; less_than Comparator.float zero 0.05
     ]
 
@@ -85,7 +85,7 @@ let float_classes =
   let* () = Sample.log_key_value "sub_normal" (string_of_float sub_normal) in
   all
     [ less_than Comparator.float 0. inf
-    ; less_than Comparator.float inf 0.03
+    ; less_than Comparator.float inf 0.05
     ; less_than Comparator.float 0.9 normal
     ; less_than Comparator.float 0.0 nan
     ; less_than Comparator.float nan 0.1
