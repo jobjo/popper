@@ -19,7 +19,7 @@ val int64 : int64 t
 val char : char t
 val float : float t
 val bool : bool t
-val arrow : 'a t -> ('b -> 'a) t
+val fn : 'a t -> ('b -> 'a) t
 val string : string t
 val option : 'a t -> 'a option t
 val result : ok:'a t -> error:'b t -> ('a, 'b) result t

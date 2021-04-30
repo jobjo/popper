@@ -105,8 +105,8 @@ let range mn mx =
     let n = mx - mn in
     let n = Int32.of_int n in
     let block = Int32.div Int32.max_int n in
-    let offset = Int32.to_int @@ Int32.div r block in
-    mn + offset
+    let offset = Int32.div r block in
+    mn + Int32.to_int offset
 
 let one_of gs =
   let* n = range 0 (List.length gs) in
@@ -183,11 +183,15 @@ let promote f =
 
 let bool = tag Tag.Bool @@ one_value_of [ false; true ]
 
-let arrow g =
+let fn g =
   let f x =
     make (fun input ->
-      let h = Int32.of_int @@ Hashtbl.hash x in
-      let data = Input.map (Int32.logxor h) input in
+      let hash = Hashtbl.hash x in
+      let modify x =
+        let seed = Random.Seed.make [ Int32.to_int x; hash ] in
+        Random.eval seed Random.int32
+      in
+      let data = Input.map modify input in
       run data g)
   in
   promote f
