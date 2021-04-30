@@ -3,7 +3,7 @@ module R = PRNG.Splitmix.Pure
 module Seed = struct
   type t = R.t
 
-  let make n = R.make [| n |]
+  let make ns = R.make @@ Array.of_list ns
   let make_self_init () = R.make_self_init ()
   let split = R.split
 end

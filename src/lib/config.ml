@@ -4,7 +4,7 @@ type config =
   ; max_shrink_modify_attempts : int
   ; num_samples : int
   ; max_size : int
-  ; seed : int
+  ; seed : int list
   ; verbose : bool
   ; max_input_length : int
   }
@@ -17,7 +17,7 @@ let default =
   ; max_shrink_modify_attempts = 100
   ; num_samples = 300
   ; max_size = 100
-  ; seed = 12345
+  ; seed = [ 1; 23; 45 ]
   ; verbose = false
   ; max_input_length = 10_000
   }

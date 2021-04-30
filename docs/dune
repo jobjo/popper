@@ -1,0 +1,12 @@
+(rule
+ (targets tutorial.ml)
+ (deps tutorial.md)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ocaml-mdx pp %{deps}))))
+
+(executable
+ (name tutorial)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))

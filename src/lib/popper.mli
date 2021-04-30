@@ -56,6 +56,17 @@ module Comparator : sig
   val result : ok:'a t -> error:'e t -> ('a, 'e) result t
 end
 
+module Consumed : sig
+  (** {1 Types }*)
+
+  type t
+
+  (** {1 Functions} *)
+
+  (** [pp out t] pretty prints the given [t] using the formatter [out]. *)
+  val pp : Stdlib.Format.formatter -> t -> unit
+end
+
 module Sample : sig
   (** {1 Types }*)
 
@@ -135,8 +146,8 @@ module Sample : sig
   (** [bool] is a sample that produces [bool] values. *)
   val bool : bool t
 
-  (** [arrow s] is a sample that produces a function value. *)
-  val arrow : 'a t -> ('b -> 'a) t
+  (** [fn s] is a sample that produces a function value. *)
+  val fn : 'a t -> ('b -> 'a) t
 
   (** [char] is a sample that produces [char] values. *)
   val string : string t
@@ -295,17 +306,6 @@ module Sample : sig
   end
 end
 
-module Consumed : sig
-  (** {1 Types }*)
-
-  type t
-
-  (** {1 Functions} *)
-
-  (** [pp out t] pretty prints the given [t] using the formatter [out]. *)
-  val pp : Stdlib.Format.formatter -> t -> unit
-end
-
 module Proposition : sig
   (** {1 Types } *)
 
@@ -388,7 +388,7 @@ module Config : sig
 
   (** [seed s] is a configuration that sets the seed to be used when running
       tests. *)
-  val seed : int -> t
+  val seed : int list -> t
 
   (** [verbose] is a configuration that turns on verbose mode. That means that
       all logged values will be displayed for each test. *)

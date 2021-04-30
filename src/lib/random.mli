@@ -1,7 +1,7 @@
 module Seed : sig
   type t
 
-  val make : int -> t
+  val make : int list -> t
   val make_self_init : unit -> t
   val split : t -> t * t
 end

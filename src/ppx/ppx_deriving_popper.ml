@@ -154,7 +154,7 @@ and of_core_type_desc ~loc ~is_rec_type ~size exp =
     of_applied_type ~loc ~is_rec_type ~size ~name ts
   | Ptyp_arrow (_, _, t) ->
     let gen_exp = of_core_type ~is_rec_type ~size:[%expr size] t in
-    [%expr Popper.Sample.arrow [%e gen_exp]]
+    [%expr Popper.Sample.fn [%e gen_exp]]
   | Ptyp_tuple ts -> of_tuple ~is_rec_type ~loc ~size:[%expr size] ts Fun.id
   | Ptyp_alias (t, _) -> of_core_type ~is_rec_type ~size t
   | Ptyp_variant (row_fields, _, _) ->
