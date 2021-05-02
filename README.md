@@ -2,7 +2,9 @@
 
 >*In so far as a scientific statement speaks about reality, it must be
 > falsifiable; and in so far as it is not falsifiable, it does not speak about
-> reality.  (Karl Popper)*
+> reality.  
+
+(Kar Popper)
 
 *Popper* is an OCaml library that can be used for writing simple *unit-tests*
 as well as *property-based* ones. Its underlying design is inspired by the Python library
@@ -13,19 +15,19 @@ High-level features of Popper include:
 - A uniform API for defining unit and property-based tests.
 - Compositional design — tests and test suites can be nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.
-- Embedded shrinking - invariants that were used when constructing test data for property-based tests are always respected.
+- Embedded shrinking — invariants that were used when constructing test data for property-based tests are always respected.
 - Colorful output (sorry [Alcotest](https://github.com/mirage/alcotest), but couldn't resist the inspiration).
 - Support for line-number reporting, timing information and debugging. 
 
 ## Getting started
 
-- A [tutorial](docs/tutorial.md) for covering the various features.
+- Check out [this tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
 
-- Or, check out the examples in the [examples](examples) folder.
+- See examples in the [examples](examples) folder.
 
 ## An example
 
-Here's what the test output might look like:
+Here's what test output might look like:
 
 ![image](https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png)
 
@@ -85,26 +87,28 @@ TODO.
 
 ## Comparing with other libraries
 
-Popper was designed with to objectives in mind:
+Popper is designed with the following objectives in mind:
 
-1. Make it as seamless as possible to write property-based tests (for instance by using a ppx to derive custom sample functions).
+1. Make it as seamless as possible to write property-based tests — for instance by using a ppx to derive custom sample functions.
 2. Use embedded shrinking (ala [Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the need for writing *shrinkers* manually.
-
 
 The property based aspects overlap with the existing libraries [QCheck](https://github.com/c-cube/qcheck) and
 [Crowbar](https://github.com/stedolan/crowbar).
 
-Popper also supports writing simple unit tests and the
-ability to compose tests into suites. This API and the output is inspired by
-the unit testing library [Alcotest](https://github.com/mirage/alcotest).
+Popper also supports writing simple unit tests and the ability to compose
+tests into suites.  This API and the output is partly inspired by the unit
+testing library [Alcotest](https://github.com/mirage/alcotest).
 
 Here's a table comparing features across different OCaml testing libraries:
 
 
 | Library                                           | Test suites   | Property-based | Embeded shrinking | PPX generators | Fuzzying
 | --------------------------------------------------|:-------------:|:--------------:|:-----------------:|:--------------:|:---------:|
-| Popper                                            | ✅            | ✅              | ✅                | ✅             :| ❌ 
+| Popper                                            | ✅            | ✅              | ✅                | ✅             | ❌ 
 | [Alcotest](https://github.com/mirage/alcotest)    | ✅            | ❌              |                   | ❌             | 
 | [OUnit](https://github.com/gildor478/ounit)       | ✅            | ❌              |                   | ❌             | 
 | [QCheck](https://github.com/c-cube/qcheck)        | ✅            | ✅              |                   | ❌             |
 | [Crowbar](https://github.com/stedolan/crowbar)    | ❌            | ✅              | ❌                | ❌              | ✅  
+
+It might be possible to write some adaptors to be able to integrate with
+these libraries but nothing such exists at the moment.
