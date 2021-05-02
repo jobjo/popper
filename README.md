@@ -1,21 +1,35 @@
 # Popper
 
-*Popper* (after Karl) is an OCaml library that can be used for writing simple *unit-tests*
+>*In so far as a scientific statement speaks about reality, it must be
+> falsifiable; and in so far as it is not falsifiable, it does not speak about
+> reality.  (Karl Popper)*
+
+*Popper* is an OCaml library that can be used for writing simple *unit-tests*
 as well as *property-based* ones. Its underlying design is inspired by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
-The API for defining and running test suites also draws inspiration from
-existing OCaml testing libraries, in particular
-[Alcotest](https://github.com/mirage/alcotest),
-[OUnit](https://github.com/gildor478/ounit) and
-[QCheck](https://github.com/c-cube/qcheck).
+High-level features of Popper include:
 
-Here's an example of what the output looks like:
+- A uniform API for defining unit and property-based tests.
+- Compositional design — tests and test suites can be nested arbitrarily.
+- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.
+- Embedded shrinking - invariants that were used when constructing test data for property-based tests are always respected.
+- Colorful output (sorry [Alcotest](https://github.com/mirage/alcotest), but couldn't resist the inspiration).
+- Support for line-number reporting, timing information and debugging. 
+
+## Getting started
+
+- A [tutorial](docs/tutorial.md) for covering the various features.
+
+- Or, check out the examples in the [examples](examples) folder.
+
+## An example
+
+Here's what the test output might look like:
 
 ![image](https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png)
 
-
-It's generated from the following test-spec:
+It was generated from the following code:
 
 ```ocaml
 open Popper
@@ -37,22 +51,22 @@ let rec eval = function
 (* A simple unit test *)
 let test_hello_world =
   test @@ fun () ->
-  equal Comparator.string "hello world" (String.lowercase_ascii "Hello World")
+    equal Comparator.string "hello world" (String.lowercase_ascii "Hello World")
 
-(* Another unit test*)
+(* Another unit test *)
 let test_lit_true = test @@ fun () -> is_true (eval (Lit true) = true)
 
 (* A property-based test *)
 let test_false_ident_or =
   test @@ fun () ->
-  let* e = sample_exp in
-  is_true (eval e = eval (Or (Lit false, e)))
+    let* e = sample_exp in
+    is_true (eval e = eval (Or (Lit false, e)))
 
 (* Another property-based test *)
 let test_true_ident_and =
   test @@ fun () ->
-  let* e = Sample.with_log "e" pp_exp sample_exp in
-  is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
+    let* e = Sample.with_log "e" pp_exp sample_exp in
+    is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
 
 let suite =
   suite
@@ -65,16 +79,32 @@ let suite =
 let () = run suite
 ```
 
-The high-level features of the library are:
+## Contributing
 
-- A uniform API for defining unit-tests and property-based tests.
-- Compositional design — tests and test suites can be nested arbitrarily.
-- Comes with a `ppx` for automatically deriving `comparator` and `sample` functions for test data.
-- Embedded shrinking - invariants that were used when constructing test-cases for property-based tests are always respected.
-- Colorful output (yes, heavily inspired by [Alcosest](https://github.com/mirage/alcotest)).
-- Support for line-number reporting, timing information and debugging. 
+TODO.
 
-## Getting started
+## Comparing with other libraries
 
-Here a [tutorial](docs/tutorial.md) covering the basics getting-started steps.
-Also see examples in the [examples](examples) folder.
+Popper was designed with to objectives in mind:
+
+1. Make it as seamless as possible to write property-based tests (for instance by using a ppx to derive custom sample functions).
+2. Use embedded shrinking (ala [Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the need for writing *shrinkers* manually.
+
+
+The property based aspects overlap with the existing libraries [QCheck](https://github.com/c-cube/qcheck) and
+[Crowbar](https://github.com/stedolan/crowbar).
+
+Popper also supports writing simple unit tests and the
+ability to compose tests into suites. This API and the output is inspired by
+the unit testing library [Alcotest](https://github.com/mirage/alcotest).
+
+Here's a table comparing features across different OCaml testing libraries:
+
+
+| Library                                           | Test suites   | Property-based | Embeded shrinking | PPX generators | Fuzzying
+| --------------------------------------------------|:-------------:|:--------------:|:-----------------:|:--------------:|:---------:|
+| Popper                                            | ✅            | ✅              | ✅                | ✅             :| ❌ 
+| [Alcotest](https://github.com/mirage/alcotest)    | ✅            | ❌              |                   | ❌             | 
+| [OUnit](https://github.com/gildor478/ounit)       | ✅            | ❌              |                   | ❌             | 
+| [QCheck](https://github.com/c-cube/qcheck)        | ✅            | ✅              |                   | ❌             |
+| [Crowbar](https://github.com/stedolan/crowbar)    | ❌            | ✅              | ❌                | ❌              | ✅  
