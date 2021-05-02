@@ -1,25 +1,25 @@
 # Using Popper 
 
-In the following sections we'll look at how to get started with defining and
-running tests.
+In the following sections we'll look at how to get started using the Popper
+library for writing and running unit and property-based tests.
 
-## Hello World
+## Hello, World
 
-In order to use the library, you need to add a dependency on `popper`.
-Popper consists of two pars:
+In order to use the library, you need to add a dependency. Popper is
+split into two parts:
 
 - A library `popper` containing functions for building and executing tests.
 
-- A `ppx` part `ppx_deriving_popper` which allows you to derive useful
-*sampler* and *comparators* for custom data-types.
+- A library `ppx_deriving_popper` which allows you to derive functions
+for *sampling* and comparing test data.
 
-We'll cover the `ppx` in a bit, but for now it's enough to know that by
+We'll cover the `ppx` in a bit, but for now it's enough to note that by
 adding the preprocessor dependency on `ppx_deriving_popper`, the runtime
-library `popper` included as well.
+library `popper` is included as well.
 
 Currently also need need to add dependencies for deriving `show` and
-`ord` for your data types. Your dune file may look like the following:
-
+`ord` for your data types. Here's an example dune file defining a test
+that requires a file `run.ml` to be present:
 
 ```clojure
 (test
@@ -28,10 +28,9 @@ Currently also need need to add dependencies for deriving `show` and
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
 ```
 
-Here's a first example of how to define a simple unit test, verifying that
-that the function `List.rev` behaves as expected.  At least when applied on
-the list of integers `[1; 2; 3]`.
-
+As an example, here is a simple unit test that verifies that
+that the function `List.rev` behaves as expected when applied with
+the list `[1; 2; 3]`:
 
 ```ocaml 
 open Popper
@@ -49,9 +48,8 @@ PASS: 1/1 tests passed in 0.00s.
   ✓  Anonymous  Passed  0ms  
 ```
 
-
-The function `check` is for running a single (anonymous) test.  It has the
-following signature:
+The function `check` is for running a single (anonymous) test.  Its signature
+is:
 
 ```ocaml skip
 val check : ?⁠config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
@@ -61,7 +59,7 @@ As you can see, it takes a function that produces a value of type
 `Proposition.t Sample.t` and runs it.
 
 We'll talk more about *samples* in a bit.  The `Proposition.t` value is the
-result of the test, and is one of the following:
+result of the test, and can take on one of the following values:
 
 - `pass` — the test passed.
 - `fail` — the test failed.
@@ -72,7 +70,8 @@ The function `equal` is used for comparing two values using a given
 a pretty printer.  In this case we construct an `int list Comparator.t` value
 using the `list` combinator in the `Comparator` module.
 
-Let's see what happens when a test fails. Modifying the test slightly: 
+Let's see what happens when a test fails.  Modifying the example above
+slightly:
 
 ```ocaml
 let () =
@@ -80,7 +79,7 @@ let () =
     equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ]
 ```
 
-When run, it yields:
+This now yields:
 
 ```
 FAIL: 0/1 tests passed and 1 failed in 0.00s.
@@ -97,13 +96,14 @@ Fatal error: exception Popper.Popper_error
 ## Property-based tests
 
 A *property-based test* is one that, instead of verifying concrete instances,
-it verifies that a certain *property* holds for a large number sampled data.
+it confirms that a certain *property* holds for a large number sampled data.
 The technique was popularized by the Haskell library
 [QuickCheck](https://hackage.haskell.org/package/QuickCheck).
 
 In Popper, there is no fundamental difference between unit tests and property
-based tests. A simple example of the latter is a test that verifies that
-reversing a list twice results in the same list. It can be expressed as follows:
+based tests.  A concrete example is a test that verifies that reversing a
+list twice results in the same list.  Using Popper, it can be expressed as
+follows:
 
 ```ocaml
 open Sample.Syntax
@@ -122,36 +122,129 @@ PASS: 1/1 tests passed in 0.02s.
   ✓  Anonymous  Passed 300 samples  13ms  
 ```
 
-In the test, a binding `xs` that draws a sample list of integers is defined.
-The test returns a proposition that asserts that reversing xs twice results
-in the same list as `xs`.
+In the test, `xs` is a sample of list of integers.  The test returns a
+proposition that asserts states that reversing `xs` twice gives the
+same list back.
 
-The function returns in the `Sample.t` context, why we can use the `let*`
-syntax defined in the `Sample.Syntax` module in order to write this in a
-declarative way.
+The function returns in the `Sample.t` context.  The `let*` syntax defined in
+the `Sample.Syntax` module provides a convenient method for expressing this
+in a declarative way.
 
 As you can read from the output, when run, `check` evaluates the property
 multiple times (300 by default), by drawing different samples and checking
-the resulting proposition for each of them.  We'll soon take a look at what
-happens when a property fails.
+the resulting proposition for each of them.  To see what happens when a test
+fails, here's an example of a test for verifying that `List.sort` returns a
+sorted list, but where the condition does not account for lists containing
+duplicates:
 
-Note that although a property-based test such as the one above is run multiple
-times, a unit-test is only run once. How does the `check` function know 
-how to distinguish between the two? The difference is that a unit test does
-not consume any input used for generating sample data. Any property based
-test must consume some data for drawing samples. A value of type `a Sample.t`
-is really a parser that reads input from a stream and produces a value of
-type `a` where the value produced depends on the values in the input stream.
+
+```ocaml
+let rec is_sorted = function
+  | x :: y :: ys -> x < y && is_sorted (y :: ys)
+  | _ -> true
+
+let () =
+  check @@ fun () ->
+    let* xs = Sample.(list int) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
+```
+
+The function `is_true` is used for a proposition that states that the given
+condition is `true`.  If `false` is given, the proposition is the `fail`
+value.
+
+Running the test results in the following error:
+
+```
+FAIL: 0/1 tests passed and 1 failed in 0.15s.
+  
+  ✖  Anonymous  Failed after 14 samples  147ms  
+  
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed Anonymous after 14 samples and 104 shrinks.                                     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+    
+    Expected true but got false.
+  
+  
+Fatal error: exception Popper.Popper_error
+```
+
+Whenever a failing sample is encountered, the `run` function attempts to find
+a *smaller* counter example by shrinking the input stream.  However, it does
+not help much much as all we know is that the proposition failed because the
+boolean condition was `false`.  In order to actually see the drawn sample for
+which the condition `is_sorted` did not hold, we need to add some logging.
+The simplest way is to use the function `Sample.with_log`, which has the
+signature:
+
+
+```
+val with_log : string -> (Stdlib.Format.formatter -> 'a -> unit) -> 'a Sample.t -> 'a Sample.t
+```
+
+It takes a string value for the key, a pretty printer and a sampler and it returns
+a new `Sample.t` value that also records the sampled values.
+
+In order to get pretty printer for list, we can derive it using `[@@deriving
+show]`.  It's also possible to derive the sampler, which we'll look at later.
+For now:
+
+```ocaml
+type int_list = int list [@@deriving show]
+
+let () =
+  check @@ fun () ->
+    let* xs = Sample.(with_log "xs" pp_int_list (list int)) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
+```
+
+This yields:
+
+
+```
+FAIL: 0/1 tests passed and 1 failed in 0.16s.
+  
+  ✖  Anonymous  Failed after 14 samples  158ms  
+  
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed Anonymous after 14 samples and 104 shrinks.                                     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+    
+    Expected true but got false.
+  
+  Log:
+    
+    xs = [0; 0]
+    
+Fatal error: exception Popper.Popper_error
+```
+
+The log section displays the sample value `xs` for which the test failed. 
+
+Note that although a property-based test such as the one above is run
+multiple times, a unit-test is only run once.  How does the `check` function
+know how to distinguish between the two?  The answer is that the unit test
+does not consume any input used for generating sample data.  Any
+property-based test must consume some data for drawing (pseudo-random)
+samples.  A value of type `a Sample.t` is really a parser that reads input
+from a stream of numbers (`int32` values) and produces a result of type `a`.
+By varying the input stream we feed to the parser, we get different results
+back.
 
 ## Test suites
 
 The function `check` is convenient for quickly running individual tests but when
-working with multiple tests it's best to group them and run them together.
+working with multiple tests it's best to bundle and run them together.
 
-There are three essential functions you need to use:
+There are three essential functions you need to know about:
 
 - `test` for creating a test.
-- `suite` for naming and bundling tests together.
+- `suite` for naming and grouping tests together.
 - `run` for running a test (or a test suite).
 
 Their signatures are:
@@ -162,7 +255,7 @@ val suite : (string * Test.t) list -> Test.t
 val run : ?⁠config:Config.t -> Test.t -> unit
 ```
 
-Here's how  you can convert both examples from above to a suite and run it:
+Here's how you can combine the tests from above in a suite, and run it:
 
 ```ocaml
 let test_rev =
@@ -174,39 +267,99 @@ let test_rev_twice =
     let* xs = Sample.(list int) in
     equal Comparator.(list int) (List.rev (List.rev xs)) xs
 
-let rev_suite = suite [("Reverse", test_rev); ("Reverse twice", test_rev_twice)]
+let test_sort =
+  test @@ fun () ->
+    let* xs = Sample.(with_log "xs" pp_int_list (list int)) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
 
-let () = run rev_suite
+let tests =
+  suite 
+    [ ("Reverse", test_rev)
+    ; ("Reverse twice", test_rev_twice)
+    ; ("Sort", test_sort)
+    ]
+
+let () = run tests
 ```
 
-Hopefully the definitions are straight-forward.  There are two tests which
+Hopefully the definitions are straight-forward.  There are three tests which
 are defined using the function `test`. They are packed together via `suite`
 and executed with `run`.
 
 This results in the output:
 
 ```
-PASS: 2/2 tests passed in 0.01s.
+FAIL: 2/3 tests passed and 1 failed in 0.18s.
   
-  ✓  Reverse        Passed               0ms  
-  ✓  Reverse twice  Passed 300 samples  15ms  
+  ✓  Reverse        Passed                    0ms  
+  ✓  Reverse twice  Passed 300 samples       17ms  
+  ✖  Sort           Failed after 9 samples  168ms  
+  
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Sort' after 9 samples and 105 shrinks.                                         │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+    
+    Expected true but got false.
+  
+  Log:
+    
+    xs = [0; 0]
+    
+  
+Fatal error: exception Popper.Popper_error
 ```
 
-Note that the value `rev_suite` has the same type as `test_rev` and
-`test_rev_twice`, namely `Test.t`.  That means that test suites can be
-nested.
+Note that the value `tests` has the same type as `test_rev` ,
+`test_rev_twice`, and `test_sort`, namely `Test.t`.  That means that test
+suites may also be nested.  For instance, as in:
+
+```ocaml
+let rev_suite =
+  suite [ ("Simple list", test_rev); ("Reverse twice", test_rev_twice) ]
+
+let tests = suite [ ("Reverse", rev_suite); ("Sort", test_sort) ]
+
+let () = run tests
+```
+
+Which gives:
+
+
+```
+FAIL: 2/3 tests passed and 1 failed in 0.18s.
+  
+  ✓  Reverse -> Simple list    Passed                    0ms  
+  ✓  Reverse -> Reverse twice  Passed 300 samples       19ms  
+  ✖  Sort                      Failed after 9 samples  157ms  
+  
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Sort' after 9 samples and 105 shrinks.                                         │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+    
+    Expected true but got false.
+  
+  Log:
+    
+    xs = [0; 0]
+    
+
+Fatal error: exception Popper.Popper_error
+```
 
 ## Deriving samples
 
-For property-based tests we often want to be able to sample data of some
-arbitrary type and use the values for verifying some properties.  You have
-two options in that case:
+For property-based tests we sample data of some type and use the values for
+verifying properties.  You have two options in that case:
 
-1) Sample the data and define comparators manually.  
+1) Sample the data and define comparators manually (as in the above examples).
 2) Derive *sample* and *comparator* functions using the `ppx_deriving_popper` ppx.
 
-To take a concrete example, consider a simple data type `exp` for representing 
-boolean expression:
+For example, consider a simple data type, `exp`, for representing boolean
+expressions:
 
 ```ocaml skip
 type exp =
@@ -216,24 +369,27 @@ type exp =
   | Not of exp
 ```
 
-And an evaluation function `eval`, with the signature:
+Along with an evaluation function, `eval`, with a signature:
 
 
 ```ocaml skip
 val eval : exp -> bool
 ```
 
-What if we want to write a test that verifies that `Lit false` is the identity
-for `Or`? That is, for any expression `e`, the proposition: 
+What if we want to write a test that verifies that `Lit false` is the
+identity expression for `Or`?  That is, for any expression `e`, the
+proposition:
 
 ```ocaml skip
 eval e = eval (Or (Lit false, e))
 ```
 
+should evaluate to true.
+
 The problem is that we need to be able to sample `exp` values.  We'll cover
-how to do this manually later but the easiest way forward is to simply derive
-it.  All we need is to derive `popper` (which additionally requires deriving
-`ord` and `show` for the *comparator* part). The `ppx`s are added like so:
+how to do this manually later but the easiest way forward is to derive it.
+All we need is to add an attribute `[@@deriving .. ]`.  It also
+requires deriving `ord` and `show` for the *comparator* part:
 
 ```ocaml
 type exp =
@@ -245,7 +401,6 @@ type exp =
 ```
 
 At the preprocessing stage, the ppxs generate the additional functions:
-
 
 ```ocaml skip
 val pp_exp : Formatter.format -> exp -> unit (* from show *)
@@ -277,10 +432,7 @@ let test_or =
 let () = run test_or
 ```
 
-The function `is_true` is used for verifying that the given condition is `true`.
-
-This time the property fails and after 5 succesful samples. That is a counter-example
-that resulted in the proposition failing, was found.
+The test now fails and after 5 successful samples:
 
 
 ```
@@ -297,13 +449,8 @@ FAIL: 0/1 tests passed and 1 failed in 0.00s.
     Expected true but got false.
 ```
 
-Whenever a failing sample is encountered, the `run` function attempts to find
-a *smaller* counter example by shrinking the input.  More on that later but
-for now you may note that it doesn't help much as all we know is that the
-proposition failed because the boolean expression evaluated to `false`.  In
-order to actually see what expression was generated, we need to add some
-logging. The simplest way is to use the function `Sample.with_log`, as in:
-
+Again, in order to actually view the expression that was generated in order
+for the proposition to fail, we need to add logging:
 
 ```ocaml skip
 let test_or =
@@ -340,6 +487,36 @@ FAIL: 0/1 tests passed and 1 failed in 0.00s.
     e = (Lit true)
 ```
 
+### Combining propositions
+
+Just like tests can be composed into test suites, propositions can also be 
+grouped. There are two functions:
+
+
+```ocaml skip
+val all : Proposition.t Sample.t list -> Proposition.t Sample.t
+
+val any : Proposition.t Sample.t list -> Proposition.t Sample.t
+```
+
+They both take a list of propositions (for convenience `Proposition.t
+Sample.t` values) and collapse them into a single proposition. As the names
+suggest `all` requires all propositions to pass, and `any` requires at least
+one to do so, in order to return a passing result.
+
+Here's an example:
+
+
+```ocaml
+let test_id =
+  test @@ fun () ->
+    let* e = sample_exp in
+    all
+      [ is_true (eval e = eval (Or (Lit false, e)))
+      ; is_true (eval e = eval (And (Lit true, e)))
+      ]
+```
+
 ## Configurations
 
 As you may have noticed, the functions `test` and `run` take an optional
@@ -350,10 +527,9 @@ lowest level, i.e. the ones passed to `test` take precedence.
 
 Here are a few examples of what can be configured:
 
-- `num_samples` — for specifying the number of samples to be drawn for property-based tests.
+- `num_samples` — for specifying the number of samples to be drawn for property-based tests. The default value is 300.
 - `verbose` — whether or not the *logged* values should be displayed for each sample.
-- `max_size` — this is a parameter that controls the maximum size of data-structures like a lists. It defaults to 100.
-
+- `max_size` — this is a parameter that controls the maximum size parameter for data-structures like a lists. It defaults to 100.
 
 For the complete list, see the module `Popper.Config`.
 
@@ -395,7 +571,8 @@ Anonymous
   ...
 ```
 
-Here's how to also change the number of samples to be tested:
+Also changing the number of samples to be tested can be done by combining `Config.t` values
+with the `Config.all` combinator:
 
 ```ocaml
 let test_or =
@@ -470,13 +647,13 @@ end
 ```
 
 Now say you would like to write a test for a property that states that
-inverting the image twice results in the same image when rendered.  It is not
-possible to derive a sample function for the abstract type `Image.t`.
-Further, even if the type was exposed we'd need to satisfy some constraints
-about the `width` and the `height` parameters.  However, writing the sample
-function yourself is straight forward — it's just a matter of generating the
-different parameters.  Here is a version where the width and height varies
-between `0` and `15`:
+inverting the image twice results in the same image when rendered.  However,
+it is not possible to derive a sample function for the abstract type
+`Image.t`.  Further, even if the type had been exposed we'd need to satisfy
+some invariants for the `width` and the `height` parameters.  Luckily,
+writing the sample function yourself is straight forward — it's just a matter
+of generating the different parameters.  Here is a version where the width
+and height varies between `0` and `15`:
 
 
 ```ocaml
@@ -491,7 +668,7 @@ let sample_img =
   Sample.return (Image.make ~width ~height get_pixel)
 ```
 
-And here is how to use the function for creating a 
+And here is how to use the function for defining a test:
 
 ```ocaml skip
 let test_invert_twice =
@@ -507,7 +684,6 @@ let () = run suite
 ```
 
 Running the test reveals a bug:
-
 
 ```
 FAIL: 0/1 tests passed and 1 failed in 0.01s.
@@ -528,13 +704,14 @@ Fatal error: exception Popper.Popper_error
 
 # A note about shrinking
 
-An important feature of Popper is that shrinking is embedded. What it means is that
+An important feature of Popper is that shrinking is *embedded*. What it means is that
 when the `run` or `check` function finds a counter-example and attempts to shrink it,
-the invariants that were used when constructing the sample are always respected.
+the invariants that were used when constructing the samples are always respected.
 In the example above, with the `Image.t` sample, it means that shrinking will never lead
-to say a `height` value that is negative.
+to, say a `height` value that is negative.
 
-The reason it works is that samplers (`Sample.t` values) are are really
-functions that parses an input stream.  Shrinking is performed by attempting
-to simplify the input rather than the parsed values.  Simplifying the input
-is done either by removing some sections or replacing it with smaller values.
+As mentioned above, a value of type `a Sample.t` is really a parser from an
+input stream to an `a` value.  Shrinking is performed by attempting to
+simplify the input rather than modifying the parsed values themselves.
+Simplifying the input is done either by removing some sections or replacing
+it with smaller values.
