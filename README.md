@@ -89,7 +89,7 @@ TODO.
 
 Popper is designed with the following objectives in mind:
 
-1. Make it as seamless as possible to write property-based tests — for instance by using a ppx to derive custom sample functions.
+1. Make it as seamless as possible to write property-based tests — for instance by using a ppx to derive *sample* functions for custom data-types.
 2. Use embedded shrinking (ala [Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the need for writing *shrinkers* manually.
 
 The property based aspects overlap with the existing libraries [QCheck](https://github.com/c-cube/qcheck) and
