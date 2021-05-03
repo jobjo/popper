@@ -42,11 +42,8 @@ let () =
 
 When run with `dune runtest`, it produces the following output:
 
-```
-PASS: 1/1 tests passed in 0.00s.
-  
-  ✓  Anonymous  Passed  0ms  
-```
+![image](https://user-images.githubusercontent.com/820478/116917024-04042200-ac46-11eb-950b-dafe2575a559.png)
+
 
 The function `check` is for running a single (anonymous) test.  Its signature
 is:
@@ -73,7 +70,7 @@ using the `list` combinator in the `Comparator` module.
 Let's see what happens when a test fails.  Modifying the example above
 slightly:
 
-```ocaml
+```ocaml 
 let () =
   check @@ fun () ->
     equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ]
@@ -81,17 +78,8 @@ let () =
 
 This now yields:
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.00s.
-  
-  ✖  Anonymous  Failed  0ms  
-  
-  Reason:
-    
-    [3,2,1] <> [2,3,1]
+![image](https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png)
 
-Fatal error: exception Popper.Popper_error
-```
 
 ## Property-based tests
 
@@ -105,7 +93,8 @@ based tests.  A concrete example is a test that verifies that reversing a
 list twice results in the same list.  Using Popper, it can be expressed as
 follows:
 
-```ocaml
+```ocaml 
+open Popper
 open Sample.Syntax
 
 let () =
@@ -116,11 +105,8 @@ let () =
 
 Which yields:
 
-```
-PASS: 1/1 tests passed in 0.02s.
-  
-  ✓  Anonymous  Passed 300 samples  13ms  
-```
+![image](https://user-images.githubusercontent.com/820478/116917398-842a8780-ac46-11eb-8bfc-154cef57529a.png)
+
 
 In the test, `xs` is a sample of list of integers.  The test returns a
 proposition that asserts states that reversing `xs` twice gives the
@@ -155,22 +141,7 @@ value.
 
 Running the test results in the following error:
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.15s.
-  
-  ✖  Anonymous  Failed after 14 samples  147ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed Anonymous after 14 samples and 104 shrinks.                                     │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    Expected true but got false.
-  
-  
-Fatal error: exception Popper.Popper_error
-```
+![image](https://user-images.githubusercontent.com/820478/116917535-ade3ae80-ac46-11eb-8a92-7b0d10a67fd8.png)
 
 Whenever a failing sample is encountered, the `run` function attempts to find
 a *smaller* counter example by shrinking the input stream.  However, it does
@@ -203,26 +174,8 @@ let () =
 
 This yields:
 
+![image](https://user-images.githubusercontent.com/820478/116917809-0c109180-ac47-11eb-8096-1896a1d832f1.png)
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.16s.
-  
-  ✖  Anonymous  Failed after 14 samples  158ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed Anonymous after 14 samples and 104 shrinks.                                     │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    Expected true but got false.
-  
-  Log:
-    
-    xs = [0; 0]
-    
-Fatal error: exception Popper.Popper_error
-```
 
 The log section displays the sample value `xs` for which the test failed. 
 
@@ -288,28 +241,8 @@ and executed with `run`.
 
 This results in the output:
 
-```
-FAIL: 2/3 tests passed and 1 failed in 0.18s.
-  
-  ✓  Reverse        Passed                    0ms  
-  ✓  Reverse twice  Passed 300 samples       17ms  
-  ✖  Sort           Failed after 9 samples  168ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed `Sort' after 9 samples and 105 shrinks.                                         │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+![image](https://user-images.githubusercontent.com/820478/116917989-411ce400-ac47-11eb-808c-3e062331e45a.png)
 
-  Reason:
-    
-    Expected true but got false.
-  
-  Log:
-    
-    xs = [0; 0]
-    
-  
-Fatal error: exception Popper.Popper_error
-```
 
 Note that the value `tests` has the same type as `test_rev` ,
 `test_rev_twice`, and `test_sort`, namely `Test.t`.  That means that test
@@ -326,29 +259,8 @@ let () = run tests
 
 Which gives:
 
+![image](https://user-images.githubusercontent.com/820478/116918131-6d386500-ac47-11eb-95c6-bc518f039952.png)
 
-```
-FAIL: 2/3 tests passed and 1 failed in 0.18s.
-  
-  ✓  Reverse -> Simple list    Passed                    0ms  
-  ✓  Reverse -> Reverse twice  Passed 300 samples       19ms  
-  ✖  Sort                      Failed after 9 samples  157ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed `Sort' after 9 samples and 105 shrinks.                                         │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    Expected true but got false.
-  
-  Log:
-    
-    xs = [0; 0]
-    
-
-Fatal error: exception Popper.Popper_error
-```
 
 ## Deriving samples
 
@@ -423,36 +335,25 @@ let rec eval = function
 Using the `sample_exp` function, the test is straight forward:
 
 
-```ocaml skip
+```ocaml
 let test_or =
   test @@ fun () ->
     let* e = sample_exp in
     is_true (eval e = eval (Or(Lit false, e)))
 
 let () = run test_or
+
 ```
 
 The test now fails and after 5 successful samples:
 
+![image](https://user-images.githubusercontent.com/820478/116918459-d324ec80-ac47-11eb-829d-cc854a55e307.png)
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.00s.
-  
-  ✖  Anonymous  Failed after 5 samples  2ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed Anonymous after 5 samples and 7 shrinks.                                        │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    Expected true but got false.
-```
 
 Again, in order to actually view the expression that was generated in order
 for the proposition to fail, we need to add logging:
 
-```ocaml skip
+```ocaml
 let test_or =
   test @@ fun () ->
     let* e = Sample.with_log "e" pp_exp sample_exp in
@@ -468,24 +369,8 @@ pretty-printer for `exp` values.  The function `pp_exp` is generated from the
 When running the test, you now also see the logged values in the output for the
 failing test:
 
+![image](https://user-images.githubusercontent.com/820478/116918579-fea7d700-ac47-11eb-8abd-1ce99315ecf1.png)
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.00s.
-  
-  ✖  Anonymous  Failed after 5 samples  2ms
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed Anonymous after 5 samples and 7 shrinks.                                        │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    Expected true but got false.
-  
-  Log:
-    
-    e = (Lit true)
-```
 
 ### Combining propositions
 
@@ -547,49 +432,25 @@ let () = run test_or
 
 You now see what all the drawn expression samples look like:
 
-```
-Anonymous
-  
-  Sample 1:
-    
-    e = (Lit false)
-  
-  ...
-  
-  Sample 6:
-    
-    e
-      =
-      (And (
-         (And ((Lit true),
-            (And ((Lit false), (Lit false))))),
-         (Or (
-            (Not
-               (And ((Lit true), (Lit false)))),
-            (And ((Lit false), (Lit false)))))
-         ))
-  ...
-```
+![image](https://user-images.githubusercontent.com/820478/116918839-53e3e880-ac48-11eb-97cf-4a91c85b3189.png)
+
 
 Also changing the number of samples to be tested can be done by combining `Config.t` values
 with the `Config.all` combinator:
 
 ```ocaml
-let test_or =
-  test ~config:Config.(all [verbose; num_samples 1000]) @@ fun () ->
+let test_not =
+  let config = Config.(all [verbose; num_samples 1000]) in
+  test ~config @@ fun () ->
     let* e = Sample.with_log "e" pp_exp sample_exp in
-    is_true (eval e = eval (Or(Lit false, e)))
+    is_true (not (eval e) = eval (Not e))
 
 let () = run test_or
 ```
 
 The output confirms that the number of samples considered is now 1000:
 
-```
-PASS: 1/1 tests passed in 0.05s.
-  
-  ✓  Anonymous  Passed 1000 samples  47ms  
-```
+![image](https://user-images.githubusercontent.com/820478/116919592-66aaed00-ac49-11eb-97dd-ccac8f823e59.png)
 
 ## Custom samples
 
@@ -670,7 +531,7 @@ let sample_img =
 
 And here is how to use the function for defining a test:
 
-```ocaml skip
+```ocaml
 let test_invert_twice =
   test @@ fun () ->
     let* img = sample_img in
@@ -685,22 +546,7 @@ let () = run suite
 
 Running the test reveals a bug:
 
-```
-FAIL: 0/1 tests passed and 1 failed in 0.01s.
-  
-  ✖  Invert twice  Failed after 1 sample  10ms  
-  
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed `Invert twice' after 1 sample and 12 shrinks.                                   │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-
-  Reason:
-    
-    -  <> b 
-  
-  
-Fatal error: exception Popper.Popper_error
-```
+![image](https://user-images.githubusercontent.com/820478/116918839-53e3e880-ac48-11eb-97cf-4a91c85b3189.png)
 
 # A note about shrinking
 

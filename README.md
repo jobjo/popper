@@ -105,9 +105,9 @@ Here's a table comparing features across different OCaml testing libraries:
 | Library                                           | Test suites   | Property-based | Embeded shrinking | PPX generators | Fuzzying
 | --------------------------------------------------|:-------------:|:--------------:|:-----------------:|:--------------:|:---------:|
 | Popper                                            | ✅            | ✅              | ✅                | ✅             | ❌ 
-| [Alcotest](https://github.com/mirage/alcotest)    | ✅            | ❌              |                   | ❌             | 
-| [OUnit](https://github.com/gildor478/ounit)       | ✅            | ❌              |                   | ❌             | 
-| [QCheck](https://github.com/c-cube/qcheck)        | ✅            | ✅              |                   | ❌             |
+| [Alcotest](https://github.com/mirage/alcotest)    | ✅            | ❌              | -                 | ❌             | -
+| [OUnit](https://github.com/gildor478/ounit)       | ✅            | ❌              | -                 | ❌             | - 
+| [QCheck](https://github.com/c-cube/qcheck)        | ✅            | ✅              | ❌                | ❌             | ❌
 | [Crowbar](https://github.com/stedolan/crowbar)    | ❌            | ✅              | ❌                | ❌              | ✅  
 
 It might be possible to write some adaptors to be able to integrate with
