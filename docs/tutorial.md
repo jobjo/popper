@@ -3,7 +3,7 @@
 In the following sections we'll look at how to get started using the Popper
 library for writing and running unit and property-based tests.
 
-## Hello, World
+## Adding the dependencies
 
 In order to use the library, you need to add a dependency. Popper is
 split into two parts:
@@ -27,6 +27,8 @@ that requires a file `run.ml` to be present:
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
 ```
+
+## Unit tests
 
 As an example, here is a simple unit test that verifies that
 that the function `List.rev` behaves as expected when applied with
