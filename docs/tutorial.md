@@ -374,7 +374,7 @@ failing test:
 ![image](https://user-images.githubusercontent.com/820478/116918579-fea7d700-ac47-11eb-8abd-1ce99315ecf1.png)
 
 
-### Combining propositions
+## Combining propositions
 
 Just like tests can be composed into test suites, propositions can also be 
 grouped. There are two functions:
@@ -550,7 +550,7 @@ Running the test reveals a bug:
 
 ![image](https://user-images.githubusercontent.com/820478/116918839-53e3e880-ac48-11eb-97cf-4a91c85b3189.png)
 
-# A note about shrinking
+## A note about shrinking
 
 An important feature of Popper is that shrinking is *embedded*. What it means is that
 when the `run` or `check` function finds a counter-example and attempts to shrink it,
