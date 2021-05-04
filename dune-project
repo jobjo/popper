@@ -27,7 +27,7 @@
  (depends
   pringo
   (ocaml
-   (>= 4.08.1))
+   (>= 4.09.1))
   dune))
 
 (package
@@ -40,5 +40,5 @@
   ppx_deriving
   popper
   (ocaml
-   (>= 4.08.1))
+   (>= 4.09.1))
   dune))
