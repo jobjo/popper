@@ -2,14 +2,16 @@
 
 (generate_opam_files true)
 
+(name popper)
+
+(source
+ (github jobjo/popper))
+
 (authors "Joel Bjornson <joel.bjornson@gmail.com>")
 
 (license ISC)
 
 (maintainers "Joel Bjornson <joel.bjornson@gmail.com>")
-
-(source
- (github jobjo/popper))
 
 (bug_reports "https://github.com/jobjo/popper/issues")
 
@@ -19,8 +21,10 @@
 
 (package
  (name popper)
- (synopsis "Testing in the spirit of Karl Popper")
- (description "An OCaml library for unit and property-based testing.")
+ (synopsis
+  "Poperty-based testing: A testing library in the spirit of Karl Popper")
+ (description
+  "Popper is an OCaml library for writing regular unit tests as well as and property-based tests. The design in inspired by the Python library Hypothesis.")
  (depends
   pringo
   (ocaml
@@ -29,11 +33,13 @@
 
 (package
  (name ppx_deriving_popper)
- (synopsis "A ppx for deriving samplers and comparators")
+ (synopsis
+  "A ppx for deriving sample and comparator functions to be used with Popper")
  (description
   "This ppx derives popper sampler and comparator functions for custom data types")
  (depends
   ppx_deriving
+  popper
   (ocaml
    (>= 4.08.1))
   dune))
