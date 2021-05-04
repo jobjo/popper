@@ -1,8 +1,10 @@
 # Popper
 
-> In so far as a scientific statement speaks about reality, it must be
+[![Main workflow](https://github.com/jobjo/popper/workflows/Main%20workflow/badge.svg?branch=main)](https://github.com/jobjo/popper/actions)
+
+> *In so far as a scientific statement speaks about reality, it must be
 > falsifiable; and in so far as it is not falsifiable, it does not speak about
-> reality.
+> reality*.
 
 (Kar Popper)
 

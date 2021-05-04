@@ -33,7 +33,6 @@
  (description
   "This ppx derives popper sampler and comparator functions for custom data types")
  (depends
-  popper
   ppx_deriving
   (ocaml
    (>= 4.08.1))
