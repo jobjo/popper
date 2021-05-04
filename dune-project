@@ -21,10 +21,9 @@
 
 (package
  (name popper)
- (synopsis
-  "Poperty-based testing: A testing library in the spirit of Karl Popper")
+ (synopsis "An OCaml testing library in the spirit of Karl Popper")
  (description
-  "Popper is an OCaml library for writing regular unit tests as well as and property-based tests. The design in inspired by the Python library Hypothesis.")
+  "Popper is an OCaml library for writing regular unit tests as well as property-based tests. The design in inspired by the Python library Hypothesis.")
  (depends
   pringo
   (ocaml
@@ -36,7 +35,7 @@
  (synopsis
   "A ppx for deriving sample and comparator functions to be used with Popper")
  (description
-  "This ppx derives popper sampler and comparator functions for custom data types")
+  "This ppx derives popper sampler and comparator functions for custom data types.")
  (depends
   ppx_deriving
   popper

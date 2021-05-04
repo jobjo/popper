@@ -15,17 +15,16 @@ as well as *property-based* ones. Its underlying design is inspired by the Pytho
 High-level features of Popper include:
 
 - A uniform API for defining unit and property-based tests.
-- Compositional design — tests and test suites can be nested arbitrarily.
-- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.
-- Embedded shrinking — invariants that were used when constructing test data for property-based tests are always respected.
-- Colorful output (sorry [Alcotest](https://github.com/mirage/alcotest), but couldn't resist the inspiration).
-- Support for line-number reporting, timing information and debugging. 
+- Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
+- Compositional design — tests may be bundled and nested arbitrarily.
+- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  - Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist getting inspiration).
+- Supports line-number reporting, timing information and logging.
 
 ## Getting started
 
-- Check out [this tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
+- See [this tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
 
-- See examples in the [examples](examples) folder.
+- Or, checkout the examples in the [examples](examples) folder.
 
 ## An example
 
@@ -46,6 +45,7 @@ type exp =
   | Not of exp
 [@@deriving show, ord, popper]
 
+(* A buggy evaluator function *)
 let rec eval = function
   | Lit b -> b
   | And (e1, e2) -> eval e1 || eval e2
