@@ -76,6 +76,11 @@ module Seq = struct
       | Seq.Nil -> Nil
       | Cons (x, xs) -> Cons (x, take (n - 1) xs)
 
+  let rec append xs ys () =
+    match xs () with
+    | Seq.Nil -> ys ()
+    | Cons (x, next) -> Seq.Cons (x, append next ys)
+
   let rec drop n xs () =
     match xs () with
     | xs when n = 0 -> xs

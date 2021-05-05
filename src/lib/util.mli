@@ -23,4 +23,10 @@ module Seq : sig
   val take : int -> 'a Seq.t -> 'a Seq.t
   val drop : int -> 'a Seq.t -> 'a Seq.t
   val unfold : ('a -> ('b * 'a) option) -> 'a -> unit -> 'b Seq.node
+
+  val append
+    :  (unit -> 'a Seq.node)
+    -> (unit -> 'a Seq.node)
+    -> unit
+    -> 'a Seq.node
 end

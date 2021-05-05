@@ -24,7 +24,7 @@ let make_seq ~max_length ~size =
 
 let of_seq ~size data =
   let zeros = Util.Seq.unfold (fun _ -> Some (0l, ())) () in
-  let data = Seq.append data zeros in
+  let data = Util.Seq.append data zeros in
   { size; data }
 
 let of_list ~size xs = of_seq ~size (List.to_seq xs)
