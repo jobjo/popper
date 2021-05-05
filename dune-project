@@ -1,8 +1,44 @@
 (lang dune 2.8)
 
-(package
- (name popper))
+(generate_opam_files true)
+
+(name popper)
+
+(source
+ (github jobjo/popper))
+
+(authors "Joel Bjornson <joel.bjornson@gmail.com>")
+
+(license ISC)
+
+(maintainers "Joel Bjornson <joel.bjornson@gmail.com>")
+
+(bug_reports "https://github.com/jobjo/popper/issues")
+
+(homepage "https://github.com/jobjo/popper/issues")
+
+(documentation "https://github.com/jobjo/popper/issues")
 
 (package
- (name ppx_deriving_popper))
-(using mdx 0.1)
+ (name popper)
+ (synopsis "An OCaml testing library in the spirit of Karl Popper")
+ (description
+  "Popper is an OCaml library for writing regular unit tests as well as property-based tests. The design in inspired by the Python library Hypothesis.")
+ (depends
+  pringo
+  (ocaml
+   (>= 4.09.1))
+  dune))
+
+(package
+ (name ppx_deriving_popper)
+ (synopsis
+  "A ppx for deriving sample and comparator functions to be used with Popper")
+ (description
+  "This ppx derives popper sampler and comparator functions for custom data types.")
+ (depends
+  ppx_deriving
+  popper
+  (ocaml
+   (>= 4.09.1))
+  dune))

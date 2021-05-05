@@ -15,10 +15,18 @@ end
 
 module List : sig
   val head_opt : 'a list -> 'a option
+  val concat_map : ('a -> 'b list) -> 'a list -> 'b list
 end
 
 module Seq : sig
   val head_tail_exn : 'a Seq.t -> 'a * 'a Seq.t
   val take : int -> 'a Seq.t -> 'a Seq.t
   val drop : int -> 'a Seq.t -> 'a Seq.t
+  val unfold : ('a -> ('b * 'a) option) -> 'a -> unit -> 'b Seq.node
+
+  val append
+    :  (unit -> 'a Seq.node)
+    -> (unit -> 'a Seq.node)
+    -> unit
+    -> 'a Seq.node
 end

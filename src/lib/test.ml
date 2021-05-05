@@ -23,7 +23,7 @@ let run ?(config = Config.default) ts =
   let rec flatten = function
     | Single res -> [ (None, res) ]
     | Suite ts ->
-      List.concat_map
+      Util.List.concat_map
         (fun (name1, test) ->
           List.map
             (fun (name2, res) ->

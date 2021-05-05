@@ -51,6 +51,15 @@ module List = struct
   let head_opt = function
     | [] -> None
     | x :: _ -> Some x
+
+  let concat_map f l =
+    let rec aux f acc = function
+      | [] -> List.rev acc
+      | x :: l ->
+        let xs = f x in
+        aux f (List.rev_append xs acc) l
+    in
+    aux f [] l
 end
 
 module Seq = struct
@@ -67,9 +76,19 @@ module Seq = struct
       | Seq.Nil -> Nil
       | Cons (x, xs) -> Cons (x, take (n - 1) xs)
 
+  let rec append xs ys () =
+    match xs () with
+    | Seq.Nil -> ys ()
+    | Cons (x, next) -> Seq.Cons (x, append next ys)
+
   let rec drop n xs () =
     match xs () with
     | xs when n = 0 -> xs
     | Seq.Nil -> Nil
     | Cons (_, xs) -> drop (n - 1) xs ()
+
+  let rec unfold f u () =
+    match f u with
+    | None -> Seq.Nil
+    | Some (x, u') -> Cons (x, unfold f u')
 end

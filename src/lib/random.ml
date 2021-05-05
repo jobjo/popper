@@ -25,7 +25,7 @@ let generate ~init f =
       let (x, t), s = run seed r in
       Some (x, (s, t))
     in
-    let seq = Seq.unfold accum (s1, init) in
+    let seq = Util.Seq.unfold accum (s1, init) in
     (seq, s2))
 
 let bind { run } f =
