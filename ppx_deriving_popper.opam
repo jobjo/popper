@@ -13,7 +13,7 @@ bug-reports: "https://github.com/jobjo/popper/issues"
 depends: [
   "ppx_deriving"
   "popper"
-  "ocaml" {>= "4.08.1"}
+  "ocaml" {>= "4.09.1"}
   "dune" {>= "2.8"}
   "odoc" {with-doc}
 ]
