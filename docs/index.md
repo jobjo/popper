@@ -15,21 +15,16 @@ High-level features of Popper include:
 - Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration here).
 - Support for line-number reporting, timing information and logging.
 
-!!! warning
-
-    The project is still at an early alpha-stage and is to be used at your own
-    risk.
-
 ## Learn
 
-- See the [getting started](getting_started) section for a step by step introduction.
+- Check out the [getting started](getting_started) section for a step by step introduction.
 - Take a look at some examples in the [examples](https://github.com/jobjo/popper/examples) folder.
-- Browse the [API docs](api/index.html).
-- Checkout the [source repo](https://github.com/jobjo/popper).
+- Browse the [API docs](https://github.com/jobjo/popper/api/index.html).
+- View the [source repository](https://github.com/jobjo/popper/api/index.html).
 
 ## Show me an example
 
-Here's what test output might look like:
+Here's what some test output might look like:
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png" />
