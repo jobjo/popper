@@ -38,7 +38,7 @@ primitive value.
 Here's a high-level depiction of what is involved in running a test:
 
 <p align="center">
-<img width="75%" src="/img/testing.svg"/>
+<img width="75%" src="../img/testing.svg"/>
 </p>
 
 All the numbers consumed from the input stream are recorded and *tagged* in
@@ -49,7 +49,7 @@ shrinking the leaves. The tree can be collapsed into a flat structure and
 converted back to a new input-stream, which in turn is fed to the sampler.
 
 <p align="center">
-<img width="75%" src="/img/shrinking.svg"/>
+<img width="75%" src="../img/shrinking.svg"/>
 </p>
 
 ## An example
