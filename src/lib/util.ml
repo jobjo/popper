@@ -92,3 +92,11 @@ module Seq = struct
     | None -> Seq.Nil
     | Some (x, u') -> Cons (x, unfold f u')
 end
+
+module Timer = struct
+  let time_it f =
+    let start = Unix.gettimeofday () in
+    let res = f () in
+    let stop = Unix.gettimeofday () in
+    (res, stop -. start)
+end

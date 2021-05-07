@@ -41,15 +41,9 @@ let map f { run } =
 
 let delayed f = make (fun seed -> run seed @@ f ())
 
-let time f x =
-  let start = Unix.gettimeofday () in
-  let res = f x in
-  let stop = Unix.gettimeofday () in
-  (res, stop -. start)
-
 let timed { run } =
   make (fun seed ->
-    let (x, s), t = time run seed in
+    let (x, s), t = Util.Timer.time_it @@ fun () -> run seed in
     ((x, t), s))
 
 let pair r1 r2 = bind r1 (fun x -> bind r2 (fun y -> return (x, y)))

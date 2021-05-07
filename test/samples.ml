@@ -205,6 +205,19 @@ let record_with_list_length_dist =
     (fun { zs; _ } -> zs)
     t1_sample
 
+let manual_with_list_length_dist =
+  let sample =
+    let* xs = Sample.(list int) in
+    let* ys = Sample.(list int) in
+    let* zs = Sample.(list int) in
+    Sample.return (xs, ys, zs)
+  in
+  gen_dist_test
+    (fun (xs, _, _) -> xs)
+    (fun (_, ys, _) -> ys)
+    (fun (_, _, zs) -> zs)
+    sample
+
 let suite =
   suite
     [ ("Int range", int_range)
@@ -222,4 +235,5 @@ let suite =
     ; ("Record list length dist", record_with_list_length_dist)
     ; ("Derived list length dist", derived_tuple_with_list_length_dist)
     ; ("Tuple list length dist", tuple_with_list_length_dist)
+    ; ("Manual list length dist", manual_with_list_length_dist)
     ]

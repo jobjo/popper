@@ -30,3 +30,7 @@ module Seq : sig
     -> unit
     -> 'a Seq.node
 end
+
+module Timer : sig
+  val time_it : (unit -> 'a) -> 'a * float
+end
