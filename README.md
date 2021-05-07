@@ -9,28 +9,32 @@
 (Kar Popper)
 
 *Popper* is an OCaml library that can be used for writing simple *unit-tests*
-as well as *property-based* ones. Its underlying design is inspired by the Python library
-[Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
+as well as *property-based* ones. Its underlying design is inspired by the
+Python library [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
 High-level features of Popper include:
 
-- A uniform API for defining unit and property-based tests.
+- A uniform API for defining regular unit and property-based tests.
 - Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
-- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  - Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist getting inspiration).
-- Supports line-number reporting, timing information and logging.
+- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
+- Deterministic (and reproducible) results.
+- Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration here).
+- Support for line-number reporting, timing information and logging.
 
 ## Getting started
 
-- See [this tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
-
+- See this [tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
 - Or, checkout the examples in the [examples](examples) folder.
+- Browse the [API docs](docs/api).
 
-## An example
+## Show me an example
 
 Here's what test output might look like:
 
-![image](https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png" />
+</p>
 
 It was generated from the following code:
 
@@ -85,21 +89,26 @@ let () = run suite
 
 ## Contributing
 
-TODO.
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Comparing with other libraries
 
 Popper is designed with the following objectives in mind:
 
-1. Make it as seamless as possible to write property-based tests — for instance by using a ppx to derive *sample* functions for custom data-types.
-2. Use embedded shrinking (ala [Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the need for writing *shrinkers* manually.
+1. Make it as seamless as possible to write property-based tests — for instance
+by using a ppx to derive *sample* functions for custom data-types.  
 
-The property based aspects overlap with the existing libraries [QCheck](https://github.com/c-cube/qcheck) and
+2. Use embedded shrinking (ala
+[Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the
+need for writing *shrinkers* manually.
+
+The property-based aspects overlap with the OCaml libraries
+[QCheck](https://github.com/c-cube/qcheck) and
 [Crowbar](https://github.com/stedolan/crowbar).
 
-Popper also supports writing simple unit tests and the ability to compose
-tests into suites.  This API and the output is partly inspired by the unit
-testing library [Alcotest](https://github.com/mirage/alcotest).
+Popper also supports writing simple unit tests and the ability to compose tests
+into suites.  This API and the output is partly inspired by the testing
+library [Alcotest](https://github.com/mirage/alcotest).
 
 Here's a table comparing features across different OCaml testing libraries:
 
