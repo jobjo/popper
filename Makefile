@@ -12,6 +12,10 @@ format:
 
 doc: test
 	dune build @doc
+	mkdocs build
+	cp -r _build/default/_doc/_html site/api
+	git checkout gh-pages
+	cp -r site/* ./
+	git commit -am "Latest docs"
 
-tutorial: 
-	dune exec docs/tutorial.exe
+
