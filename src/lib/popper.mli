@@ -1,4 +1,6 @@
-(** A library for unit and property-based testing. *)
+(** Popper is an OCaml testing library that can be used for writing simple
+    unit-tests as well as property-based ones. Its underlying design is inspired
+    by the Python library Hypothesis. *)
 
 (** {1 Modules } *)
 
@@ -418,7 +420,7 @@ end
 
 exception Popper_error
 
-(** {2 Constructing tests } *)
+(** {1 Constructing tests } *)
 
 (** [test ?config f] creates a test that when run evaluates [f] that produces a
     [Proposition.t Sample.t] value. If the the sample consumes any input, it is
@@ -432,7 +434,7 @@ val test : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> Test.t
     suite. *)
 val suite : (string * Test.t) list -> Test.t
 
-(** {2 Propositions } *)
+(** {1 Propositions } *)
 
 (** [pass] is a sample that always returns the value [pass]. *)
 val pass : Proposition.t Sample.t
@@ -495,21 +497,21 @@ val is_true : ?loc:string -> bool -> Proposition.t Sample.t
 val is_false : ?loc:string -> bool -> Proposition.t Sample.t
 
 (** [all ps] combines a list of proposition samples into a sample that only
-    returns pass in case all returned propositions are [pass]. *)
+    returns pass in case all returned propositions pass. *)
 val all : Proposition.t Sample.t list -> Proposition.t Sample.t
 
-(** [any ps] combines a list of proposition samples into a sample that returns
-    [pass] in case any of the returned propositions are [pass]. *)
+(** [any ps] combines a list of proposition samples into a single sample that
+    returns pass in case any of the returned propositions pass. *)
 val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 
 (** {2 Running tests } *)
 
-(** [check ?config f] Runs a single anonymous test using the [config] settings
+(** [check ?config f] runs a single anonymous test using the [config] settings
     if given. In case the test fails, an exception of type [Popper_error] is
     raised. *)
 val check : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
 
-(** [test ?config t] Runs the given test [t] using the [config] settings if
+(** [test ?config t] runs the given test [t] using the [config] settings if
     given. In case the test fails, an exception of type [Popper_error] is
     raised. *)
 val run : ?config:Config.t -> Test.t -> unit
