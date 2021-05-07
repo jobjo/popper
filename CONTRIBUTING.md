@@ -1,10 +1,9 @@
 # Contributing
 
-Contributions are welcomed and done by creating a Pull Request to be landed on
-the `main` branch!
+Contributions are welcomed and done by creating a pull request to be landed on
+the `main` branch.
 
-See  [open issues](https://github.com/jobjo/popper/issues). The ones labeled
-with `good first issue` may be a good start if you're new to the project.
+See [open issues](https://github.com/jobjo/popper/issues) for some list of items. 
 
 If you have any questions, comments or suggestions open a [new
 issue](https://github.com/jobjo/popper/issues/new) or get in touch over email.
@@ -19,7 +18,7 @@ cd popper
 opam install -t --deps-only .
 ```
 
-There are a few Make targets for convenience:
+There are a few make-targets for convenience:
 
 - `make test` — build project and execute tests.
 - `make examples` — build and run examples.
@@ -32,7 +31,9 @@ There are a few Make targets for convenience:
 In order to build and test the documentation you need to install
 [MkDocs](https://www.mkdocs.org/).
 
-You also need the [Material for MkDocs](https://github.com/squidfunk/mkdocs-material) plugin:
+You also need the [Material for
+MkDocs](https://github.com/squidfunk/mkdocs-material) plugin, which is installed
+by:
 
 ```
 pip install mkdocs-material

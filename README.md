@@ -31,13 +31,15 @@ High-level features of Popper include:
 
 ## Contributing
 
-See [this page](CONTRIBUTING.md) for how to build and contribute to Popper.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build and contribute to
+Popper.
 
 ## Learn
 
-- Check out the [getting started](getting_started) section for a step by step introduction.
-- Take a look at some examples in the [examples](https://github.com/jobjo/popper/examples) folder.
-- Browse the [API docs](https://github.com/jobjo/popper/api/index.html).
+- Check out the [getting started](https://jobjo.github.io/popper/getting_started) section for a step by step introduction.
+- Take a look at some examples in the [examples](https://github.com/jobjo/popper/tree/main/examples) folder.
+- Browse the [API docs](https://jobjo.github.io/popper/api).
+
 ## Show me an example
 
 Here's what test output might look like:
@@ -96,10 +98,6 @@ let suite =
 
 let () = run suite
 ```
-
-## Contributing
-
-See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Comparing with other libraries
 
