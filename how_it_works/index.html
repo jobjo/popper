@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <script>
+	// Hack for scrolling window when linking to anchor tag with fixed nav header
+        var shiftWindow = function() { scrollBy(0, -75) };
+        window.addEventListener("hashchange", shiftWindow);
+        function load() { if (window.location.hash) shiftWindow(); }
+      </script>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>How it works - Popper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css" rel="stylesheet">
+    <link href="../css/extra.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="../js/base.js"></script> 
+    </head>
+
+    <body class="">
+
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+	<div class="container">
+	<a class="navbar-brand" href="..">Popper</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse">
+          <!-- Main navigation -->
+          <nav class="nav">
+            <ul class="navbar-nav">
+              <li >
+                <a class="nav-link" href="..">About</a>
+              </li>
+              <li >
+                <a class="nav-link" href="../getting_started/">Getting started</a>
+              </li>
+              <li class="active">
+                <a class="nav-link" href="./">How it works</a>
+              </li>
+            </ul>
+          </nav>
+
+          <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+		<i class="fa fa-search"></i> Search
+              </a>
+            </li>
+          </ul>
+	</div>
+	</div>
+      </nav><div id="content" class="container">
+        
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    
+    <li class="breadcrumb-item active" aria-current="page">How it works</li>
+  </ol>
+</nav>
+
+
+<h1 id="how-it-works">How it works</h1>
+<p><a href="https://github.com/jobjo/popper">Popper</a> is designed to facilitate
+property-based, where regular unit tests are just special cases.  It's inspired
+by a technique introduced by the Python library
+<a href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis</a>. </p>
+<p>The fundamental difference between libraries based on the original
+property-based testing framework, <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>, 
+has to do with how sample generation and shrinking works.</p>
+<p>In QuickCheck-based libraries, there are two orthogonal concepts:</p>
+<ul>
+<li><em>Generators</em> — for generating arbitrary test data (samples).</li>
+<li><em>Shrinkers</em> — for simplifying values that results in failing tests.</li>
+</ul>
+<p>For any custom data-type you wish to sample, you need to provide a generator as
+well as a shrinker (or no shrinking will be applied).  Further, any invariant —
+with respect to how the data is to be generated must also be reflected in the
+shrinker.</p>
+<p>In <a href="https://github.com/jobjo/popper">Popper</a> and
+<a href="https://hypothesis.readthedocs.io/en/latest">Hypothesis</a>, shrinking is generic
+and never violate any invariants embedded in the generators. This eliminates the
+hassle of defining shrinkers and keeping them in synch. The downside is that it
+less efficient and doesn't always result in optimally shrunken results.</p>
+<h2 id="sampling-and-shrinking">Sampling and shrinking</h2>
+<p>A <em>sampler</em>, in Popper, is a value of some type <code>a
+Sample.t</code> and corresponds to a <em>generator</em> in
+<a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>.</p>
+<p>When an <code>a Sample.t</code> value is run, it consumes input from a sequence of <code>int32</code>
+numbers. Each number is used for guiding some decision or for parsing a
+primitive value. </p>
+<p>Here's a high-level depiction of what is involved in running a test:</p>
+<p align="center">
+<img width="75%" src="/img/testing.svg"/>
+</p>
+
+<p>All the numbers consumed from the input stream are recorded and <em>tagged</em> in
+order to provide some more structure about the role of different sub-segments.
+In fact, the <em>consumed</em> data is arranged in a tree structure. This makes it
+easier for the shrinker to modify the tree by either removing sub-branches or
+shrinking the leaves. The tree can be collapsed into a flat structure and
+converted back to a new input-stream, which in turn is fed to the sampler.</p>
+<p align="center">
+<img width="75%" src="/img/shrinking.svg"/>
+</p>
+
+<h2 id="an-example">An example</h2>
+<p>To look at a concrete example, below is dummy-test for illustrating how sampling
+and shrinking really works. The code introduces a new data-type, <code>contact</code>, for
+which a sample function is derived. The function <code>test</code> samples a <code>contact</code>
+value and returns a proposition that fails for any value created by the <code>Mail</code>
+constructor. The derived sample function <code>contact_sample</code> is enhanced with
+<em>logging</em> and also returns the consumed<em> input, via the function
+</em><code>Sample.with_consumed</code>. Additionally the sampler is <em>resized</em> to <code>10</code> so that
+*it will
+produce small (but not too small values) initially:</p>
+<pre><code class="language-ocaml">open Popper
+open Sample.Syntax
+
+type contact =
+  | Email of string
+  | Mail of
+      { street : string
+      ; number : int option
+      ; zip : string
+      }
+[@@deriving show, ord, popper]
+
+let test () =
+  let* contact, consumed =
+    contract_sample
+    |&gt; Sample.resize 10
+    |&gt; Sample.with_log &quot;contact&quot; pp_contact
+    |&gt; Sample.with_consumed
+  in
+  Format.printf &quot;%a@.%a@.&quot; Consumed.pp consumed pp_contact contact;
+  match contact with
+  | Email _ -&gt; pass
+  | Mail _ -&gt; fail &quot;Expected email&quot;
+
+let () = check test
+</code></pre>
+<p>Each sampled <code>contact</code> value and <code>consumed</code> input pair is also printed.</p>
+<p>When run, we can see how the samples are produced and what the consumed data
+looks like. That is the the data in the input-stream fed to the sampler.
+The first consumed input and corresponding <code>contact</code> pair is:</p>
+<pre><code> 0                                                                         1303638800  
+ 1  name[street]-1,list-2,sub-list-3,choice-4                               875735887  
+ 2  name[street]-1,list-2,sub-list-3,name[element]-5,char-6                1313326574  
+ 3  name[street]-1,list-2,sub-list-3,sub-list-7,choice-8                   1489071124  
+ 4  name[street]-1,list-2,sub-list-3,sub-list-7,name[element]-9,char-10     146106767  
+ 5  name[street]-1,list-2,sub-list-3,sub-list-7,sub-list-11,choice-12       620372157  
+ 6  name[street]-1,list-2,sub-list-3,sub-list-7,sub-list-13,choice-14      1449571827  
+ 7  name[street]-1,list-2,sub-list-3,sub-list-15,choice-16                  398247927  
+ 8  name[number]-17                                                         154391388  
+ 9  name[zip]-18,list-19,sub-list-20,choice-21                              877744873  
+10  name[zip]-18,list-19,sub-list-20,name[element]-22,char-23               113482031  
+11  name[zip]-18,list-19,sub-list-20,sub-list-24,choice-25                 2102918577  
+12  name[zip]-18,list-19,sub-list-20,sub-list-24,name[element]-26,char-27   352979668  
+13  name[zip]-18,list-19,sub-list-20,sub-list-24,sub-list-28,choice-29     1423603695  
+14  name[zip]-18,list-19,sub-list-20,sub-list-24,sub-list-30,choice-31     2122464862  
+15  name[zip]-18,list-19,sub-list-20,sub-list-32,choice-33                  279715071  
+
+Run.Mail {street = &quot;Ni&quot;; number = None; zip = &quot;wV&quot;}
+</code></pre>
+<p>This happened to be a <code>Mail</code> contact why the proposition returned failed.  Now,
+shrinking kicks in, in order to find a smaller input sequence for which the test
+still fails. The algorithm for shrinking takes into account the tagged information.
+It's a search procedure where at at each step an attempt to either</p>
+<ul>
+<li>Decrease some value from the input sequence.</li>
+<li>Remove some blocks of values.</li>
+</ul>
+<p>Decreasing could mean changing the input that resulted in character <code>N</code> to be
+<code>a</code> and removing blocks might result in removing some elements from a list.
+When it comes to removing, the tagging of the input is important as it gives
+hints to where candidates for removing feasible subsections are encountered.
+Randomly removing data is likely to drastically alter the resulting sample.</p>
+<p>For every shrink step, the sample function is run again in order to verify that
+the sampled data still yields a failed proposition. The algorithm never looks at
+the sampled values themselves. It only notices whether or not shrinking was
+successful. The key to shrinking is that sampler are designed such that
+a shorter and smaller input implies <em>smaller</em> sampled values.</p>
+<p>Since we're printing each invocation of the <code>test</code> function, we can observe
+each shrink attempt. Here are a few of the intermediate ones:</p>
+<pre><code> 0                                                                         1303638800  
+ 1  name[street]-1,list-2,sub-list-3,choice-4                               875735887  
+ 2  name[street]-1,list-2,sub-list-3,name[element]-5,char-6                1313326574  
+ 3  name[street]-1,list-2,sub-list-3,sub-list-7,choice-8                   1489071124  
+ 4  name[street]-1,list-2,sub-list-3,sub-list-7,name[element]-9,char-10             0  
+ 5  name[street]-1,list-2,sub-list-3,sub-list-7,sub-list-11,choice-12       398247927  
+ 6  name[street]-1,list-2,sub-list-3,sub-list-7,sub-list-13,choice-14        77195694  
+ 7  name[street]-1,list-2,sub-list-3,sub-list-15,choice-16                  877744873  
+ 8  name[number]-17                                                                 0  
+ 9  name[zip]-18,list-19,sub-list-20,choice-21                             2102918577  
+10  name[zip]-18,list-19,sub-list-20,name[element]-22,char-23               352979668  
+11  name[zip]-18,list-19,sub-list-20,sub-list-24,choice-25                 1423603695  
+12  name[zip]-18,list-19,sub-list-20,sub-list-24,name[element]-26,char-27  2122464862  
+13  name[zip]-18,list-19,sub-list-20,sub-list-24,sub-list-28,choice-29              0  
+14  name[zip]-18,list-19,sub-list-20,sub-list-24,sub-list-30,choice-31              0  
+15  name[zip]-18,list-19,sub-list-20,sub-list-32,choice-33                          0  
+
+Run.Mail {street = &quot;N0&quot;; number = None; zip = &quot;00&quot;}
+
+...
+
+0                                                                      1303638800  
+1  name[street]-1,list-2,sub-list-3,choice-4                                    0  
+2  name[number]-5                                                               0  
+3  name[zip]-6,list-7,sub-list-8,choice-9                              2102918577  
+4  name[zip]-6,list-7,sub-list-8,name[element]-10,char-11                       0  
+5  name[zip]-6,list-7,sub-list-8,sub-list-12,choice-13                 2122464862  
+6  name[zip]-6,list-7,sub-list-8,sub-list-12,name[element]-14,char-15           0  
+7  name[zip]-6,list-7,sub-list-8,sub-list-12,sub-list-16,choice-17              0  
+8  name[zip]-6,list-7,sub-list-8,sub-list-12,sub-list-18,choice-19              0  
+9  name[zip]-6,list-7,sub-list-8,sub-list-20,choice-21                  352979668  
+
+...
+
+Run.Mail {street = &quot;&quot;; number = None; zip = &quot;00&quot;}
+
+0                                             1303638800  
+1  name[street]-1,list-2,sub-list-3,choice-4           0  
+2  name[number]-5                                      0  
+3  name[zip]-6,list-7,sub-list-8,choice-9              0  
+
+(Run.Email &quot;0&quot;)
+
+...
+
+0                                                                0  
+1  name[x0]-1,list-2,sub-list-3,choice-4                 875735887  
+2  name[x0]-1,list-2,sub-list-3,name[element]-5,char-6  1313326574  
+3  name[x0]-1,list-2,sub-list-3,sub-list-7,choice-8              0  
+4  name[x0]-1,list-2,sub-list-3,sub-list-9,choice-10      77195694  
+
+Run.Mail {street = &quot;N&quot;; number = None; zip = &quot;&quot;}
+</code></pre>
+<p>As seen, sometimes the shrink step fails and results in a valid test.
+Eventually, in this case, the input is shrunken down to the following
+sequence:</p>
+<pre><code>0                                             1303638795  
+1  name[street]-1,list-2,sub-list-3,choice-4           0  
+2  name[number]-5                                      0  
+3  name[zip]-6,list-7,sub-list-8,choice-9              0  
+
+Run.Mail {street = &quot;&quot;; number = None; zip = &quot;&quot;}
+</code></pre>
+<p>And the final counter-example is displayed:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/117324228-82033b80-ae87-11eb-9783-65207ac3767f.png" /></p>
+
+<ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
+  <li class="last-updated-holder displayDate loading">
+    <span class="last-updated-text">Last updated:</span>
+    <time role="presentation" datetime="2018-10-25T00:00:00.000Z" data-article-date-source="ms.date"></time>
+  </li>
+<!--
+  <li class="readingTime">
+    2 minutes to read
+  </li>
+-->
+  <li class="contributors-holder">
+    <span class="contributors-text">Contributors</span>
+    <ul class="contributors" data-bi-name="contributors"></ul>
+  </li>
+</ul>
+</div>
+        <div class="col-md-3"><div class="navbar-light navbar-expand-md hidden-print sticky-top sticky-offset" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    <div id="toc-collapse" class="navbar-collapse collapse card">
+        <ul class="nav flex-column bs-sidenav">
+            <li class="nav-item main"><a class="nav-link" href="#how-it-works">How it works</a></li>
+                <li class="nav-item">
+                    <a href="#sampling-and-shrinking" class="nav-link">Sampling and shrinking</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#an-example" class="nav-link">An example</a>
+                </li>
+        </ul>
+    </div>
+</div></div>
+      </div>
+      </div>
+
+      <footer class="col-md-12">
+	<hr>
+	<div class="container">
+	</div>
+      </footer>
+      <script>
+	var base_url = "..",
+            shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+      </script>
+      <script src="../js/base.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/ocaml.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/lisp.min.js" defer></script>
+      <script src="../javascripts/config.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+      <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="h4 modal-title">Keyboard Shortcuts</p>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

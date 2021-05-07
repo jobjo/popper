@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <script>
+	// Hack for scrolling window when linking to anchor tag with fixed nav header
+        var shiftWindow = function() { scrollBy(0, -75) };
+        window.addEventListener("hashchange", shiftWindow);
+        function load() { if (window.location.hash) shiftWindow(); }
+      </script>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Getting started - Popper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css" rel="stylesheet">
+    <link href="../css/extra.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="../js/base.js"></script> 
+    </head>
+
+    <body class="">
+
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+	<div class="container">
+	<a class="navbar-brand" href="..">Popper</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse">
+          <!-- Main navigation -->
+          <nav class="nav">
+            <ul class="navbar-nav">
+              <li >
+                <a class="nav-link" href="..">About</a>
+              </li>
+              <li class="active">
+                <a class="nav-link" href="./">Getting started</a>
+              </li>
+              <li >
+                <a class="nav-link" href="../how_it_works/">How it works</a>
+              </li>
+            </ul>
+          </nav>
+
+          <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+		<i class="fa fa-search"></i> Search
+              </a>
+            </li>
+          </ul>
+	</div>
+	</div>
+      </nav><div id="content" class="container">
+        
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    
+    <li class="breadcrumb-item active" aria-current="page">Getting started</li>
+  </ol>
+</nav>
+
+
+<h1 id="getting-started">Getting started</h1>
+<p>In the following sections we'll look at how to get started using
+<a href="https://github.com/jobjo/popper">Popper</a> for writing and running <em>unit</em> and
+<em>property-based</em> tests.</p>
+<p><a href="https://github.com/jobjo/popper">Popper</a> consists of two parts:</p>
+<ul>
+<li>
+<p>A library <code>popper</code> — containing functions for building and executing tests.</p>
+</li>
+<li>
+<p>A library <code>ppx_deriving_popper</code> — for deriving functions for <em>sampling</em> and
+<em>comparing</em> test data for custom data-types.</p>
+</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>Installing <code>ppx_deriving_popper</code> via <a href="https://opam.ocaml.org/">OPAM</a> brings in
+both the ppx and the testing library.</p>
+<pre><code>&gt; opam install ppx_deriving_popper
+</code></pre>
+<p>Similarly, if you're using the ppx, adding a preprocessor dependency on
+<code>ppx_deriving_popper</code> includes the runtime library <code>popper</code> as well.</p>
+<p>Currently, using the <code>[@@deriving ... popper]</code> attribute also requires
+dependencies for deriving <code>show</code> and <code>ord</code> for your data types. Below is an
+example <a href="https://github.com/ocaml/dune">dune</a> file for defining a test. It
+assumes a file <code>run.ml</code>.</p>
+<pre><code class="language-lisp">(test
+ (name run)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
+</code></pre>
+<h2 id="unit-tests">Unit tests</h2>
+<p>As a first example, here is a simple unit test verifying that the function
+<code>List.rev</code> behaves as expected when applied with the list <code>[1; 2; 3]</code>:</p>
+<pre><code class="language-ocaml">open Popper
+
+let () =
+  check @@ fun () -&gt;
+    equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 3; 2; 1 ]
+</code></pre>
+<p>When run with <code>dune runtest</code>, it produces the following output:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917024-04042200-ac46-11eb-950b-dafe2575a559.png" /></p>
+<p>The function <code>check</code> is for running a single (anonymous) test.  Its signature
+is:</p>
+<pre><code class="language-ocaml">val check : ?⁠config:Config.t -&gt; (unit -&gt; Proposition.t Sample.t) -&gt; unit
+</code></pre>
+<p>As you can see, it takes a function that produces a value of type
+<code>Proposition.t Sample.t</code> and runs it.</p>
+<p>We'll discuss <em>samples</em> in the next sections.  The <code>Proposition.t</code> value is the
+result of the test, and can take on one of the following values:</p>
+<ul>
+<li><code>pass</code> — the proposition is <code>true</code>, the test/sample passed.</li>
+<li><code>fail</code> — the proposition is <code>false</code>, the test/sample failed.</li>
+<li><code>discarded</code> — the proposition is neither <code>true</code> nor <code>false</code>, the tests/sample is discarded.</li>
+</ul>
+<p>The function <code>equal</code> constructs a proposition for stating that two values 
+are equal according to a given <code>Comparator.t</code> value:</p>
+<pre><code class="language-ocaml">val equal : ?⁠loc:string -&gt; 'a Comparator.t -&gt; 'a -&gt; 'a -&gt; Proposition.t Sample.t
+</code></pre>
+<p>An <code>'a Comparator.t</code> value consists of a <em>compare function</em> and a
+<em>pretty-printer</em> for the type <code>'a</code>.  For convenience, the function returns in
+the <code>Sample.t</code> context.</p>
+<p>In this case we construct an <code>int list Comparator.t</code> value using the <code>list</code>
+combinator from the <code>Comparator</code> module. </p>
+<p>Let's see what happens when a test fails.  Modifying the example above slightly:</p>
+<pre><code class="language-ocaml">let () =
+  check @@ fun () -&gt;
+    equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ]
+</code></pre>
+<p>This now yields:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png" /></p>
+<p>The reason the comparator contains a pretty-printer is to be able to explain why
+a particular proposition failed for the given arguments.</p>
+<h2 id="property-based-tests">Property-based tests</h2>
+<p>A <em>property-based test</em> is one that, instead of verifying concrete examples,
+confirms that a certain <em>property</em> holds for a large number sampled data.  The
+technique was popularized by the Haskell library
+<a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>. Using
+property-based testing effectively is a topic of its own and independent of the
+particular library or language one is using. Here's a <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">good
+article</a> with
+examples using F#.</p>
+<p>As a simple example, consider a test that verifies that reversing a list twice
+results in the same list.  Using <a href="https://github.com/jobjo/popper">Popper</a>, it
+can be expressed as follows:</p>
+<pre><code class="language-ocaml">open Popper
+open Sample.Syntax
+
+let () =
+  check @@ fun () -&gt;
+    let* xs = Sample.(list int) in
+    equal Comparator.(list int) (List.rev (List.rev xs)) xs
+</code></pre>
+<p>In the test, <code>xs</code> is a sample of list of integers.  The test returns a
+proposition that asserts states that reversing <code>xs</code> twice gives the
+same list back.</p>
+<p>The function returns in the <code>Sample.t</code> context.  The <code>let*</code> syntax defined in
+the <code>Sample.Syntax</code> module provides a convenient method for expressing this
+in a declarative way.</p>
+<p>When run, it yields the output:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917398-842a8780-ac46-11eb-8bfc-154cef57529a.png" /></p>
+<p>The function <code>check</code> evaluates the property multiple times (300 by default), by
+drawing different samples and checking the resulting proposition for each of
+them.  </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In <a href="https://github.com/jobjo/popper">Popper</a>, there is no fundamental difference between unit tests and property-based tests. 
+They are constructed and run using the same functions. </p>
+</div>
+<p>To see what happens when a test fails, here is an example verifying that
+<code>List.sort</code> returns a sorted list, but where the condition does not account for
+lists containing duplicates:</p>
+<pre><code class="language-ocaml">let rec is_sorted = function
+  | x :: y :: ys -&gt; x &lt; y &amp;&amp; is_sorted (y :: ys)
+  | _ -&gt; true
+
+let () =
+  check @@ fun () -&gt;
+    let* xs = Sample.(list int) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
+</code></pre>
+<p>The function <code>is_true</code> is used for constructing a proposition stating that the given
+boolean condition is <code>true</code>.  </p>
+<p>This test fails with:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917535-ade3ae80-ac46-11eb-8a92-7b0d10a67fd8.png" /></p>
+<p>The output is not very helpful as all that is revealed is that the proposition
+failed because the boolean condition was <code>false</code>.  In order to actually see the
+drawn sample list, for which the condition <code>is_sorted</code> did not hold, you need to
+add some logging.  The simplest way is to use the function <code>Sample.with_log</code>:</p>
+<pre><code class="language-ocaml">val with_log : string -&gt; (Stdlib.Format.formatter -&gt; 'a -&gt; unit) -&gt; 'a Sample.t -&gt; 'a Sample.t
+</code></pre>
+<p>It takes a string value for the key, a pretty-printer and a sampler, and it
+returns a new <code>Sample.t</code> value that also records the sampled values.</p>
+<p>To quickly obtain a pretty-printer for lists of integers, you may derive it using
+<code>[@@deriving show]</code>.  We'll soon see how to also derive samplers and comparators
+as well. For now:</p>
+<pre><code class="language-ocaml">type int_list = int list [@@deriving show]
+
+let () =
+  check @@ fun () -&gt;
+    let* xs = Sample.(with_log &quot;xs&quot; pp_int_list (list int)) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
+</code></pre>
+<p>The result, when run:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917809-0c109180-ac47-11eb-8096-1896a1d832f1.png" /></p>
+<p>The log section now displays the sample value <code>xs</code> for which the test failed. </p>
+<p>A property-based test such as the one above is run multiple times, a unit-test
+is only run once.  How does the <code>check</code> function know how to distinguish between
+the two?  The answer is that a unit test does not consume any input when
+generating the resulting proposition.  Any property-based test must consume some
+data for drawing (pseudo-random) samples.  A value of type <code>a Sample.t</code> is
+really a <em>parser</em> that reads input from a stream of numbers (<code>int32</code> values) and
+produces a result of type <code>a</code>.  By varying the input stream we feed to the
+parser, we get different results.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whenever a failing sample is encountered, the <code>check/run</code> function attempts to find
+a <em>smaller</em> counter-example by <em>shrinking</em> the input stream that was used for producing
+the sample.</p>
+</div>
+<h2 id="test-suites">Test suites</h2>
+<p>The function <code>check</code> is convenient for quickly running individual tests but when
+working with multiple tests it's best to bundle and run them together.</p>
+<p>There are three essential functions you need to know about:</p>
+<ul>
+<li><code>test</code> for creating a test.</li>
+<li><code>suite</code> for naming and grouping tests together.</li>
+<li><code>run</code> for running a test (or a test suite).</li>
+</ul>
+<p>Their signatures are:</p>
+<pre><code>val test : ?⁠config:Config.t -&gt; (unit -&gt; Proposition.t Sample.t) -&gt; Test.t
+val suite : (string * Test.t) list -&gt; Test.t
+val run : ?⁠config:Config.t -&gt; Test.t -&gt; unit
+</code></pre>
+<p>Here's how you can combine the tests from above in a suite, and run it:</p>
+<pre><code class="language-ocaml">let test_rev =
+  test @@ fun () -&gt;
+    equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 3; 2; 1 ]
+
+let test_rev_twice =
+  test @@ fun () -&gt;
+    let* xs = Sample.(list int) in
+    equal Comparator.(list int) (List.rev (List.rev xs)) xs
+
+let test_sort =
+  test @@ fun () -&gt;
+    let* xs = Sample.(with_log &quot;xs&quot; pp_int_list (list int)) in
+    is_true (is_sorted @@ List.sort Int.compare xs)
+
+let tests =
+  suite 
+    [ (&quot;Reverse&quot;, test_rev)
+    ; (&quot;Reverse twice&quot;, test_rev_twice)
+    ; (&quot;Sort&quot;, test_sort)
+    ]
+
+let () = run tests
+</code></pre>
+<p>Hopefully the definitions are straight-forward.  There are three tests which
+are defined using the function <code>test</code>. They are packed together via <code>suite</code>
+and executed with <code>run</code>.</p>
+<p>This results in the output:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917989-411ce400-ac47-11eb-808c-3e062331e45a.png" /></p>
+<p>Note that the value <code>tests</code> has the same type as <code>test_rev</code> ,
+<code>test_rev_twice</code>, and <code>test_sort</code>, namely <code>Test.t</code>.  That means that test
+suites may also be nested.  For instance, as in:</p>
+<pre><code class="language-ocaml">let rev_suite =
+  suite [ (&quot;Simple list&quot;, test_rev); (&quot;Reverse twice&quot;, test_rev_twice) ]
+
+let tests = suite [ (&quot;Reverse&quot;, rev_suite); (&quot;Sort&quot;, test_sort) ]
+
+let () = run tests
+</code></pre>
+<p>Which gives:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918131-6d386500-ac47-11eb-95c6-bc518f039952.png" /></p>
+<p>The nesting is reflected by the output, such as <code>Reverse -&gt; Simple list</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is only one type of tests (<code>Test.t</code> values) and tests may be nested
+arbitrarily using the <code>suite</code> combinator.</p>
+</div>
+<h2 id="deriving-samples">Deriving samples</h2>
+<p>For property-based tests we sample data of some type and use the values for
+verifying properties. There are two options:</p>
+<ol>
+<li>Sample the data and define comparators manually (as done in the examples above).</li>
+<li>Derive <em>sample</em> and <em>comparator</em> functions using the <code>ppx_deriving_popper</code> ppx.</li>
+</ol>
+<p>For example, consider a simple data type, <code>exp</code>, for representing boolean
+expressions:</p>
+<pre><code class="language-ocaml">type exp =
+  | Lit of bool
+  | And of exp * exp
+  | Or of exp * exp
+  | Not of exp
+</code></pre>
+<p>Along with an evaluation function, <code>eval</code>, with a signature:</p>
+<pre><code class="language-ocaml">val eval : exp -&gt; bool
+</code></pre>
+<p>What if we would like to write a test that verifies that <code>Lit false</code> is the
+identity expression for <code>Or</code>?  That is, for any expression <code>e</code>, the
+proposition:</p>
+<pre><code class="language-ocaml">eval e = eval (Or (Lit false, e))
+</code></pre>
+<p>should evaluate to true.</p>
+<p>We must to be able to sample <code>exp</code> values.  We'll cover how to do this manually
+later but the easiest way forward is to derive it.  All that is needed is adding
+an attribute <code>[@@deriving .. popper]</code>.  It also requires deriving <code>ord</code> and <code>show</code> for
+the <em>comparator</em> part. </p>
+<pre><code class="language-ocaml">type exp =
+  | Lit of bool
+  | And of exp * exp
+  | Or of exp * exp
+  | Not of exp
+[@@deriving show, ord, popper]
+</code></pre>
+<p>At the preprocessing stage, the ppxs generate the additional functions:</p>
+<pre><code class="language-ocaml">val exp_comparator : exp Comparator.t
+val exp_sample : exp Sample.t
+</code></pre>
+<p>Alternatively, if you only care about deriving the sample function you may skip
+<code>show</code> and <code>ord</code> and use <code>sample</code> instead of <code>popper</code>, i.e.:</p>
+<pre><code class="language-ocaml">type exp = ... [@@deriving sample]
+</code></pre>
+<p>Before writing the property-based test, here's (a buggy) implementation of <code>eval</code>:</p>
+<pre><code class="language-ocaml">let rec eval = function
+  | Lit b -&gt; b
+  | And (e1, e2) -&gt; eval e1 &amp;&amp; eval e2
+  | Or (e1, e2) -&gt; eval e1 || eval e2
+  | Not b -&gt; not @@ eval b
+</code></pre>
+<p>Using the <code>exp_sample</code> function, the test is straight forward:</p>
+<pre><code class="language-ocaml">let test_or =
+  test @@ fun () -&gt;
+    let* e = exp_sample in
+    is_true (eval e = eval (Or (Lit false, e)))
+
+let () = run test_or
+</code></pre>
+<p>The test now fails after 5 successful samples:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918459-d324ec80-ac47-11eb-829d-cc854a55e307.png" /></p>
+<p>Again, in order to actually view the expression that was generated in order
+for the proposition to fail, we need to add some logging:</p>
+<pre><code class="language-ocaml">let test_or =
+  test @@ fun () -&gt;
+    let* e = Sample.with_log &quot;e&quot; pp_exp exp_sample in
+    is_true (eval e = eval (Or(Lit false, e)))
+
+let () = run test_or
+</code></pre>
+<p>The <code>with_log</code> function takes a name, here <code>"e"</code>.  We must also pass a
+pretty-printer for <code>exp</code> values.  The function <code>pp_exp</code> is generated from the
+<code>ppx_deriving.show</code> ppx.  The last argument is a sample value to be enhanced
+with logging.</p>
+<p>When running the test, you now also see the logged values in the output:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918579-fea7d700-ac47-11eb-8abd-1ce99315ecf1.png" /></p>
+<h2 id="combining-propositions">Combining propositions</h2>
+<p>Just like tests can be composed into test suites, <em>propositions</em> can also be 
+bundled. There are two functions:</p>
+<pre><code class="language-ocaml">val all : Proposition.t Sample.t list -&gt; Proposition.t Sample.t
+
+val any : Proposition.t Sample.t list -&gt; Proposition.t Sample.t
+</code></pre>
+<p>They both take a list of propositions (for convenience <code>Proposition.t
+Sample.t</code> values) and collapse them into a single proposition. As the names
+suggest, <code>all</code> requires all propositions to pass, and <code>any</code> requires at least
+one to do so, in order to return a successful result.</p>
+<p>Here's an example:</p>
+<pre><code class="language-ocaml">let test_id =
+  test @@ fun () -&gt;
+    let* e = exp_sample in
+    all
+      [ is_true (eval e = eval (Or (Lit false, e)))
+      ; is_true (eval e = eval (And (Lit true, e)))
+      ]
+</code></pre>
+<h2 id="configurations">Configurations</h2>
+<p>As you may have noticed, the functions <code>test</code>, <code>check</code>,  and <code>run</code> all take an
+optional configuration argument called <code>config</code>.  This allows overriding some
+settings.  Either at the level of an individual test or for all tests when
+passed to <code>run</code>.  In case there are overlapping settings, the ones defined at
+the lowest level, i.e. the ones passed to an individual <code>test</code> take precedence.</p>
+<p>Here are some examples of what can be configured:</p>
+<ul>
+<li><code>num_samples</code> — for specifying the number of samples to be drawn for property-based tests. The default value is 300.</li>
+<li><code>verbose</code> — whether or not the <em>logged</em> values should be displayed for each sample.</li>
+<li><code>max_size</code> — this is a parameter that controls the maximum size parameter for data-structures like a lists. It defaults to 100.</li>
+</ul>
+<p>For the complete list, see the module <code>Popper.Config</code>.</p>
+<p>First, let's see what happens when we run a test configured with <code>verbose</code>. Here's a modified 
+version of the <code>test_or</code> function from above:</p>
+<pre><code class="language-ocaml">let test_or =
+  test ~config:Config.verbose @@ fun () -&gt;
+    let* e = Sample.with_log &quot;e&quot; pp_exp exp_sample in
+    is_true (eval e = eval (Or(Lit false, e)))
+
+let () = run test_or
+</code></pre>
+<p>You now see what all the drawn expression samples look like:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918839-53e3e880-ac48-11eb-97cf-4a91c85b3189.png" /></p>
+<p>Also changing the number of samples to be tested can be done by combining <code>Config.t</code> values
+with the <code>Config.all</code> combinator. For example:</p>
+<pre><code class="language-ocaml">let test_not =
+  let config = Config.(all [verbose; num_samples 1000]) in
+  test ~config @@ fun () -&gt;
+    let* e = Sample.with_log &quot;e&quot; pp_exp exp_sample in
+    is_true (not (eval e) = eval (Not e))
+
+let () = run test_not
+</code></pre>
+<p>The output confirms that the number of samples evaluated is now 1000:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/116919592-66aaed00-ac49-11eb-97dd-ccac8f823e59.png" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If property-based tests are slow to execute, you may decrease the number of
+samples using <code>Config.num_samples</code> or decrease the max-size parameter with
+<code>Config.max_size</code>.</p>
+</div>
+<h2 id="custom-samples">Custom samples</h2>
+<p>It is not always feasible to derive generic sample functions for the data-types
+you need for testing.  Specifically when:</p>
+<ol>
+<li>The data-type is abstract.</li>
+<li>There are invariants that the samples must satisfy.</li>
+</ol>
+<p>In those cases you may need to write your own samplers.</p>
+<p>To give an example, consider testing an module, <code>Image</code>, with the following 
+signature:</p>
+<pre><code class="language-ocaml">type color = White | Black | Transparent
+type t 
+val make : width:int -&gt; height:int -&gt; (x:int -&gt; y:int -&gt; color) -&gt; t
+val render : t -&gt; string
+val invert : t -&gt; t
+</code></pre>
+<p>Here's an implementation:</p>
+<pre><code class="language-ocaml">module Image = struct
+  type color = White | Black | Transparent
+  type t =
+    { width : int
+    ; height : int
+    ; get_pixel : x:int -&gt; y:int -&gt; color
+    }
+
+  let make ~width ~height get_pixel = { width; height; get_pixel }
+
+  let render { width; height; get_pixel } =
+    List.init height (fun y -&gt;
+      List.init width (fun x -&gt;
+        match get_pixel ~x ~y with
+        | White -&gt; &quot;w &quot;
+        | Black -&gt; &quot;b &quot;
+        | Transparent -&gt; &quot;- &quot;)
+      |&gt; String.concat &quot;&quot;)
+    |&gt; String.concat &quot;\n&quot;
+
+  let invert { width; height; get_pixel } =
+    let get_pixel ~x ~y =
+      match get_pixel ~x ~y with
+      | White -&gt; Black
+      | Black -&gt; White
+      | Transparent -&gt; White
+    in
+    { width; height; get_pixel }
+end
+</code></pre>
+<p>Now say you would like to write a test for a property that states that
+inverting the image twice results in the same image when rendered.  However,
+it is not possible to derive a sample function for the abstract type
+<code>Image.t</code>.  Further, even if the type had been exposed we'd need to satisfy
+some invariants for the <code>width</code> and the <code>height</code> parameters.  Luckily,
+writing the sample function yourself is straight forward — it's just a matter
+of generating the different parameters.  Here is a version where the width
+and height varies between <code>0</code> and <code>15</code>:</p>
+<pre><code class="language-ocaml">let sample_img =
+  let* width = Sample.Int.range 0 15 in
+  let* height = Sample.Int.range 0 15 in
+  let* lookup =
+    Sample.fn
+      (Sample.one_value_of [ Image.Black; Image.White; Image.Transparent ])
+  in
+  let get_pixel ~x ~y = lookup (x, y) in
+  Sample.return (Image.make ~width ~height get_pixel)
+</code></pre>
+<p>And here is how to use the function for defining a test:</p>
+<pre><code class="language-ocaml">let test_invert_twice =
+  test @@ fun () -&gt;
+    let* img = sample_img in
+    equal
+      Comparator.string
+      (Image.render img)
+      (Image.render (Image.invert (Image.invert img)))
+
+let suite = suite [ (&quot;Invert twice&quot;, test_invert_twice) ]
+let () = run suite
+</code></pre>
+<p>Running the test reveals a bug:</p>
+<p><img alt="image" src="https://user-images.githubusercontent.com/820478/117197597-e8348380-addf-11eb-83b6-7c37c60cdf67.png" /></p>
+<p>The test failed after the first sample and 13 successful shrink-steps were
+performed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An important feature of <a href="https://github.com/jobjo/popper">Popper</a> is that
+shrinking is <em>embedded</em>. It means that when a failing sample is encountered,
+and an attempt is made to shrink it, the invariants used for constructing
+the sample are always respected!  In the example above — with the <code>Image.t</code>
+sample — shrinking would never cause, say, the <code>height</code> to be negative.</p>
+</div>
+<p>As mentioned above, a value of type <code>a Sample.t</code> is really a parser from an
+input stream to an <code>a</code> value.  Shrinking is performed by attempting to simplify
+the input rather than modifying the parsed values themselves.  Simplifying the
+input is done either by removing some sections or replacing it with smaller
+values. For more information see the <a href="../how_it_works/">how it works</a> section.</p>
+
+<ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
+  <li class="last-updated-holder displayDate loading">
+    <span class="last-updated-text">Last updated:</span>
+    <time role="presentation" datetime="2018-10-25T00:00:00.000Z" data-article-date-source="ms.date"></time>
+  </li>
+<!--
+  <li class="readingTime">
+    2 minutes to read
+  </li>
+-->
+  <li class="contributors-holder">
+    <span class="contributors-text">Contributors</span>
+    <ul class="contributors" data-bi-name="contributors"></ul>
+  </li>
+</ul>
+</div>
+        <div class="col-md-3"><div class="navbar-light navbar-expand-md hidden-print sticky-top sticky-offset" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    <div id="toc-collapse" class="navbar-collapse collapse card">
+        <ul class="nav flex-column bs-sidenav">
+            <li class="nav-item main"><a class="nav-link" href="#getting-started">Getting started</a></li>
+                <li class="nav-item">
+                    <a href="#installation" class="nav-link">Installation</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#unit-tests" class="nav-link">Unit tests</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#property-based-tests" class="nav-link">Property-based tests</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#test-suites" class="nav-link">Test suites</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#deriving-samples" class="nav-link">Deriving samples</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#combining-propositions" class="nav-link">Combining propositions</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#configurations" class="nav-link">Configurations</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#custom-samples" class="nav-link">Custom samples</a>
+                </li>
+        </ul>
+    </div>
+</div></div>
+      </div>
+      </div>
+
+      <footer class="col-md-12">
+	<hr>
+	<div class="container">
+	</div>
+      </footer>
+      <script>
+	var base_url = "..",
+            shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+      </script>
+      <script src="../js/base.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/ocaml.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/lisp.min.js" defer></script>
+      <script src="../javascripts/config.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+      <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="h4 modal-title">Keyboard Shortcuts</p>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <script>
+	// Hack for scrolling window when linking to anchor tag with fixed nav header
+        var shiftWindow = function() { scrollBy(0, -75) };
+        window.addEventListener("hashchange", shiftWindow);
+        function load() { if (window.location.hash) shiftWindow(); }
+      </script>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="./img/favicon.ico">
+        <title>Popper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css" rel="stylesheet">
+    <link href="css/extra.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="js/base.js"></script> 
+    </head>
+
+    <body class="homepage ">
+
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+	<div class="container">
+	<a class="navbar-brand" href=".">Popper</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse">
+          <!-- Main navigation -->
+          <nav class="nav">
+            <ul class="navbar-nav">
+              <li class="active">
+                <a class="nav-link" href=".">About</a>
+              </li>
+              <li >
+                <a class="nav-link" href="getting_started/">Getting started</a>
+              </li>
+              <li >
+                <a class="nav-link" href="how_it_works/">How it works</a>
+              </li>
+            </ul>
+          </nav>
+
+          <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+		<i class="fa fa-search"></i> Search
+              </a>
+            </li>
+          </ul>
+	</div>
+	</div>
+      </nav><div id="content" class="container">
+        
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    
+    <li class="breadcrumb-item active" aria-current="page">About</li>
+  </ol>
+</nav>
+
+
+<h1 id="about">About</h1>
+<p><a href="https://github.com/jobjo/popper">Popper</a> is an OCaml testing library that can
+be used for writing simple <em>unit-tests</em> as well as <em>property-based</em> ones. Its
+underlying design is inspired by the Python library
+<a href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis</a>. </p>
+<p>High-level features of Popper include:</p>
+<ul>
+<li>A uniform API for defining regular unit and property-based tests.</li>
+<li>Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.</li>
+<li>Compositional design — tests may be bundled and nested arbitrarily.</li>
+<li>Ships with a <code>ppx</code> for automatically deriving <em>comparator</em> and <em>sample</em> functions for custom data types.  </li>
+<li>Deterministic (and reproducible) results.</li>
+<li>Colorful output (cred goes to <a href="https://github.com/mirage/alcotest">Alcotest</a>, couldn't resist some inspiration here).</li>
+<li>Support for line-number reporting, timing information and logging.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The project is still at an early alpha-stage and is to be used at your own
+risk.</p>
+</div>
+<h2 id="learn">Learn</h2>
+<ul>
+<li>See the <a href="docs/../getting_started">getting started</a> section for a step by step introduction.</li>
+<li>Checkout the examples in the <a href="https://github.com/jobjo/popper/examples">examples</a> folder.</li>
+<li>Browse the <a href="docs/api">API docs</a>.</li>
+</ul>
+<h2 id="show-me-an-example">Show me an example</h2>
+<p>Here's what test output might look like:</p>
+<p align="center">
+<img src="https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png" />
+</p>
+
+<p>It was generated from the following code:</p>
+<pre><code class="language-ocaml">open Popper
+open Sample.Syntax
+
+type exp =
+  | Lit of bool
+  | And of exp * exp
+  | Or of exp * exp
+  | Not of exp
+[@@deriving show, ord, popper]
+
+(* A buggy evaluator function *)
+let rec eval = function
+  | Lit b -&gt; b
+  | And (e1, e2) -&gt; eval e1 || eval e2
+  | Or (e1, e2) -&gt; eval e1 || eval e2
+  | Not b -&gt; not @@ eval b
+
+(* A simple unit test *)
+let test_hello_world =
+  test @@ fun () -&gt;
+    equal Comparator.string &quot;hello world&quot; (String.lowercase_ascii &quot;Hello World&quot;)
+
+(* Another unit test *)
+let test_lit_true = test @@ fun () -&gt; is_true (eval (Lit true) = true)
+
+(* A property-based test *)
+let test_false_ident_or =
+  test @@ fun () -&gt;
+    let* e = sample_exp in
+    is_true (eval e = eval (Or (Lit false, e)))
+
+(* Another property-based test *)
+let test_true_ident_and =
+  test @@ fun () -
+    let* e = Sample.with_log &quot;e&quot; pp_exp sample_exp in
+    is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
+
+let suite =
+  suite
+    [ (&quot;Hello World&quot;, test_hello_world)
+    ; (&quot;Lit true&quot;, test_lit_true)
+    ; (&quot;False ident or&quot;, test_false_ident_or)
+    ; (&quot;True ident and&quot;, test_true_ident_and)
+    ]
+
+let () = run suite
+</code></pre>
+
+<ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
+  <li class="last-updated-holder displayDate loading">
+    <span class="last-updated-text">Last updated:</span>
+    <time role="presentation" datetime="2018-10-25T00:00:00.000Z" data-article-date-source="ms.date"></time>
+  </li>
+<!--
+  <li class="readingTime">
+    2 minutes to read
+  </li>
+-->
+  <li class="contributors-holder">
+    <span class="contributors-text">Contributors</span>
+    <ul class="contributors" data-bi-name="contributors"></ul>
+  </li>
+</ul>
+</div>
+        <div class="col-md-3"><div class="navbar-light navbar-expand-md hidden-print sticky-top sticky-offset" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    <div id="toc-collapse" class="navbar-collapse collapse card">
+        <ul class="nav flex-column bs-sidenav">
+            <li class="nav-item main"><a class="nav-link" href="#about">About</a></li>
+                <li class="nav-item">
+                    <a href="#learn" class="nav-link">Learn</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#show-me-an-example" class="nav-link">Show me an example</a>
+                </li>
+        </ul>
+    </div>
+</div></div>
+      </div>
+      </div>
+
+      <footer class="col-md-12">
+	<hr>
+	<div class="container">
+	</div>
+      </footer>
+      <script>
+	var base_url = ".",
+            shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+      </script>
+      <script src="js/base.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/ocaml.min.js" defer></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/languages/lisp.min.js" defer></script>
+      <script src="javascripts/config.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+      <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="h4 modal-title">Keyboard Shortcuts</p>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.1.2
+Build Date UTC : 2021-05-07 09:15:03.561665+00:00
+-->
