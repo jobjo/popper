@@ -1,6 +1,7 @@
 # Popper
 
 [![Main workflow](https://github.com/jobjo/popper/workflows/Main%20workflow/badge.svg?branch=main)](https://github.com/jobjo/popper/actions)
+[![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://jobjo.github.io/popper/api)
 
 > *In so far as a scientific statement speaks about reality, it must be
 > falsifiable; and in so far as it is not falsifiable, it does not speak about
@@ -8,9 +9,15 @@
 
 (Kar Popper)
 
-*Popper* is an OCaml library that can be used for writing simple *unit-tests*
-as well as *property-based* ones. Its underlying design is inspired by the
-Python library [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
+[Popper](https://github.com/jobjo/popper) is an OCaml testing library that can
+be used for writing simple *unit-tests* as well as *property-based* ones. Its
+underlying design is inspired by the Python library
+[Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
+
+See the documentation page [here](https://jobjo.github.io/popper/) for
+information on how to get started.
+
+## Overview
 
 High-level features of Popper include:
 
@@ -22,12 +29,15 @@ High-level features of Popper include:
 - Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration here).
 - Support for line-number reporting, timing information and logging.
 
-## Getting started
+## Contributing
 
-- See this [tutorial](docs/tutorial.md) for a step by step introduction of the various features and the API.
-- Or, checkout the examples in the [examples](examples) folder.
-- Browse the [API docs](docs/api).
+See [this page](CONTRIBUTING.md) for how to build and contribute to Popper.
 
+## Learn
+
+- Check out the [getting started](getting_started) section for a step by step introduction.
+- Take a look at some examples in the [examples](https://github.com/jobjo/popper/examples) folder.
+- Browse the [API docs](https://github.com/jobjo/popper/api/index.html).
 ## Show me an example
 
 Here's what test output might look like:

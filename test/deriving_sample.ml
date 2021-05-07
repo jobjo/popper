@@ -88,20 +88,20 @@ let make_test name sample =
 
 let suite =
   Popper.suite
-    [ make_test "T1" sample_t1
-    ; make_test "T2" sample_t2
-    ; make_test "T3" sample_t3
-    ; make_test "T4" sample_t4
-    ; make_test "T5" sample_t5
-    ; make_test "T6" sample_t6
-    ; make_test "T7" sample_t7
-    ; make_test "T8" sample_t8
-    ; make_test "T9" sample_t9
-    ; make_test "T10" sample_t10
-    ; make_test "T12" sample_t12
-    ; make_test "T13" sample_t13
-    ; make_test "T14" sample_t14
-    ; make_test "T16" sample_t16
-    ; make_test "T18" sample_t18
-    ; make_test "T19" sample_t18
+    [ make_test "T1" t1_sample
+    ; make_test "T2" t2_sample
+    ; make_test "T3" t3_sample
+    ; make_test "T4" t4_sample
+    ; make_test "T5" t5_sample
+    ; make_test "T6" t6_sample
+    ; make_test "T7" t7_sample
+    ; make_test "T8" t8_sample
+    ; make_test "T9" t9_sample
+    ; make_test "T10" t10_sample
+    ; make_test "T12" t12_sample
+    ; make_test "T13" t13_sample
+    ; make_test "T14" t14_sample
+    ; make_test "T16" t16_sample
+    ; make_test "T18" t18_sample
+    ; make_test "T19" t19_sample
     ]

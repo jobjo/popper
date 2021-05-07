@@ -1,8 +1,8 @@
 # How it works
 
 [Popper](https://github.com/jobjo/popper) is designed to facilitate
-property-based, where regular unit tests are just special cases.  It's inspired
-by a technique introduced by the Python library
+property-based testing, where regular unit tests are just special cases.  It's
+inspired by a technique introduced by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
 The fundamental difference between libraries based on the original
@@ -15,15 +15,15 @@ In QuickCheck-based libraries, there are two orthogonal concepts:
 - *Shrinkers* — for simplifying values that results in failing tests.
 
 For any custom data-type you wish to sample, you need to provide a generator as
-well as a shrinker (or no shrinking will be applied).  Further, any invariant —
-with respect to how the data is to be generated must also be reflected in the
+well as a shrinker (or no shrinking is applied).  Further, any invariant —
+with respect to how the data is to be generated — must also be reflected in the
 shrinker.
 
 In [Popper](https://github.com/jobjo/popper) and
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest), shrinking is generic
 and never violate any invariants embedded in the generators. This eliminates the
 hassle of defining shrinkers and keeping them in synch. The downside is that it
-less efficient and doesn't always result in optimally shrunken results.
+is less efficient and doesn't always result in optimally shrunken results.
 
 ## Sampling and shrinking
 

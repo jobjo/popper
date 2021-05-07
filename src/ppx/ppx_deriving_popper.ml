@@ -11,7 +11,11 @@ let sample_name n =
   if String.equal n "t" then
     "sample"
   else
-    Printf.sprintf "sample_%s" n
+    Printf.sprintf "%s_sample" n
+
+let comparator_name = function
+  | "t" -> "comparator"
+  | name -> Printf.sprintf "%s_comparator" name
 
 let pp_name = function
   | "t" -> "pp"
@@ -20,10 +24,6 @@ let pp_name = function
 let compare_name = function
   | "t" -> "compare"
   | name -> Printf.sprintf "compare_%s" name
-
-let comparator_name = function
-  | "t" -> "comparator"
-  | name -> Printf.sprintf "%s_comparator" name
 
 let poly_fun_name n = Printf.sprintf "sample_poly_%s" n
 
