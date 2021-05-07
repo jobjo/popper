@@ -1,10 +1,13 @@
 # Contributing
 
 Contributions are welcomed and done by creating a Pull Request to be landed on
-the `main` branch.
+the `main` branch!
 
 See  [open issues](https://github.com/jobjo/popper/issues). The ones labeled
-with `good first issue` may be best if you're new to the project.
+with `good first issue` may be a good start if you're new to the project.
+
+If you have any questions, comments or suggestions open a [new
+issue](https://github.com/jobjo/popper/issues/new) or get in touch over email.
 
 ## Building
 
@@ -21,12 +24,22 @@ There are a few Make targets for convenience:
 - `make test` — build project and execute tests.
 - `make examples` — build and run examples.
 - `make clean` — clean.
-- `make doc` - generate docs on the `gh-pages` branch and requires having `MkDocs` installed.
+- `make format` — runs `ocamlformat` on all files.
+- `make api-docs` - build api documentation using `dune build @doc`
+- `make serve-docs` - serve non-api documentation from localhost (requires [MkDocs](https://www.mkdocs.org/).
+- `make publish-docs` - commits latest api and *mkdocs* documentation on the `gh-pages` branch.
 
 In order to build and test the documentation you need to install
 [MkDocs](https://www.mkdocs.org/).
 
-The documentation is published on the `gh-pages` 
+You also need the [Material for MkDocs](https://github.com/squidfunk/mkdocs-material) plugin:
+
+```
+pip install mkdocs-material
+```
+
+To generate and serve the docs, run `make serve-docs` and view at
+[http://localhost:8000/](http://localhost:8000/).
 
 ## Project structure
 
@@ -37,4 +50,3 @@ The project is organized as follows:
 - `test` contains tests.
 - `examples` contains examples.
 - `docs` consists for markdown files and are built with `mkdocs`.
-

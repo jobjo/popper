@@ -1,8 +1,8 @@
 # How it works
 
 [Popper](https://github.com/jobjo/popper) is designed to facilitate
-property-based, where regular unit tests are just special cases.  It's inspired
-by a technique introduced by the Python library
+property-based testing, where regular unit tests are just special cases.  It's
+inspired by a technique introduced by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
 The fundamental difference between libraries based on the original
