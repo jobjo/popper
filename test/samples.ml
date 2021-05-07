@@ -196,14 +196,14 @@ let derived_tuple_with_list_length_dist =
     (fun (xs, _, _) -> xs)
     (fun (_, ys, _) -> ys)
     (fun (_, _, zs) -> zs)
-    sample_t2
+    t2_sample
 
 let record_with_list_length_dist =
   gen_dist_test
     (fun { xs; _ } -> xs)
     (fun { ys; _ } -> ys)
     (fun { zs; _ } -> zs)
-    sample_t1
+    t1_sample
 
 let suite =
   suite

@@ -37,8 +37,8 @@ let test_diff =
 
 let test_point_sum =
   test (fun () ->
-    let* left = sample_point in
-    let* right = sample_point in
+    let* left = point_sample in
+    let* right = point_sample in
     let expected = { x = left.x + right.x; y = left.y + right.y } in
     let actual = point_sum left right in
     equal ~loc:__LOC__ point_comparator expected actual)

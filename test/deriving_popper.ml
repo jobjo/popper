@@ -87,19 +87,19 @@ let make_test name comparator sample =
 
 let suite =
   Popper.suite
-    [ make_test "T1" t1_comparator sample_t1
-    ; make_test "T2" t2_comparator sample_t2
-    ; make_test "T3" t3_comparator sample_t3
-    ; make_test "T4" t4_comparator sample_t4
-    ; make_test "T5" t5_comparator sample_t5
-    ; make_test "T6" t6_comparator sample_t6
-    ; make_test "T7" t7_comparator sample_t7
-    ; make_test "T8" t8_comparator sample_t8
-    ; make_test "T9" t9_comparator sample_t9
-    ; make_test "T10" t10_comparator sample_t10
-    ; make_test "T12" t12_comparator sample_t12
-    ; make_test "T13" t13_comparator sample_t13
-    ; make_test "T14" t14_comparator sample_t14
-    ; make_test "T16" t16_comparator sample_t16
-    ; make_test "T18" t18_comparator sample_t18
+    [ make_test "T1" t1_comparator t1_sample
+    ; make_test "T2" t2_comparator t2_sample
+    ; make_test "T3" t3_comparator t3_sample
+    ; make_test "T4" t4_comparator t4_sample
+    ; make_test "T5" t5_comparator t5_sample
+    ; make_test "T6" t6_comparator t6_sample
+    ; make_test "T7" t7_comparator t7_sample
+    ; make_test "T8" t8_comparator t8_sample
+    ; make_test "T9" t9_comparator t9_sample
+    ; make_test "T10" t10_comparator t10_sample
+    ; make_test "T12" t12_comparator t12_sample
+    ; make_test "T13" t13_comparator t13_sample
+    ; make_test "T14" t14_comparator t14_sample
+    ; make_test "T16" t16_comparator t16_sample
+    ; make_test "T18" t18_comparator t18_sample
     ]
