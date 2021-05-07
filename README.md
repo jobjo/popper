@@ -7,7 +7,7 @@
 > falsifiable; and in so far as it is not falsifiable, it does not speak about
 > reality*.
 
-(Kar Popper)
+(Karl Popper)
 
 [Popper](https://github.com/jobjo/popper) is an OCaml testing library that can
 be used for writing simple *unit-tests* as well as *property-based* ones. Its
