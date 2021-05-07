@@ -415,7 +415,7 @@ both the ppx and the testing library.</p>
 <p>Currently, using the <code>[@@deriving ... popper]</code> attribute also requires
 dependencies for deriving <code>show</code> and <code>ord</code> for your data types. Below is an
 example <a href="https://github.com/ocaml/dune">dune</a> file for defining a test. It
-assumes a file <code>run.ml</code>.</p>
+assumes a file <code>run.ml</code>:</p>
 <pre><code class="language-lisp">(test
  (name run)
  (preprocess
@@ -432,49 +432,49 @@ let () =
 </code></pre>
 <p>When run with <code>dune runtest</code>, it produces the following output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917024-04042200-ac46-11eb-950b-dafe2575a559.png" /></p>
-<p>The function <code>check</code> is for running a single (anonymous) test.  Its signature
+<p>The function <code>check</code> is for running a single (anonymous) test. Its signature
 is:</p>
 <pre><code class="language-ocaml">val check : ?⁠config:Config.t -&gt; (unit -&gt; Proposition.t Sample.t) -&gt; unit
 </code></pre>
 <p>As you can see, it takes a function that produces a value of type
 <code>Proposition.t Sample.t</code> and runs it.</p>
-<p>We'll discuss <em>samples</em> in the next sections.  The <code>Proposition.t</code> value is the
-result of the test, and can take on one of the following values:</p>
+<p>We'll discuss <em>samples</em> in the next sections. The <code>Proposition.t</code> value is the
+result of the test, and evaluates to any of the following values:</p>
 <ul>
-<li><code>pass</code> — the proposition is <code>true</code>, the test/sample passed.</li>
-<li><code>fail</code> — the proposition is <code>false</code>, the test/sample failed.</li>
-<li><code>discarded</code> — the proposition is neither <code>true</code> nor <code>false</code>, the tests/sample is discarded.</li>
+<li><code>pass</code> — the proposition is <code>true</code>, the test passed.</li>
+<li><code>fail</code> — the proposition is <code>false</code>, the test failed.</li>
+<li><code>discarded</code> — the proposition is neither <code>true</code> nor <code>false</code>, the tests was discarded.</li>
 </ul>
 <p>The function <code>equal</code> constructs a proposition for stating that two values 
 are equal according to a given <code>Comparator.t</code> value:</p>
 <pre><code class="language-ocaml">val equal : ?⁠loc:string -&gt; 'a Comparator.t -&gt; 'a -&gt; 'a -&gt; Proposition.t Sample.t
 </code></pre>
-<p>An <code>'a Comparator.t</code> value consists of a <em>compare function</em> and a
-<em>pretty-printer</em> for the type <code>'a</code>.  For convenience, the function returns in
+<p>A value of type <code>a Comparator.t</code> wraps a <em>compare function</em> and a
+<em>pretty-printer</em> for the type <code>a</code>. For convenience, the function returns in
 the <code>Sample.t</code> context.</p>
 <p>In this case we construct an <code>int list Comparator.t</code> value using the <code>list</code>
 combinator from the <code>Comparator</code> module. </p>
-<p>Let's see what happens when a test fails.  Modifying the example above slightly:</p>
+<p>Let's see what happens when a test fails. Modifying the example above slightly:</p>
 <pre><code class="language-ocaml">let () =
   check @@ fun () -&gt;
     equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ]
 </code></pre>
 <p>This now yields:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png" /></p>
-<p>The reason the comparator contains a pretty-printer is to be able to explain why
+<p>The reason the comparator contains a pretty-printer is to be able to explain <em>why</em>
 a particular proposition failed for the given arguments.</p>
 <h2 id="property-based-tests">Property-based tests</h2>
 <p>A <em>property-based test</em> is one that, instead of verifying concrete examples,
-confirms that a certain <em>property</em> holds for a large number sampled data.  The
+confirms that a certain <em>property</em> holds for a large number sampled data. The
 technique was popularized by the Haskell library
 <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>. Using
-property-based testing effectively is a topic of its own and independent of the
-particular library or language one is using. Here's a <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">good
+property-based testing effectively is a topic of its own and is independent of
+the particular choice of library or language. Here's a <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">good
 article</a> with
 examples using F#.</p>
-<p>As a simple example, consider a test that verifies that reversing a list twice
-results in the same list.  Using <a href="https://github.com/jobjo/popper">Popper</a>, it
-can be expressed as follows:</p>
+<p>The school-book example for property-based testing is one that verifies that
+reversing a list twice gives the same list back.  Using
+<a href="https://github.com/jobjo/popper">Popper</a>, it can be expressed as follows:</p>
 <pre><code class="language-ocaml">open Popper
 open Sample.Syntax
 
@@ -483,13 +483,12 @@ let () =
     let* xs = Sample.(list int) in
     equal Comparator.(list int) (List.rev (List.rev xs)) xs
 </code></pre>
-<p>In the test, <code>xs</code> is a sample of list of integers.  The test returns a
-proposition that asserts states that reversing <code>xs</code> twice gives the
-same list back.</p>
-<p>The function returns in the <code>Sample.t</code> context.  The <code>let*</code> syntax defined in
-the <code>Sample.Syntax</code> module provides a convenient method for expressing this
-in a declarative way.</p>
-<p>When run, it yields the output:</p>
+<p>In the test, <code>xs</code> is a <em>sample</em> of list of integers.  The test returns a
+<em>proposition</em> that asserts that reversing <code>xs</code> twice gives the same list back.</p>
+<p>The function returns in the <code>Sample.t</code> context, which we will discuss in the
+next sections. The <code>let*</code> syntax defined in the <code>Sample.Syntax</code> module provides
+a convenient method for expressing this in a declarative way.</p>
+<p>When run, it produces the following output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917398-842a8780-ac46-11eb-8bfc-154cef57529a.png" /></p>
 <p>The function <code>check</code> evaluates the property multiple times (300 by default), by
 drawing different samples and checking the resulting proposition for each of
@@ -499,7 +498,7 @@ them.  </p>
 <p>In <a href="https://github.com/jobjo/popper">Popper</a>, there is no fundamental difference between unit tests and property-based tests. 
 They are constructed and run using the same functions. </p>
 </div>
-<p>To see what happens when a test fails, here is an example verifying that
+<p>To see what happens when a test fail, here is an example verifying that
 <code>List.sort</code> returns a sorted list, but where the condition does not account for
 lists containing duplicates:</p>
 <pre><code class="language-ocaml">let rec is_sorted = function
@@ -516,15 +515,16 @@ boolean condition is <code>true</code>.  </p>
 <p>This test fails with:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917535-ade3ae80-ac46-11eb-8a92-7b0d10a67fd8.png" /></p>
 <p>The output is not very helpful as all that is revealed is that the proposition
-failed because the boolean condition was <code>false</code>.  In order to actually see the
-drawn sample list, for which the condition <code>is_sorted</code> did not hold, you need to
-add some logging.  The simplest way is to use the function <code>Sample.with_log</code>:</p>
+failed because the boolean condition was <code>false</code>. In order to actually observe
+the drawn sample list, for which the condition <code>is_sorted</code> did not hold, you
+need to add some logging.  The simplest way is to use the function
+<code>Sample.with_log</code>:</p>
 <pre><code class="language-ocaml">val with_log : string -&gt; (Stdlib.Format.formatter -&gt; 'a -&gt; unit) -&gt; 'a Sample.t -&gt; 'a Sample.t
 </code></pre>
 <p>It takes a string value for the key, a pretty-printer and a sampler, and it
 returns a new <code>Sample.t</code> value that also records the sampled values.</p>
 <p>To quickly obtain a pretty-printer for lists of integers, you may derive it using
-<code>[@@deriving show]</code>.  We'll soon see how to also derive samplers and comparators
+<code>[@@deriving show]</code>.  We'll soon see how to also derive <em>samplers</em> and <em>comparators</em>
 as well. For now:</p>
 <pre><code class="language-ocaml">type int_list = int list [@@deriving show]
 
@@ -537,7 +537,7 @@ let () =
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917809-0c109180-ac47-11eb-8096-1896a1d832f1.png" /></p>
 <p>The log section now displays the sample value <code>xs</code> for which the test failed. </p>
 <p>A property-based test such as the one above is run multiple times, a unit-test
-is only run once.  How does the <code>check</code> function know how to distinguish between
+is only run once. How does the <code>check</code> function know how to distinguish between
 the two?  The answer is that a unit test does not consume any input when
 generating the resulting proposition.  Any property-based test must consume some
 data for drawing (pseudo-random) samples.  A value of type <code>a Sample.t</code> is
@@ -588,14 +588,14 @@ let tests =
 
 let () = run tests
 </code></pre>
-<p>Hopefully the definitions are straight-forward.  There are three tests which
+<p>Hopefully the definitions are straight-forward. There are three tests which
 are defined using the function <code>test</code>. They are packed together via <code>suite</code>
 and executed with <code>run</code>.</p>
 <p>This results in the output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917989-411ce400-ac47-11eb-808c-3e062331e45a.png" /></p>
-<p>Note that the value <code>tests</code> has the same type as <code>test_rev</code> ,
+<p>Note that the value <code>tests</code> has the same type as <code>test_rev</code>,
 <code>test_rev_twice</code>, and <code>test_sort</code>, namely <code>Test.t</code>.  That means that test
-suites may also be nested.  For instance, as in:</p>
+suites may also be nested. For instance, as in:</p>
 <pre><code class="language-ocaml">let rev_suite =
   suite [ (&quot;Simple list&quot;, test_rev); (&quot;Reverse twice&quot;, test_rev_twice) ]
 
