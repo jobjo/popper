@@ -5,6 +5,7 @@ val map : ('a -> 'b) -> 'a t -> 'b t
 val return : 'a -> 'a t
 val bind : 'a t -> ('a -> 'b t) -> 'b t
 val both : 'a t -> 'b t -> ('a * 'b) t
+val size : int t
 val sized : (int -> 'a t) -> 'a t
 val resize : int -> 'a t -> 'a t
 val one_of : 'a t list -> 'a t

@@ -7,24 +7,18 @@ let map f gen = make (fun input -> Output.map f @@ run input gen)
 
 let return value =
   make (fun input ->
-    let size = Input.size input in
-    Output.make
-      ~value
-      ~size
-      ~consumed:Consumed.empty
-      ~remaining:input
-      ~log:Log.empty)
+    Output.make ~value ~consumed:Consumed.empty ~remaining:input ~log:Log.empty)
 
-let bind gen f =
+let bind s f =
   make (fun input ->
-    let o1 = run input gen in
-    let o2 = run (Output.remaining o1) (f @@ Output.value o1) in
-    let consumed = Consumed.add (Output.consumed o1) (Output.consumed o2) in
-    let log = Log.add (Output.log o1) (Output.log o2) in
-    o2
-    |> Output.set_consumed consumed
-    |> Output.set_log log
-    |> Output.set_size (Input.size input))
+    let output1 = run input s in
+    let input2 = Output.remaining output1 in
+    let output2 = run input2 (f @@ Output.value output1) in
+    let consumed =
+      Consumed.add (Output.consumed output1) (Output.consumed output2)
+    in
+    let log = Log.add (Output.log output1) (Output.log output2) in
+    output2 |> Output.set_consumed consumed |> Output.set_log log)
 
 let both g1 g2 =
   let ( let* ) = bind in
@@ -33,7 +27,14 @@ let both g1 g2 =
   return (x, y)
 
 let size = make @@ fun input -> run input (return @@ Input.size input)
-let resize size g = make @@ fun input -> run (Input.set_size size input) g
+
+let resize size s =
+  make (fun input ->
+    let org_size = Input.size input in
+    let output = run (Input.set_size size input) s in
+    let remaining = Input.set_size org_size @@ Output.remaining output in
+    Output.set_remaining remaining output)
+
 let delayed f = make (fun input -> run input @@ f ())
 
 module Syntax = struct
@@ -47,8 +48,7 @@ open Syntax
 
 let log log =
   make (fun input ->
-    let size = Input.size input in
-    Output.make ~value:() ~size ~consumed:Consumed.empty ~remaining:input ~log)
+    Output.make ~value:() ~consumed:Consumed.empty ~remaining:input ~log)
 
 let log_with pp x =
   let pp out = Format.fprintf out "%a" pp x in
@@ -83,7 +83,6 @@ let int32 =
     | Some (value, remaining) ->
       Output.make
         ~value
-        ~size:(Input.size input)
         ~consumed:(Consumed.value value)
         ~remaining
         ~log:Log.empty)
@@ -174,12 +173,7 @@ let promote f =
       Consumed.tag Tag.Function @@ Consumed.value (List.hd @@ Input.take 1 input)
     in
     let remaining = Input.drop 1 input in
-    Output.make
-      ~value
-      ~size:(Input.size input)
-      ~consumed
-      ~remaining
-      ~log:Log.empty)
+    Output.make ~value ~consumed ~remaining ~log:Log.empty)
 
 let bool = tag Tag.Bool @@ one_value_of [ false; true ]
 

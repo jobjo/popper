@@ -13,6 +13,7 @@ val shrink
   :  max_tries:int
   -> max_tries_modify:int
   -> num_shrink_rounds:int
+  -> size:int
   -> Proposition.t Output.t
   -> Proposition.t Sample.t
   -> result Random.t

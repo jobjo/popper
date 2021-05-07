@@ -197,10 +197,10 @@ let shrink
   ~max_tries
   ~max_tries_modify
   ~num_shrink_rounds
+  ~size
   output
   (gen : Proposition.t Sample.t)
   =
-  let size = Output.size output in
   let node = of_consumed @@ Output.consumed output in
   let keep t =
     let input = to_input ~size t in

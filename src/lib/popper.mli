@@ -94,6 +94,9 @@ module Sample : sig
       combines their result. *)
   val both : 'a t -> 'b t -> ('a * 'b) t
 
+  (** [size] returns the current [max-size] argument. *)
+  val size : int t
+
   (** [sized f] lifts the function [f] that depend on a size argument to a
       sample. *)
   val sized : (int -> 'a t) -> 'a t

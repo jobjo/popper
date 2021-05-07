@@ -20,6 +20,7 @@ let is_result_discarded { Test_result.status; _ } =
   | _ -> false
 
 let run ?(config = Config.default) ts =
+  let seed = Random.Seed.make @@ Config.get_seed config in
   let rec flatten = function
     | Single res -> [ (None, res) ]
     | Suite ts ->
@@ -36,30 +37,27 @@ let run ?(config = Config.default) ts =
             (flatten test))
         ts
   in
-  let results =
-    let+ results =
+  let num_passed, num_failed, num_discarded, results, time =
+    let results, time =
+      Util.Timer.time_it @@ fun () ->
       flatten ts
       |> List.map (fun (name, f) ->
            let res = f config in
-           Random.map (fun x -> { x with Test_result.name }) res)
-      |> Random.sequence
+           Random.map (fun x -> { x with Test_result.name }) res
+           |> Random.eval seed)
     in
     let num_failed = List.length @@ List.filter is_result_fail results in
     let num_passed = List.length @@ List.filter is_result_passed results in
     let num_discarded =
       List.length @@ List.filter is_result_discarded results
     in
-    (num_passed, num_failed, num_discarded, results)
+    (num_passed, num_failed, num_discarded, results, time)
   in
-  let random =
-    let+ (num_passed, num_failed, num_discarded, results), time =
-      Random.timed results
-    in
+  let test_result =
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  let res = Random.eval (Random.Seed.make @@ Config.get_seed config) random in
-  Test_result.pp Format.std_formatter res;
-  res.Test_result.num_failed = 0
+  Test_result.pp Format.std_formatter test_result;
+  test_result.Test_result.num_failed = 0
 
 let single t = Single t
 let suite ts = Suite ts
@@ -142,6 +140,7 @@ let make ?(config = Config.default) test_fun =
                 ~max_tries
                 ~max_tries_modify
                 ~num_shrink_rounds:10
+                ~size
                 output
                 (test_fun ())
             in
