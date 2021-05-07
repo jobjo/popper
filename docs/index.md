@@ -18,9 +18,9 @@ High-level features of Popper include:
 ## Learn
 
 - Check out the [getting started](getting_started) section for a step by step introduction.
-- Take a look at some examples in the [examples](https://github.com/jobjo/popper/examples) folder.
-- Browse the [API docs](https://github.com/jobjo/popper/api/index.html).
-- View the [source repository](https://github.com/jobjo/popper/api/index.html).
+- Take a look at some examples in the [examples](https://github.com/jobjo/popper/tree/main/examples) folder.
+- Browse the [API docs](https://jobjo.github.io/popper/api/).
+- View the [source repository](https://github.com/jobjo/popper).
 
 ## Show me an example
 
