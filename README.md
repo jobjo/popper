@@ -14,8 +14,8 @@ be used for writing simple *unit-tests* as well as *property-based* ones. Its
 underlying design is inspired by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
-See the documentation page [here](https://jobjo.github.io/popper/) for
-information on how to get started.
+See the [documentation page](https://jobjo.github.io/popper/) for information on
+how to get started.
 
 ## Overview
 
