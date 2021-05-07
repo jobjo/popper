@@ -22,9 +22,9 @@ High-level features of Popper include:
 
 ## Learn
 
-- See the [getting started](docs/../getting_started) section for a step by step introduction.
+- See the [getting started](getting_started) section for a step by step introduction.
 - Checkout the examples in the [examples](https://github.com/jobjo/popper/examples) folder.
-- Browse the [API docs](docs/api).
+- Browse the [API docs](api).
 
 ## Show me an example
 

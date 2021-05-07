@@ -1,6 +1,10 @@
 .PHONY: test format examples
 all:
 	dune build 
+
+clean:
+	dune clean
+
 test:
 	dune runtest --force
 
