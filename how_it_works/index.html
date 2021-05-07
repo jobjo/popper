@@ -98,14 +98,14 @@ has to do with how sample generation and shrinking works.</p>
 <li><em>Shrinkers</em> — for simplifying values that results in failing tests.</li>
 </ul>
 <p>For any custom data-type you wish to sample, you need to provide a generator as
-well as a shrinker (or no shrinking will be applied).  Further, any invariant —
-with respect to how the data is to be generated must also be reflected in the
+well as a shrinker (or no shrinking is applied).  Further, any invariant —
+with respect to how the data is to be generated — must also be reflected in the
 shrinker.</p>
 <p>In <a href="https://github.com/jobjo/popper">Popper</a> and
 <a href="https://hypothesis.readthedocs.io/en/latest">Hypothesis</a>, shrinking is generic
 and never violate any invariants embedded in the generators. This eliminates the
 hassle of defining shrinkers and keeping them in synch. The downside is that it
-less efficient and doesn't always result in optimally shrunken results.</p>
+is less efficient and doesn't always result in optimally shrunken results.</p>
 <h2 id="sampling-and-shrinking">Sampling and shrinking</h2>
 <p>A <em>sampler</em>, in Popper, is a value of some type <code>a
 Sample.t</code> and corresponds to a <em>generator</em> in
