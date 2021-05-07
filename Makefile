@@ -23,10 +23,10 @@ serve-docs:
 	mkdocs serve
 
 # Builds and publishes docs to gh-pages branch
-publish-docs: test
+publish-docs:
 	dune build @doc
 	mkdocs build
 	cp -r _build/default/_doc/_html site/api
 	git checkout gh-pages
-	cp -r site/* ./
-	git commit -am "Latest docs"
+	cp -rf site/* ./
+	rm -rf site

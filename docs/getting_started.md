@@ -26,7 +26,7 @@ Similarly, if you're using the ppx, adding a preprocessor dependency on
 Currently, using the `[@@deriving ... popper]` attribute also requires
 dependencies for deriving `show` and `ord` for your data types. Below is an
 example [dune](https://github.com/ocaml/dune) file for defining a test. It
-assumes a file `run.ml`.
+assumes a file `run.ml`:
 
 ```lisp
 (test
@@ -53,7 +53,7 @@ When run with `dune runtest`, it produces the following output:
 ![image](https://user-images.githubusercontent.com/820478/116917024-04042200-ac46-11eb-950b-dafe2575a559.png)
 
 
-The function `check` is for running a single (anonymous) test.  Its signature
+The function `check` is for running a single (anonymous) test. Its signature
 is:
 
 ```ocaml
@@ -63,12 +63,12 @@ val check : ?⁠config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
 As you can see, it takes a function that produces a value of type
 `Proposition.t Sample.t` and runs it.
 
-We'll discuss *samples* in the next sections.  The `Proposition.t` value is the
-result of the test, and can take on one of the following values:
+We'll discuss *samples* in the next sections. The `Proposition.t` value is the
+result of the test, and evaluates to any of the following values:
 
-- `pass` — the proposition is `true`, the test/sample passed.
-- `fail` — the proposition is `false`, the test/sample failed.
-- `discarded` — the proposition is neither `true` nor `false`, the tests/sample is discarded.
+- `pass` — the proposition is `true`, the test passed.
+- `fail` — the proposition is `false`, the test failed.
+- `discarded` — the proposition is neither `true` nor `false`, the tests was discarded.
 
 The function `equal` constructs a proposition for stating that two values 
 are equal according to a given `Comparator.t` value:
@@ -77,14 +77,14 @@ are equal according to a given `Comparator.t` value:
 val equal : ?⁠loc:string -> 'a Comparator.t -> 'a -> 'a -> Proposition.t Sample.t
 ```
 
-An `'a Comparator.t` value consists of a *compare function* and a
-*pretty-printer* for the type `'a`.  For convenience, the function returns in
+A value of type `a Comparator.t` wraps a *compare function* and a
+*pretty-printer* for the type `a`. For convenience, the function returns in
 the `Sample.t` context.
 
 In this case we construct an `int list Comparator.t` value using the `list`
 combinator from the `Comparator` module. 
 
-Let's see what happens when a test fails.  Modifying the example above slightly:
+Let's see what happens when a test fails. Modifying the example above slightly:
 
 ```ocaml 
 let () =
@@ -92,28 +92,27 @@ let () =
     equal Comparator.(list int) (List.rev [ 1; 2; 3 ]) [ 2; 3; 1 ]
 ```
 
-
 This now yields:
 
 ![image](https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png)
 
-The reason the comparator contains a pretty-printer is to be able to explain why
+The reason the comparator contains a pretty-printer is to be able to explain *why*
 a particular proposition failed for the given arguments.
 
 ## Property-based tests
 
 A *property-based test* is one that, instead of verifying concrete examples,
-confirms that a certain *property* holds for a large number sampled data.  The
+confirms that a certain *property* holds for a large number sampled data. The
 technique was popularized by the Haskell library
 [QuickCheck](https://hackage.haskell.org/package/QuickCheck). Using
-property-based testing effectively is a topic of its own and independent of the
-particular library or language one is using. Here's a [good
+property-based testing effectively is a topic of its own and is independent of
+the particular choice of library or language. Here's a [good
 article](https://fsharpforfunandprofit.com/posts/property-based-testing-2/) with
 examples using F#.
 
-As a simple example, consider a test that verifies that reversing a list twice
-results in the same list.  Using [Popper](https://github.com/jobjo/popper), it
-can be expressed as follows:
+The school-book example for property-based testing is one that verifies that
+reversing a list twice gives the same list back.  Using
+[Popper](https://github.com/jobjo/popper), it can be expressed as follows:
 
 ```ocaml 
 open Popper
@@ -125,15 +124,14 @@ let () =
     equal Comparator.(list int) (List.rev (List.rev xs)) xs
 ```
 
-In the test, `xs` is a sample of list of integers.  The test returns a
-proposition that asserts states that reversing `xs` twice gives the
-same list back.
+In the test, `xs` is a *sample* of list of integers.  The test returns a
+*proposition* that asserts that reversing `xs` twice gives the same list back.
 
-The function returns in the `Sample.t` context.  The `let*` syntax defined in
-the `Sample.Syntax` module provides a convenient method for expressing this
-in a declarative way.
+The function returns in the `Sample.t` context, which we will discuss in the
+next sections. The `let*` syntax defined in the `Sample.Syntax` module provides
+a convenient method for expressing this in a declarative way.
 
-When run, it yields the output:
+When run, it produces the following output:
 
 ![image](https://user-images.githubusercontent.com/820478/116917398-842a8780-ac46-11eb-8bfc-154cef57529a.png)
 
@@ -145,7 +143,7 @@ them.
     In [Popper](https://github.com/jobjo/popper), there is no fundamental difference between unit tests and property-based tests. 
     They are constructed and run using the same functions. 
 
-To see what happens when a test fails, here is an example verifying that
+To see what happens when a test fail, here is an example verifying that
 `List.sort` returns a sorted list, but where the condition does not account for
 lists containing duplicates:
 
@@ -168,9 +166,10 @@ This test fails with:
 ![image](https://user-images.githubusercontent.com/820478/116917535-ade3ae80-ac46-11eb-8a92-7b0d10a67fd8.png)
 
 The output is not very helpful as all that is revealed is that the proposition
-failed because the boolean condition was `false`.  In order to actually see the
-drawn sample list, for which the condition `is_sorted` did not hold, you need to
-add some logging.  The simplest way is to use the function `Sample.with_log`:
+failed because the boolean condition was `false`. In order to actually observe
+the drawn sample list, for which the condition `is_sorted` did not hold, you
+need to add some logging.  The simplest way is to use the function
+`Sample.with_log`:
 
 ```ocaml
 val with_log : string -> (Stdlib.Format.formatter -> 'a -> unit) -> 'a Sample.t -> 'a Sample.t
@@ -180,7 +179,7 @@ It takes a string value for the key, a pretty-printer and a sampler, and it
 returns a new `Sample.t` value that also records the sampled values.
 
 To quickly obtain a pretty-printer for lists of integers, you may derive it using
-`[@@deriving show]`.  We'll soon see how to also derive samplers and comparators
+`[@@deriving show]`.  We'll soon see how to also derive *samplers* and *comparators*
 as well. For now:
 
 ```ocaml
@@ -199,14 +198,13 @@ The result, when run:
 The log section now displays the sample value `xs` for which the test failed. 
 
 A property-based test such as the one above is run multiple times, a unit-test
-is only run once.  How does the `check` function know how to distinguish between
+is only run once. How does the `check` function know how to distinguish between
 the two?  The answer is that a unit test does not consume any input when
 generating the resulting proposition.  Any property-based test must consume some
 data for drawing (pseudo-random) samples.  A value of type `a Sample.t` is
 really a *parser* that reads input from a stream of numbers (`int32` values) and
 produces a result of type `a`.  By varying the input stream we feed to the
 parser, we get different results.
-
 
 !!! note
     Whenever a failing sample is encountered, the `check/run` function attempts to find
@@ -259,7 +257,7 @@ let tests =
 let () = run tests
 ```
 
-Hopefully the definitions are straight-forward.  There are three tests which
+Hopefully the definitions are straight-forward. There are three tests which
 are defined using the function `test`. They are packed together via `suite`
 and executed with `run`.
 
@@ -267,10 +265,9 @@ This results in the output:
 
 ![image](https://user-images.githubusercontent.com/820478/116917989-411ce400-ac47-11eb-808c-3e062331e45a.png)
 
-
-Note that the value `tests` has the same type as `test_rev` ,
+Note that the value `tests` has the same type as `test_rev`,
 `test_rev_twice`, and `test_sort`, namely `Test.t`.  That means that test
-suites may also be nested.  For instance, as in:
+suites may also be nested. For instance, as in:
 
 ```ocaml
 let rev_suite =
