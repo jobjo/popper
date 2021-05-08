@@ -23,9 +23,9 @@
 
 (package
  (name popper)
- (synopsis "An OCaml testing library in the spirit of Karl Popper")
+ (synopsis "Popperty-based testing")
  (description
-  "Popper is an OCaml library for writing regular unit tests as well as property-based tests. The design in inspired by the Python library Hypothesis.")
+  "Popper (after Karl) is an OCaml library for writing regular unit tests as well as property-based tests. The design is inspired by the Python library Hypothesis.")
  (depends
   pringo
   (ocaml
