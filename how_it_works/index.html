@@ -188,6 +188,21 @@
   
   
     <li class="md-nav__item">
+      <a href="../api_documentation/" class="md-nav__link">
+        API documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../getting_started/" class="md-nav__link">
         Getting started
       </a>
@@ -311,40 +326,39 @@
                 
                 <h1 id="how-it-works">How it works</h1>
 <p><a href="https://github.com/jobjo/popper">Popper</a> is designed to facilitate
-property-based testing, where regular unit tests are just special cases.  It's
+property-based testing, where regular unit tests are just special cases. It's
 inspired by a technique introduced by the Python library
 <a href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis</a>. </p>
 <p>The fundamental difference between libraries based on the original
 property-based testing framework, <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>, 
-has to do with how sample generation and shrinking works.</p>
+has to do with how sample generation and shrinking work.</p>
 <p>In QuickCheck-based libraries, there are two orthogonal concepts:</p>
 <ul>
 <li><em>Generators</em> — for generating arbitrary test data (samples).</li>
 <li><em>Shrinkers</em> — for simplifying values that results in failing tests.</li>
 </ul>
 <p>For any custom data-type you wish to sample, you need to provide a generator as
-well as a shrinker (or no shrinking is applied).  Further, any invariant —
-with respect to how the data is to be generated — must also be reflected in the
-shrinker.</p>
+well as a shrinker (or no shrinking is applied). Further, any invariant — with
+respect to how samples are generated — must also be reflected in the shrinker.</p>
 <p>In <a href="https://github.com/jobjo/popper">Popper</a> and
-<a href="https://hypothesis.readthedocs.io/en/latest">Hypothesis</a>, shrinking is generic
-and never violate any invariants embedded in the generators. This eliminates the
-hassle of defining shrinkers and keeping them in synch. The downside is that it
-is less efficient and doesn't always result in optimally shrunken results.</p>
+<a href="https://hypothesis.readthedocs.io/en/latest">Hypothesis</a>, shrinking is
+<em>generic</em> and never violates any invariants embedded in the generators. This
+eliminates the hassle of defining shrinkers and keeping them in synch. The
+downside is that it may be less efficient and doesn't always produce optimally
+shrunken results.</p>
 <h2 id="sampling-and-shrinking">Sampling and shrinking</h2>
-<p>A <em>sampler</em>, in Popper, is a value of some type <code>a
-Sample.t</code> and corresponds to a <em>generator</em> in
-<a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>.</p>
+<p>A <em>sampler</em>, in Popper, is a value of some type <code>a Sample.t</code> and corresponds to
+a <em>generator</em> in <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>.</p>
 <p>When an <code>a Sample.t</code> value is run, it consumes input from a sequence of <code>int32</code>
-numbers. Each number is used for guiding some decision or for parsing a
-primitive value. </p>
+values. Each number is used for guiding some decision or for parsing a primitive
+value. </p>
 <p>Here's a high-level depiction of what is involved in running a test:</p>
 <p align="center">
 <img width="75%" src="../img/testing.svg"/>
 </p>
 
 <p>All the numbers consumed from the input stream are recorded and <em>tagged</em> in
-order to provide some more structure about the role of different sub-segments.
+order to provide some information about the different sub-segments of the input.
 In fact, the <em>consumed</em> data is arranged in a tree structure. This makes it
 easier for the shrinker to modify the tree by either removing sub-branches or
 shrinking the leaves. The tree can be collapsed into a flat structure and
@@ -357,12 +371,11 @@ converted back to a new input-stream, which in turn is fed to the sampler.</p>
 <p>To look at a concrete example, below is dummy-test for illustrating how sampling
 and shrinking really works. The code introduces a new data-type, <code>contact</code>, for
 which a sample function is derived. The function <code>test</code> samples a <code>contact</code>
-value and returns a proposition that fails for any value created by the <code>Mail</code>
+value and returns a proposition that fails for any sample produced by the <code>Mail</code>
 constructor. The derived sample function <code>contact_sample</code> is enhanced with
-<em>logging</em> and also returns the consumed<em> input, via the function
-</em><code>Sample.with_consumed</code>. Additionally the sampler is <em>resized</em> to <code>10</code> so that
-*it will
-produce small (but not too small values) initially:</p>
+<em>logging</em> and also returns the <em>consumed</em> input, via the function
+<em><code>Sample.with_consumed</code>. Additionally the sampler is </em>resized* to <code>10</code> so that
+small — but not too small values — initially:</p>
 <pre><code class="language-ocaml">open Popper
 open Sample.Syntax
 

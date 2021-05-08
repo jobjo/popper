@@ -186,6 +186,21 @@
 
   
   
+  
+    <li class="md-nav__item">
+      <a href="../api_documentation/" class="md-nav__link">
+        API documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -395,8 +410,7 @@
                 
                 <h1 id="getting-started">Getting started</h1>
 <p>In the following sections we'll look at how to get started using
-<a href="https://github.com/jobjo/popper">Popper</a> for writing and running <em>unit</em> and
-<em>property-based</em> tests.</p>
+<a href="https://github.com/jobjo/popper">Popper</a> for writing and running tests.</p>
 <p><a href="https://github.com/jobjo/popper">Popper</a> consists of two parts:</p>
 <ul>
 <li>
@@ -424,7 +438,7 @@ assumes a file <code>run.ml</code>:</p>
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
 </code></pre>
 <h2 id="unit-tests">Unit tests</h2>
-<p>As a first example, here is a simple unit test verifying that the function
+<p>As a first example, here is a simple unit-test verifying that the function
 <code>List.rev</code> behaves as expected when applied with the list <code>[1; 2; 3]</code>:</p>
 <pre><code class="language-ocaml">open Popper
 
@@ -438,17 +452,17 @@ let () =
 is:</p>
 <pre><code class="language-ocaml">val check : ?⁠config:Config.t -&gt; (unit -&gt; Proposition.t Sample.t) -&gt; unit
 </code></pre>
-<p>As you can see, it takes a function that produces a value of type
-<code>Proposition.t Sample.t</code> and runs it.</p>
-<p>We'll discuss <em>samples</em> in the next sections. The <code>Proposition.t</code> value is the
-result of the test, and evaluates to any of the following values:</p>
+<p>It takes a function that produces a value of type <code>Proposition.t Sample.t</code> and
+executes it.</p>
+<p>We'll discuss the <code>Sample.t</code> part in the next sections. The <code>Proposition.t</code>
+value is the result of the test, and evaluates to one of the following values:</p>
 <ul>
-<li><code>pass</code> — the proposition is <code>true</code>, the test passed.</li>
-<li><code>fail</code> — the proposition is <code>false</code>, the test failed.</li>
-<li><code>discarded</code> — the proposition is neither <code>true</code> nor <code>false</code>, the tests was discarded.</li>
+<li><code>pass</code> — the proposition is <code>true</code>, the test passes.</li>
+<li><code>fail</code> — the proposition is <code>false</code>, the test fails.</li>
+<li><code>discarded</code> — the proposition is neither <code>true</code> nor <code>false</code>, the tests is discarded.</li>
 </ul>
-<p>The function <code>equal</code> constructs a proposition for stating that two values 
-are equal according to a given <code>Comparator.t</code> value:</p>
+<p>The function <code>equal</code> constructs a proposition stating that two values are equal
+according to the given <code>Comparator.t</code> value:</p>
 <pre><code class="language-ocaml">val equal : ?⁠loc:string -&gt; 'a Comparator.t -&gt; 'a -&gt; 'a -&gt; Proposition.t Sample.t
 </code></pre>
 <p>A value of type <code>a Comparator.t</code> wraps a <em>compare function</em> and a
@@ -463,18 +477,18 @@ combinator from the <code>Comparator</code> module. </p>
 </code></pre>
 <p>This now yields:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png" /></p>
-<p>The reason the comparator contains a pretty-printer is to be able to explain <em>why</em>
-a particular proposition failed for the given arguments.</p>
+<p>The reason the comparator embeds a pretty-printer is for being able able to
+explain <em>why</em> a particular proposition failed for the given arguments.</p>
 <h2 id="property-based-tests">Property-based tests</h2>
-<p>A <em>property-based test</em> is one that, instead of verifying concrete examples,
-confirms that a certain <em>property</em> holds for a large number sampled data. The
-technique was popularized by the Haskell library
+<p>A <em>property-based test</em> is one that, instead of verifying a concrete test-case,
+confirms that a certain <em>property</em> holds for a large number sampled data points.
+The technique was popularized by the Haskell library
 <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>. Using
 property-based testing effectively is a topic of its own and is independent of
-the particular choice of library or language. Here's a <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">good
+the particular choice of library or language. Here is a <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">good
 article</a> with
 examples using F#.</p>
-<p>The school-book example for property-based testing is one that verifies that
+<p>The school-book example for a property-based test is one that verifies that
 reversing a list twice gives the same list back.  Using
 <a href="https://github.com/jobjo/popper">Popper</a>, it can be expressed as follows:</p>
 <pre><code class="language-ocaml">open Popper
@@ -485,11 +499,10 @@ let () =
     let* xs = Sample.(list int) in
     equal Comparator.(list int) (List.rev (List.rev xs)) xs
 </code></pre>
-<p>In the test, <code>xs</code> is a <em>sample</em> of list of integers.  The test returns a
-<em>proposition</em> that asserts that reversing <code>xs</code> twice gives the same list back.</p>
-<p>The function returns in the <code>Sample.t</code> context, which we will discuss in the
-next sections. The <code>let*</code> syntax defined in the <code>Sample.Syntax</code> module provides
-a convenient method for expressing this in a declarative way.</p>
+<p>In the test, <code>xs</code> is a <em>sample</em> of list of integers. The test returns a
+<em>proposition</em> that asserts that after reversing <code>xs</code> twice we end up with the same list.</p>
+<p>The <code>let*</code> syntax defined in the <code>Sample.Syntax</code> module provides a convenient
+method for expressing this in a declarative way.</p>
 <p>When run, it produces the following output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917398-842a8780-ac46-11eb-8bfc-154cef57529a.png" /></p>
 <p>The function <code>check</code> evaluates the property multiple times (300 by default), by
@@ -497,8 +510,7 @@ drawing different samples and checking the resulting proposition for each of
 them.  </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In <a href="https://github.com/jobjo/popper">Popper</a>, there is no fundamental difference between unit tests and property-based tests. 
-They are constructed and run using the same functions. </p>
+<p>In <a href="https://github.com/jobjo/popper">Popper</a>, there is no fundamental difference between unit tests and property-based tests. They are constructed and run using the same functions. </p>
 </div>
 <p>To see what happens when a test fail, here is an example verifying that
 <code>List.sort</code> returns a sorted list, but where the condition does not account for
@@ -512,22 +524,25 @@ let () =
     let* xs = Sample.(list int) in
     is_true (is_sorted @@ List.sort Int.compare xs)
 </code></pre>
-<p>The function <code>is_true</code> is used for constructing a proposition stating that the given
-boolean condition is <code>true</code>.  </p>
+<p>The function <code>is_true</code> is used for constructing a proposition stating that the
+given boolean condition is <code>true</code>.  </p>
 <p>This test fails with:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917535-ade3ae80-ac46-11eb-8a92-7b0d10a67fd8.png" /></p>
-<p>The output is not very helpful as all that is revealed is that the proposition
-failed because the boolean condition was <code>false</code>. In order to actually observe
-the drawn sample list, for which the condition <code>is_sorted</code> did not hold, you
-need to add some logging.  The simplest way is to use the function
-<code>Sample.with_log</code>:</p>
-<pre><code class="language-ocaml">val with_log : string -&gt; (Stdlib.Format.formatter -&gt; 'a -&gt; unit) -&gt; 'a Sample.t -&gt; 'a Sample.t
+<p>The output is not very informative as all it says is that the proposition failed
+because the boolean condition was <code>false</code>. In order to actually observe the
+drawn sample for which the condition <code>is_sorted</code> did not hold, you need to
+add some logging. The simplest way is to use the function <code>Sample.with_log</code>:</p>
+<pre><code class="language-ocaml">val with_log 
+  : string 
+  -&gt; (Stdlib.Format.formatter -&gt; 'a -&gt; unit) 
+  -&gt; 'a Sample.t 
+  -&gt; 'a Sample.t
 </code></pre>
-<p>It takes a string value for the key, a pretty-printer and a sampler, and it
-returns a new <code>Sample.t</code> value that also records the sampled values.</p>
-<p>To quickly obtain a pretty-printer for lists of integers, you may derive it using
-<code>[@@deriving show]</code>.  We'll soon see how to also derive <em>samplers</em> and <em>comparators</em>
-as well. For now:</p>
+<p>It takes a string value for the key, a pretty-printer, and a sampler. It returns
+a new <code>Sample.t</code> value that also records the sampled values.</p>
+<p>To quickly obtain a pretty-printer for lists of integers, you may derive it
+using <code>[@@deriving show]</code>. We'll soon look at how to also derive <em>samplers</em> and
+<em>comparators</em> as well. For now:</p>
 <pre><code class="language-ocaml">type int_list = int list [@@deriving show]
 
 let () =
@@ -537,15 +552,15 @@ let () =
 </code></pre>
 <p>The result, when run:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917809-0c109180-ac47-11eb-8096-1896a1d832f1.png" /></p>
-<p>The log section now displays the sample value <code>xs</code> for which the test failed. </p>
+<p>The log section now displays the sampled value <code>xs</code> for which the test failed. </p>
 <p>A property-based test such as the one above is run multiple times, a unit-test
-is only run once. How does the <code>check</code> function know how to distinguish between
-the two?  The answer is that a unit test does not consume any input when
-generating the resulting proposition.  Any property-based test must consume some
-data for drawing (pseudo-random) samples.  A value of type <code>a Sample.t</code> is
-really a <em>parser</em> that reads input from a stream of numbers (<code>int32</code> values) and
-produces a result of type <code>a</code>.  By varying the input stream we feed to the
-parser, we get different results.</p>
+is only run once. How does <code>check</code> know how to distinguish between the two?  The
+answer is that a unit test does not consume any input when generating the
+resulting proposition. Any property-based test must consume some data for
+drawing (pseudo-random) samples. A value of type <code>a Sample.t</code> is really a
+<em>parser</em> that reads input from a stream of numbers (<code>int32</code> values) and produces
+a result of type <code>a</code>.  By varying the input stream we feed to the parser, we get
+different results.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Whenever a failing sample is encountered, the <code>check/run</code> function attempts to find
@@ -553,9 +568,9 @@ a <em>smaller</em> counter-example by <em>shrinking</em> the input stream that w
 the sample.</p>
 </div>
 <h2 id="test-suites">Test suites</h2>
-<p>The function <code>check</code> is convenient for quickly running individual tests but when
-working with multiple tests it's best to bundle and run them together.</p>
-<p>There are three essential functions you need to know about:</p>
+<p>The function <code>check</code> is convenient for quickly running individual tests, but
+when working with multiple tests it's best to bundle and run them together.</p>
+<p>There are three essential functions for this purpose:</p>
 <ul>
 <li><code>test</code> for creating a test.</li>
 <li><code>suite</code> for naming and grouping tests together.</li>
@@ -590,14 +605,14 @@ let tests =
 
 let () = run tests
 </code></pre>
-<p>Hopefully the definitions are straight-forward. There are three tests which
-are defined using the function <code>test</code>. They are packed together via <code>suite</code>
-and executed with <code>run</code>.</p>
+<p>Hopefully the definitions are straight-forward. There are three tests which are
+defined using the function <code>test</code>. They are packed together by the <code>suite</code>
+combinator and executed with <code>run</code>.</p>
 <p>This results in the output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917989-411ce400-ac47-11eb-808c-3e062331e45a.png" /></p>
-<p>Note that the value <code>tests</code> has the same type as <code>test_rev</code>,
-<code>test_rev_twice</code>, and <code>test_sort</code>, namely <code>Test.t</code>.  That means that test
-suites may also be nested. For instance, as in:</p>
+<p>Note that the value <code>tests</code> has the same type as <code>test_rev</code>, <code>test_rev_twice</code>,
+and <code>test_sort</code>, namely <code>Test.t</code>. That means that test suites may also be
+nested. For instance, as in:</p>
 <pre><code class="language-ocaml">let rev_suite =
   suite [ (&quot;Simple list&quot;, test_rev); (&quot;Reverse twice&quot;, test_rev_twice) ]
 
@@ -605,17 +620,17 @@ let tests = suite [ (&quot;Reverse&quot;, rev_suite); (&quot;Sort&quot;, test_so
 
 let () = run tests
 </code></pre>
-<p>Which gives:</p>
+<p>Which yields:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918131-6d386500-ac47-11eb-95c6-bc518f039952.png" /></p>
 <p>The nesting is reflected by the output, such as <code>Reverse -&gt; Simple list</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>There is only one type of tests (<code>Test.t</code> values) and tests may be nested
+<p>There is only one type of tests — <code>Test.t</code> values — and tests may be nested
 arbitrarily using the <code>suite</code> combinator.</p>
 </div>
 <h2 id="deriving-samples">Deriving samples</h2>
-<p>For property-based tests we sample data of some type and use the values for
-verifying properties. There are two options:</p>
+<p>For property-based tests, we sample data of some type and use the values for
+verifying certain properties. There are two options for sampling the input data:</p>
 <ol>
 <li>Sample the data and define comparators manually (as done in the examples above).</li>
 <li>Derive <em>sample</em> and <em>comparator</em> functions using the <code>ppx_deriving_popper</code> ppx.</li>
@@ -632,15 +647,14 @@ expressions:</p>
 <pre><code class="language-ocaml">val eval : exp -&gt; bool
 </code></pre>
 <p>What if we would like to write a test that verifies that <code>Lit false</code> is the
-identity expression for <code>Or</code>?  That is, for any expression <code>e</code>, the
-proposition:</p>
+identity expression for <code>Or</code>?  That is, for any expression <code>e</code>, the following
+proposition should evaluate to true/pass:</p>
 <pre><code class="language-ocaml">eval e = eval (Or (Lit false, e))
 </code></pre>
-<p>should evaluate to true.</p>
-<p>We must to be able to sample <code>exp</code> values.  We'll cover how to do this manually
-later but the easiest way forward is to derive it.  All that is needed is adding
-an attribute <code>[@@deriving .. popper]</code>.  It also requires deriving <code>ord</code> and <code>show</code> for
-the <em>comparator</em> part. </p>
+<p>How can we sample <code>exp</code> values?  We'll cover how to do this manually in a bit
+but the easiest way forward is to derive it. All that is needed is adding an
+attribute <code>[@@deriving .. popper]</code>. It also requires deriving <code>ord</code> and <code>show</code>
+for the <em>comparator</em> part. </p>
 <pre><code class="language-ocaml">type exp =
   | Lit of bool
   | And of exp * exp
@@ -648,7 +662,7 @@ the <em>comparator</em> part. </p>
   | Not of exp
 [@@deriving show, ord, popper]
 </code></pre>
-<p>At the preprocessing stage, the ppxs generate the additional functions:</p>
+<p>At the preprocessing stage, the popper ppx generates two functions:</p>
 <pre><code class="language-ocaml">val exp_comparator : exp Comparator.t
 val exp_sample : exp Sample.t
 </code></pre>
@@ -660,7 +674,7 @@ val exp_sample : exp Sample.t
 <pre><code class="language-ocaml">let rec eval = function
   | Lit b -&gt; b
   | And (e1, e2) -&gt; eval e1 &amp;&amp; eval e2
-  | Or (e1, e2) -&gt; eval e1 || eval e2
+  | Or (e1, e2) -&gt; eval e1 &amp;&amp; eval e2
   | Not b -&gt; not @@ eval b
 </code></pre>
 <p>Using the <code>exp_sample</code> function, the test is straight forward:</p>
@@ -673,8 +687,8 @@ let () = run test_or
 </code></pre>
 <p>The test now fails after 5 successful samples:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918459-d324ec80-ac47-11eb-829d-cc854a55e307.png" /></p>
-<p>Again, in order to actually view the expression that was generated in order
-for the proposition to fail, we need to add some logging:</p>
+<p>Again, in order to actually see the expression that was generated in order for
+the proposition to fail, we need to add some logging:</p>
 <pre><code class="language-ocaml">let test_or =
   test @@ fun () -&gt;
     let* e = Sample.with_log &quot;e&quot; pp_exp exp_sample in
@@ -682,10 +696,8 @@ for the proposition to fail, we need to add some logging:</p>
 
 let () = run test_or
 </code></pre>
-<p>The <code>with_log</code> function takes a name, here <code>"e"</code>.  We must also pass a
-pretty-printer for <code>exp</code> values.  The function <code>pp_exp</code> is generated from the
-<code>ppx_deriving.show</code> ppx.  The last argument is a sample value to be enhanced
-with logging.</p>
+<p>The <code>with_log</code> requires providing a pretty-printer. We use <code>pp_exp</code> which is
+derived by <code>show</code>. </p>
 <p>When running the test, you now also see the logged values in the output:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116918579-fea7d700-ac47-11eb-8abd-1ce99315ecf1.png" /></p>
 <h2 id="combining-propositions">Combining propositions</h2>
@@ -708,17 +720,20 @@ one to do so, in order to return a successful result.</p>
       ; is_true (eval e = eval (And (Lit true, e)))
       ]
 </code></pre>
+<p>You may also use the combinators from the <a href="https://jobjo.github.io/popper/api/popper/Popper/Proposition/index.html">Proposition
+module</a>,
+which do not return in the <code>Sample</code> context.</p>
 <h2 id="configurations">Configurations</h2>
 <p>As you may have noticed, the functions <code>test</code>, <code>check</code>,  and <code>run</code> all take an
-optional configuration argument called <code>config</code>.  This allows overriding some
+optional configuration argument called <code>config</code>. This allows overriding some
 settings.  Either at the level of an individual test or for all tests when
 passed to <code>run</code>.  In case there are overlapping settings, the ones defined at
 the lowest level, i.e. the ones passed to an individual <code>test</code> take precedence.</p>
-<p>Here are some examples of what can be configured:</p>
+<p>Here are some examples of what may be configured:</p>
 <ul>
 <li><code>num_samples</code> — for specifying the number of samples to be drawn for property-based tests. The default value is 300.</li>
 <li><code>verbose</code> — whether or not the <em>logged</em> values should be displayed for each sample.</li>
-<li><code>max_size</code> — this is a parameter that controls the maximum size parameter for data-structures like a lists. It defaults to 100.</li>
+<li><code>max_size</code> — this is a parameter that controls the maximum size parameter for data-structures like lists. It defaults to 100.</li>
 </ul>
 <p>For the complete list, see the module <code>Popper.Config</code>.</p>
 <p>First, let's see what happens when we run a test configured with <code>verbose</code>. Here's a modified 
@@ -742,7 +757,7 @@ with the <code>Config.all</code> combinator. For example:</p>
 
 let () = run test_not
 </code></pre>
-<p>The output confirms that the number of samples evaluated is now 1000:</p>
+<p>The output confirms that the number of evaluated samples is now 1000:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116919592-66aaed00-ac49-11eb-97dd-ccac8f823e59.png" /></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -757,7 +772,7 @@ you need for testing.  Specifically when:</p>
 <li>The data-type is abstract.</li>
 <li>There are invariants that the samples must satisfy.</li>
 </ol>
-<p>In those cases you may need to write your own samplers.</p>
+<p>In those cases you need to write your own sampler.</p>
 <p>To give an example, consider testing an module, <code>Image</code>, with the following 
 signature:</p>
 <pre><code class="language-ocaml">type color = White | Black | Transparent
@@ -797,14 +812,13 @@ val invert : t -&gt; t
     { width; height; get_pixel }
 end
 </code></pre>
-<p>Now say you would like to write a test for a property that states that
-inverting the image twice results in the same image when rendered.  However,
-it is not possible to derive a sample function for the abstract type
-<code>Image.t</code>.  Further, even if the type had been exposed we'd need to satisfy
-some invariants for the <code>width</code> and the <code>height</code> parameters.  Luckily,
-writing the sample function yourself is straight forward — it's just a matter
-of generating the different parameters.  Here is a version where the width
-and height varies between <code>0</code> and <code>15</code>:</p>
+<p>Now say you would like to write a test for a property that states that inverting
+the image twice results in the same image when rendered. However, it is not
+possible to derive a sample function for the abstract type <code>Image.t</code>. Further,
+even if the type had been exposed we need to constrain the <code>width</code> and the
+<code>height</code> parameters. Luckily, writing the sample function yourself is straight
+forward — it's just a matter of generating the different parameters.  Here is a
+version where the width and height varies between <code>0</code> and <code>14</code>:</p>
 <pre><code class="language-ocaml">let sample_img =
   let* width = Sample.Int.range 0 15 in
   let* height = Sample.Int.range 0 15 in
@@ -829,21 +843,18 @@ let () = run suite
 </code></pre>
 <p>Running the test reveals a bug:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/117197597-e8348380-addf-11eb-83b6-7c37c60cdf67.png" /></p>
-<p>The test failed after the first sample and 13 successful shrink-steps were
+<p>The test failed after the first sample, and 13 successful shrink-steps were
 performed.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>An important feature of <a href="https://github.com/jobjo/popper">Popper</a> is that
 shrinking is <em>embedded</em>. It means that when a failing sample is encountered,
 and an attempt is made to shrink it, the invariants used for constructing
-the sample are always respected!  In the example above — with the <code>Image.t</code>
+the sample are always respected! In the example above — with the <code>Image.t</code>
 sample — shrinking would never cause, say, the <code>height</code> to be negative.</p>
 </div>
-<p>As mentioned above, a value of type <code>a Sample.t</code> is really a parser from an
-input stream to an <code>a</code> value.  Shrinking is performed by attempting to simplify
-the input rather than modifying the parsed values themselves.  Simplifying the
-input is done either by removing some sections or replacing it with smaller
-values. For more information see the <a href="../how_it_works/">how it works</a> section.</p>
+<p>In the <a href="../how_it_works/">how it works</a> section, you can read more about show
+sampling and shrinking really work.</p>
                 
               
               
@@ -862,7 +873,7 @@ values. For more information see the <a href="../how_it_works/">how it works</a>
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href=".." class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="../api_documentation/" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -871,7 +882,7 @@ values. For more information see the <a href="../how_it_works/">how it works</a>
               <span class="md-footer__direction">
                 Previous
               </span>
-              About
+              API documentation
             </div>
           </div>
         </a>
