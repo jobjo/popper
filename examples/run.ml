@@ -8,6 +8,7 @@ let suite =
     ; ("Arithmetic", Arithmetic.suite)
     ; ("Tree", Tree.suite)
     ; ("Equal", Equal.suite)
+    ; ("Image", Image.suite)
     ]
 
 let () = run suite

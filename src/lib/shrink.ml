@@ -174,21 +174,18 @@ let try_shrink { indexed; nodes; overrides; node_indexes } =
   let* arr_ix = R.range 0 @@ Array.length node_indexes in
   let node_ix = Array.get node_indexes arr_ix in
   let+ override = shrink_node @@ unindex @@ IM.find node_ix nodes in
-  match override with
-  | Some override ->
-    let overrides = IM.add node_ix override overrides in
-    let t = { indexed; nodes; overrides; node_indexes } in
-    Some t
-  | None -> None
+  Option.map
+    (fun override ->
+      let overrides = IM.add node_ix override overrides in
+      { indexed; nodes; overrides; node_indexes })
+    override
 
 let modify ~max_tries data =
   let open Random.Syntax in
   let+ r =
     Random.until_some ~max_tries (Random.delayed @@ fun () -> try_shrink data)
   in
-  match r with
-  | Some x -> x
-  | None -> data
+  Option.fold ~none:data ~some:Fun.id r
 
 let to_input ~size c =
   c |> to_consumed |> Consumed.to_list |> List.map snd |> Input.of_list ~size
