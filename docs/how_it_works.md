@@ -1,13 +1,13 @@
 # How it works
 
 [Popper](https://github.com/jobjo/popper) is designed to facilitate
-property-based testing, where regular unit tests are just special cases.  It's
+property-based testing, where regular unit tests are just special cases. It's
 inspired by a technique introduced by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
 The fundamental difference between libraries based on the original
 property-based testing framework, [QuickCheck](https://hackage.haskell.org/package/QuickCheck), 
-has to do with how sample generation and shrinking works.
+has to do with how sample generation and shrinking work.
 
 In QuickCheck-based libraries, there are two orthogonal concepts:
 
@@ -15,25 +15,24 @@ In QuickCheck-based libraries, there are two orthogonal concepts:
 - *Shrinkers* — for simplifying values that results in failing tests.
 
 For any custom data-type you wish to sample, you need to provide a generator as
-well as a shrinker (or no shrinking is applied).  Further, any invariant —
-with respect to how the data is to be generated — must also be reflected in the
-shrinker.
+well as a shrinker (or no shrinking is applied). Further, any invariant — with
+respect to how samples are generated — must also be reflected in the shrinker.
 
 In [Popper](https://github.com/jobjo/popper) and
-[Hypothesis](https://hypothesis.readthedocs.io/en/latest), shrinking is generic
-and never violate any invariants embedded in the generators. This eliminates the
-hassle of defining shrinkers and keeping them in synch. The downside is that it
-is less efficient and doesn't always result in optimally shrunken results.
+[Hypothesis](https://hypothesis.readthedocs.io/en/latest), shrinking is
+*generic* and never violates any invariants embedded in the generators. This
+eliminates the hassle of defining shrinkers and keeping them in synch. The
+downside is that it may be less efficient and doesn't always produce optimally
+shrunken results.
 
 ## Sampling and shrinking
 
-A *sampler*, in Popper, is a value of some type `a
-Sample.t` and corresponds to a *generator* in
-[QuickCheck](https://hackage.haskell.org/package/QuickCheck).
+A *sampler*, in Popper, is a value of some type `a Sample.t` and corresponds to
+a *generator* in [QuickCheck](https://hackage.haskell.org/package/QuickCheck).
 
 When an `a Sample.t` value is run, it consumes input from a sequence of `int32`
-numbers. Each number is used for guiding some decision or for parsing a
-primitive value. 
+values. Each number is used for guiding some decision or for parsing a primitive
+value. 
 
 Here's a high-level depiction of what is involved in running a test:
 
@@ -42,7 +41,7 @@ Here's a high-level depiction of what is involved in running a test:
 </p>
 
 All the numbers consumed from the input stream are recorded and *tagged* in
-order to provide some more structure about the role of different sub-segments.
+order to provide some information about the different sub-segments of the input.
 In fact, the *consumed* data is arranged in a tree structure. This makes it
 easier for the shrinker to modify the tree by either removing sub-branches or
 shrinking the leaves. The tree can be collapsed into a flat structure and
@@ -57,12 +56,11 @@ converted back to a new input-stream, which in turn is fed to the sampler.
 To look at a concrete example, below is dummy-test for illustrating how sampling
 and shrinking really works. The code introduces a new data-type, `contact`, for
 which a sample function is derived. The function `test` samples a `contact`
-value and returns a proposition that fails for any value created by the `Mail`
+value and returns a proposition that fails for any sample produced by the `Mail`
 constructor. The derived sample function `contact_sample` is enhanced with
-*logging* and also returns the consumed* input, via the function
+*logging* and also returns the *consumed* input, via the function
 *`Sample.with_consumed`. Additionally the sampler is *resized* to `10` so that
-*it will
-produce small (but not too small values) initially:
+small — but not too small values — initially:
 
 ```ocaml
 open Popper
@@ -214,5 +212,3 @@ Run.Mail {street = ""; number = None; zip = ""}
 And the final counter-example is displayed:
 
 ![image](https://user-images.githubusercontent.com/820478/117324228-82033b80-ae87-11eb-9783-65207ac3767f.png)
-
-

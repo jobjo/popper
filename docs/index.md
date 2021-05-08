@@ -5,6 +5,9 @@ be used for writing simple *unit-tests* as well as *property-based* ones. Its
 underlying design is inspired by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
+!!! warning
+    Popper is currently in alpha-stage and is to be used at your own risk.
+
 High-level features of Popper include:
 
 - A uniform API for defining regular unit and property-based tests.
@@ -12,19 +15,19 @@ High-level features of Popper include:
 - Compositional design — tests may be bundled and nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
 - Deterministic (and reproducible) results.
-- Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration here).
+- Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist the inspiration).
 - Support for line-number reporting, timing information and logging.
 
 ## Learn
 
 - Check out the [getting started](getting_started) section for a step by step introduction.
-- Take a look at some examples in the [examples](https://github.com/jobjo/popper/tree/main/examples) folder.
-- Browse the [API docs](https://jobjo.github.io/popper/api/).
+- Take a look at some [examples](https://github.com/jobjo/popper/tree/main/examples).
+- Browse the [API](https://jobjo.github.io/popper/api/).
 - View the [source repository](https://github.com/jobjo/popper).
 
 ## Show me an example
 
-Here's what some test output might look like:
+Here's what test output looks like:
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png" />

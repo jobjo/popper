@@ -504,7 +504,7 @@ val all : Proposition.t Sample.t list -> Proposition.t Sample.t
     returns pass in case any of the returned propositions pass. *)
 val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 
-(** {2 Running tests } *)
+(** {1 Running tests } *)
 
 (** [check ?config f] runs a single anonymous test using the [config] settings
     if given. In case the test fails, an exception of type [Popper_error] is
