@@ -7,7 +7,7 @@ module Test = Test
 module Consumed = Consumed
 module Config = Config
 
-exception Popper_error
+exception Test_failure
 
 let suite ts = Test.suite ts
 
@@ -38,6 +38,6 @@ let run ?(config = Config.default) t =
   if Test.run ~config t then
     ()
   else
-    raise Popper_error
+    raise Test_failure
 
 let check ?config f = run ?config (Test.make f)

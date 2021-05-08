@@ -418,7 +418,7 @@ end
 
 (** {1 Types and exceptions } *)
 
-exception Popper_error
+exception Test_failure
 
 (** {1 Constructing tests } *)
 
@@ -507,11 +507,11 @@ val any : Proposition.t Sample.t list -> Proposition.t Sample.t
 (** {1 Running tests } *)
 
 (** [check ?config f] runs a single anonymous test using the [config] settings
-    if given. In case the test fails, an exception of type [Popper_error] is
+    if given. In case the test fails, an exception of type [Test_failure] is
     raised. *)
 val check : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
 
 (** [test ?config t] runs the given test [t] using the [config] settings if
-    given. In case the test fails, an exception of type [Popper_error] is
+    given. In case the test fails, an exception of type [Test_failure] is
     raised. *)
 val run : ?config:Config.t -> Test.t -> unit
