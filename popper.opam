@@ -7,8 +7,8 @@ description:
 maintainer: ["Joel Bjornson <joel.bjornson@gmail.com>"]
 authors: ["Joel Bjornson <joel.bjornson@gmail.com>"]
 license: "ISC"
-homepage: "https://github.com/jobjo/popper/issues"
-doc: "https://github.com/jobjo/popper/issues"
+homepage: "https://github.com/jobjo/popper"
+doc: "https://jobjo.github.io/popper/"
 bug-reports: "https://github.com/jobjo/popper/issues"
 depends: [
   "pringo"

@@ -17,9 +17,9 @@
 
 (bug_reports "https://github.com/jobjo/popper/issues")
 
-(homepage "https://github.com/jobjo/popper/issues")
+(homepage "https://github.com/jobjo/popper")
 
-(documentation "https://github.com/jobjo/popper/issues")
+(documentation "https://jobjo.github.io/popper/")
 
 (package
  (name popper)
