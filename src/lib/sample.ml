@@ -158,11 +158,6 @@ let option g =
       one_of [ return None; map Option.some g ])
 
 let result ~ok ~error = one_of [ map Result.ok ok; map Result.error error ]
-
-let char =
-  let+ n = tag Char @@ map Int32.to_int int32 in
-  Char.chr (48 + (n mod (122 - 48)))
-
 let unit = return ()
 let one_value_of vs = one_of @@ List.map return vs
 
@@ -189,11 +184,6 @@ let fn g =
       run data g)
   in
   promote f
-
-let string =
-  map
-    (fun input -> String.concat "" @@ List.map (String.make 1) input)
-    (list char)
 
 let with_consumed g =
   make (fun input ->
@@ -303,9 +293,24 @@ module Char = struct
   let numeric = map Char.chr @@ Int.range 48 58
   let alpha = choose [ (3., lower); (1., upper) ]
   let alpha_numeric = choose [ (5., lower); (2., upper); (1., numeric) ]
+  let any_char = map Char.chr @@ Int.range 0 256
+
+  let char =
+    choose
+      [ (1., return 'a')
+      ; (10., lower)
+      ; (5., upper)
+      ; (5., alpha_numeric)
+      ; (1., any_char)
+      ]
 end
 
 module String = struct
+  let string =
+    map
+      (fun input -> String.concat "" @@ Stdlib.List.map (String.make 1) input)
+      (list Char.char)
+
   let of_list cs = String.of_seq @@ Stdlib.List.to_seq cs
   let of_length n = map (String.concat "") @@ List.of_length n string
   let range mn mx = map (String.concat "") @@ List.range mn mx string
@@ -346,3 +351,6 @@ let float = Float.float
 let int64 =
   let+ f = float in
   Int64.of_float f
+
+let string = String.string
+let char = Char.char
