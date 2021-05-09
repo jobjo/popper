@@ -1,7 +1,10 @@
 open Popper
 open Sample.Syntax
 
-let eq_list = equal Comparator.(list int)
+type int_list = int list [@@deriving show, ord, popper]
+
+let eq_list = equal int_list_comparator
+let test = test ~config:(Config.num_samples 1000)
 
 let test_rev =
   test (fun () ->
@@ -13,7 +16,7 @@ let test_rev =
 
 let test_rev_twice =
   test (fun () ->
-    let* xs = Sample.list Sample.int in
+    let* xs = int_list_sample in
     eq_list (List.rev (List.rev xs)) xs)
 
 let suite = suite [ ("Reverse", test_rev); ("Reverse twice", test_rev_twice) ]

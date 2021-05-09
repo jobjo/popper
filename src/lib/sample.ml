@@ -195,8 +195,14 @@ let tag_name name = tag (Tag.Name name)
 
 module Int = struct
   let range = range
-  let small = range (-10) 10
-  let medium = range (-1000) 1000
+
+  let small =
+    let pos = range 0 10 in
+    one_of [ pos; map Stdlib.Int.neg pos ]
+
+  let medium =
+    let pos = range 0 1000 in
+    one_of [ pos; map Stdlib.Int.neg pos ]
 
   let any_int =
     let* b = tag Sign int32 in
@@ -209,7 +215,7 @@ module Int = struct
     tag Int
     @@ choose
          [ (5., return 0)
-         ; (10., return 1)
+         ; (20., return 1)
          ; (10., return (-1))
          ; (50., small)
          ; (100., medium)

@@ -24,7 +24,7 @@ let test_and =
 
 let test_or =
   test
-    ~config:Config.(all [ num_samples 50; verbose; max_size 100 ])
+    ~config:Config.(max_size 100)
     (fun () ->
       let* e1 = Sample.with_log "e1" pp sample
       and* e2 = Sample.with_log "e2" pp sample in
