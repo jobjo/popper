@@ -1,5 +1,11 @@
 # About
 
+> *In so far as a scientific statement speaks about reality, it must be
+> falsifiable; and in so far as it is not falsifiable, it does not speak about
+> reality*.
+
+— Karl Popper
+
 [Popper](https://github.com/jobjo/popper) is an OCaml testing library that can
 be used for writing simple *unit-tests* as well as *property-based* ones. Its
 underlying design is inspired by the Python library
@@ -10,7 +16,7 @@ underlying design is inspired by the Python library
 
 High-level features of Popper include:
 
-- A uniform API for defining regular unit and property-based tests.
+- A uniform API for defining regular unit— and property-based tests.
 - Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
