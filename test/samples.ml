@@ -49,7 +49,8 @@ let neg_pos_ratio =
   let* () = Sample.log_key_value "Negative" (string_of_float neg) in
   let* () = Sample.log_key_value "Zero" (string_of_float zero) in
   let* () = Sample.log_key_value "Positive" (string_of_float pos) in
-  all [ in_range 0.48 0.52 neg; in_range 0.48 0.52 pos; in_range 0.01 0.1 zero ]
+  all
+    [ in_range 0.45 0.55 neg; in_range 0.45 0.55 pos; in_range 0.01 0.05 zero ]
 
 let int_range =
   let open Sample in
