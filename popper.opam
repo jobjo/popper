@@ -11,7 +11,7 @@ doc: "https://jobjo.github.io/popper/"
 bug-reports: "https://github.com/jobjo/popper/issues"
 depends: [
   "pringo"
-  "ocaml" {>= "4.09.1"}
+  "ocaml" {>= "4.09.1" & < "4.13"}
   "dune" {>= "2.8"}
   "odoc" {with-doc}
 ]
