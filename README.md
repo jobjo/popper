@@ -15,7 +15,7 @@ how to get started.
 
 High-level features of Popper include:
 
-- A uniform API for defining regular unit— and property-based tests.
+- A uniform API for defining regular unit- and property-based tests.
 - Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
