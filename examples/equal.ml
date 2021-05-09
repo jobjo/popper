@@ -15,7 +15,7 @@ type t =
 
 let test =
   Popper.test
-    ~config:Config.(all [ verbose; max_size 400; num_samples 50 ])
+    ~config:Config.(all [ max_size 400; num_samples 50 ])
     (fun () ->
       let* p = Sample.with_log "p" pp sample in
       equal comparator p p)

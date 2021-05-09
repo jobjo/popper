@@ -24,26 +24,32 @@ let dist f gen =
     | Some n -> float n /. float !count
     | None -> 0.
 
+let in_range mn mx x =
+  all
+    [ less_equal_than Comparator.float mn x
+    ; less_equal_than Comparator.float x mx
+    ]
+
 let neg_pos_ratio =
   test @@ fun () ->
   let lookup =
     dist
-      (fun n -> if n < 0 then `Neg else if n = 0 then `Zero else `Non_neg)
+      (fun n ->
+        if n < 0 then
+          `Neg
+        else if n = 0 then
+          `Zero
+        else
+          `Positive)
       Sample.int
   in
   let neg = lookup `Neg in
   let zero = lookup `Zero in
-  let nneg = lookup `Non_neg in
+  let pos = lookup `Positive in
   let* () = Sample.log_key_value "Negative" (string_of_float neg) in
-  let* () = Sample.log_key_value "Non-negative" (string_of_float nneg) in
   let* () = Sample.log_key_value "Zero" (string_of_float zero) in
-  all
-    [ less_than Comparator.float 0.4 neg
-    ; less_than Comparator.float neg 0.5
-    ; less_than Comparator.float 0.5 nneg
-    ; less_than Comparator.float nneg 0.6
-    ; less_than Comparator.float zero 0.05
-    ]
+  let* () = Sample.log_key_value "Positive" (string_of_float pos) in
+  all [ in_range 0.48 0.52 neg; in_range 0.48 0.52 pos; in_range 0.01 0.1 zero ]
 
 let int_range =
   let open Sample in
