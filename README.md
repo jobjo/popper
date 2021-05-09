@@ -45,7 +45,7 @@ Popper.
 Here's what test output might look like:
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/820478/116737784-8f34ac00-a9e9-11eb-8130-a89adce0522f.png" />
+<img src="https://user-images.githubusercontent.com/820478/117573669-2deb9780-b0d1-11eb-842d-fcc7648d8985.png"/>
 </p>
 
 It was generated from the following code:
@@ -79,13 +79,13 @@ let test_lit_true = test @@ fun () -> is_true (eval (Lit true) = true)
 (* A property-based test *)
 let test_false_ident_or =
   test @@ fun () ->
-    let* e = sample_exp in
-    is_true (eval e = eval (Or (Lit false, e)))
+  let* e = exp_sample in
+  is_true (eval e = eval (Or (Lit false, e)))
 
 (* Another property-based test *)
 let test_true_ident_and =
   test @@ fun () ->
-    let* e = Sample.with_log "e" pp_exp sample_exp in
+    let* e = Sample.with_log "e" pp_exp exp_sample in
     is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
 
 let suite =
