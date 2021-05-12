@@ -11,8 +11,9 @@ doc: "https://jobjo.github.io/popper/"
 bug-reports: "https://github.com/jobjo/popper/issues"
 depends: [
   "ppx_deriving"
-  "popper"
-  "ocaml" {>= "4.09.1" & < "4.13"}
+  "ppxlib"
+  "popper" {= version}
+  "ocaml" {>= "4.09.1" }
   "dune" {>= "2.8"}
   "odoc" {with-doc}
 ]
