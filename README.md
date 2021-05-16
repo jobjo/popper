@@ -73,8 +73,8 @@ let test_lit_true = test @@ fun () -> is_true (eval (Lit true) = true)
 (* A property-based test *)
 let test_false_ident_or =
   test @@ fun () ->
-  let* e = exp_sample in
-  is_true (eval e = eval (Or (Lit false, e)))
+    let* e = exp_sample in
+    is_true (eval e = eval (Or (Lit false, e)))
 
 (* Another property-based test *)
 let test_true_ident_and =
