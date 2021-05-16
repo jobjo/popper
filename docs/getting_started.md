@@ -95,8 +95,8 @@ This now yields:
 
 ![image](https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png)
 
-The reason the comparator embeds a pretty-printer is for being able able to
-explain *why* a particular proposition failed for the given arguments.
+The comparator embeds a pretty-printer for being able to explain why a
+particular proposition failed for the given arguments.
 
 ## Property-based tests
 
@@ -545,9 +545,9 @@ end
 Now say you would like to write a test for a property that states that inverting
 the image twice results in the same image when rendered. However, it is not
 possible to derive a sample function for the abstract type `Image.t`. Further,
-even if the type had been exposed we need to constrain the `width` and the
+even if the type had been exposed, we need to constrain the `width` and the
 `height` parameters. Luckily, writing the sample function yourself is straight
-forward — it's just a matter of generating the different parameters.  Here is a
+forward — it's just a matter of generating the different parameters. Here is a
 version where the width and height varies between `0` and `14`:
 
 ```ocaml
@@ -584,12 +584,13 @@ Running the test reveals a bug:
 The test failed after the first sample, and 13 successful shrink-steps were
 performed.
 
-!!! note
-    An important feature of [Popper](https://github.com/jobjo/popper) is that
-    shrinking is *embedded*. It means that when a failing sample is encountered,
-    and an attempt is made to shrink it, the invariants used for constructing
-    the sample are always respected! In the example above — with the `Image.t`
-    sample — shrinking would never cause, say, the `height` to be negative.
-
-In the [how it works](../how_it_works/) section, you can read more about show
-sampling and shrinking really work.
+!!! note 
+    An important feature of Popper is that shrinking is embedded. It means that
+    when a failing sample is encountered and an attempt is made to shrink it,
+    the invariants used for constructing the sample are always respected! Thus,
+    in the example above — with the `Image.t sample` — shrinking would never
+    cause, say, the height to be negative.
+    
+    
+You can read more about the mechanisms behind sampling and shrinking in the [how
+it works](../how_it_works/) section.

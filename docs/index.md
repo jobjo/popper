@@ -1,14 +1,8 @@
 # About
 
-> *In so far as a scientific statement speaks about reality, it must be
-> falsifiable; and in so far as it is not falsifiable, it does not speak about
-> reality*.
-
-— Karl Popper
-
-[Popper](https://github.com/jobjo/popper) is an OCaml testing library that can
-be used for writing simple *unit-tests* as well as *property-based* ones. Its
-underlying design is inspired by the Python library
+[Popper](https://github.com/jobjo/popper) (after Karl) is an OCaml testing
+library that can be used for writing simple *unit-tests* as well as
+*property-based* ones. Its underlying design is inspired by the Python library
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
 
 !!! warning
