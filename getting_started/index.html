@@ -477,8 +477,8 @@ combinator from the <code>Comparator</code> module. </p>
 </code></pre>
 <p>This now yields:</p>
 <p><img alt="image" src="https://user-images.githubusercontent.com/820478/116917152-3281fd00-ac46-11eb-9316-c1228505ec33.png" /></p>
-<p>The reason the comparator embeds a pretty-printer is for being able able to
-explain <em>why</em> a particular proposition failed for the given arguments.</p>
+<p>The comparator embeds a pretty-printer for being able to explain why a
+particular proposition failed for the given arguments.</p>
 <h2 id="property-based-tests">Property-based tests</h2>
 <p>A <em>property-based test</em> is one that, instead of verifying a concrete test-case,
 confirms that a certain <em>property</em> holds for a large number sampled data points.
@@ -815,9 +815,9 @@ end
 <p>Now say you would like to write a test for a property that states that inverting
 the image twice results in the same image when rendered. However, it is not
 possible to derive a sample function for the abstract type <code>Image.t</code>. Further,
-even if the type had been exposed we need to constrain the <code>width</code> and the
+even if the type had been exposed, we need to constrain the <code>width</code> and the
 <code>height</code> parameters. Luckily, writing the sample function yourself is straight
-forward — it's just a matter of generating the different parameters.  Here is a
+forward — it's just a matter of generating the different parameters. Here is a
 version where the width and height varies between <code>0</code> and <code>14</code>:</p>
 <pre><code class="language-ocaml">let sample_img =
   let* width = Sample.Int.range 0 15 in
@@ -847,14 +847,14 @@ let () = run suite
 performed.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>An important feature of <a href="https://github.com/jobjo/popper">Popper</a> is that
-shrinking is <em>embedded</em>. It means that when a failing sample is encountered,
-and an attempt is made to shrink it, the invariants used for constructing
-the sample are always respected! In the example above — with the <code>Image.t</code>
-sample — shrinking would never cause, say, the <code>height</code> to be negative.</p>
+<p>An important feature of Popper is that shrinking is embedded. It means that
+when a failing sample is encountered and an attempt is made to shrink it,
+the invariants used for constructing the sample are always respected! Thus,
+in the example above — with the <code>Image.t sample</code> — shrinking would never
+cause, say, the height to be negative.</p>
 </div>
-<p>In the <a href="../how_it_works/">how it works</a> section, you can read more about show
-sampling and shrinking really work.</p>
+<p>You can read more about the mechanisms behind sampling and shrinking in the <a href="../how_it_works/">how
+it works</a> section.</p>
                 
               
               
