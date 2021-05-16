@@ -12,7 +12,6 @@ type t =
   | Choice
   | Name of string
   | Sub_list
-[@@deriving show]
 
 val is_operator : t -> bool
 val is_value : t -> bool
