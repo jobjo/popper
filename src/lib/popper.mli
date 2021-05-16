@@ -44,13 +44,16 @@ module Comparator : sig
       and [c2]. *)
   val tuple : 'a t -> 'b t -> ('a * 'b) t
 
-  (** [tuple c] creates a comparator for lists using the the comparator [c]. *)
+  (** [tuple c] creates a comparator for lists using the the comparator [c] for
+      comparing elements. *)
   val list : 'a t -> 'a list t
 
-  (** [array c] creates a comparator for arrays using the the comparator [c]. *)
+  (** [array c] creates a comparator for arrays using the the comparator [c] for
+      comparing elements. *)
   val array : 'a t -> 'a array t
 
-  (** [option c] creates a comparator for options using the the comparator [c]. *)
+  (** [option c] creates a comparator for options using the the comparator [c]
+      for comparing elements. *)
   val option : 'a t -> 'a option t
 
   (** [option ~ok ~error] creates a comparator for result values using the the
@@ -93,7 +96,7 @@ module Sample : sig
   val bind : 'a t -> ('a -> 'b t) -> 'b t
 
   (** [both s1 s2] is a sample that when run executes [s1] followed by [s2] and
-      combines their result. *)
+      combines their results. *)
   val both : 'a t -> 'b t -> ('a * 'b) t
 
   (** [size] returns the current [max-size] argument. *)
@@ -107,7 +110,7 @@ module Sample : sig
       [n].*)
   val resize : int -> 'a t -> 'a t
 
-  (** [one_of ss] is a sample that selects on of the given sample from the list
+  (** [one_of ss] is a sample that selects one of the given sample from the list
       [ss].*)
   val one_of : 'a t list -> 'a t
 
@@ -159,7 +162,7 @@ module Sample : sig
 
   (** {1 Combinators for higher-kinded types } *)
 
-  (** [option s] is a sample that either produces a value [None] or a value of
+  (** [option s] is a sample that either produces a value [None] or a value
       [Some] using [s]. *)
   val option : 'a t -> 'a option t
 
@@ -458,7 +461,7 @@ val less_than
   -> 'a
   -> Proposition.t Sample.t
 
-(** [greater_than?loc cmp x y] is a sample that returns a proposition that is
+(** [greater_than ?loc cmp x y] is a sample that returns a proposition that is
     [pass] only if [x] is greater than [y], using the given comparator [cmp]. If
     [loc] is passed, it reports the location string in case of failure. *)
 val greater_than
@@ -468,6 +471,10 @@ val greater_than
   -> 'a
   -> Proposition.t Sample.t
 
+(** [greater_equal_than ?loc cmp x y] is a sample that returns a proposition
+    that is [pass] only if [x] is greater than or equal to [y], using the given
+    comparator [cmp]. If [loc] is passed, it reports the location string in case
+    of failure. *)
 val greater_equal_than
   :  ?loc:string
   -> 'a Comparator.t
@@ -511,7 +518,7 @@ val any : Proposition.t Sample.t list -> Proposition.t Sample.t
     raised. *)
 val check : ?config:Config.t -> (unit -> Proposition.t Sample.t) -> unit
 
-(** [test ?config t] runs the given test [t] using the [config] settings if
+(** [run ?config t] runs the given test [t] using the [config] settings if
     given. In case the test fails, an exception of type [Test_failure] is
     raised. *)
 val run : ?config:Config.t -> Test.t -> unit
