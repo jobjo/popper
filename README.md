@@ -1,6 +1,5 @@
 <div align="center">
-<img width="35%" src="docs/img/popper_logo.png"/>
-  
+<img width="35%" src="docs/img/logo_dark.png"/>
 # Property-based testing at ease
 
 </div>
