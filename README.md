@@ -1,4 +1,4 @@
-# Popper
+<img width="50%" src="docs/img/popper_logo.png"/>
 
 [![Main workflow](https://github.com/jobjo/popper/workflows/Main%20workflow/badge.svg?branch=main)](https://github.com/jobjo/popper/actions)
 [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://jobjo.github.io/popper/api)
