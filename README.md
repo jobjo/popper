@@ -1,5 +1,5 @@
-<div align="center" style="background-color:white;padding:10px;margin-bottom:10px;border-radius:10px">
-<img width="35%" src="docs/img/logo.png"/>
+<div align="center" >
+<img width="40%" src="docs/img/logo_white_bg.png"/>
 
 # Property-based testing at ease
 
