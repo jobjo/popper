@@ -11,7 +11,7 @@ library that can be used for writing simple *unit-tests* as well as
 High-level features of Popper include:
 
 - A uniform API for defining regular unit- and property-based tests.
-- Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
+- Embedded shrinking — invariants used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
 - Deterministic (and reproducible) results.
@@ -29,7 +29,7 @@ High-level features of Popper include:
 
 Here's what test output looks like:
 
-<img src="https://user-images.githubusercontent.com/820478/117573669-2deb9780-b0d1-11eb-842d-fcc7648d8985.png"/>
+<img src="https://user-images.githubusercontent.com/820478/120936083-ebcc6a80-c6fd-11eb-9449-4f163ed7b03c.png"/>
 
 It was generated from the following code:
 
@@ -71,13 +71,17 @@ let test_true_ident_and =
     let* e = Sample.with_log "e" pp_exp exp_sample in
     is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
 
-let suite =
+(* Bundle some tests together *)
+let exp_suite =
   suite
-    [ ("Hello World", test_hello_world)
-    ; ("Lit true", test_lit_true)
+    [ ("Lit true", test_lit_true)
     ; ("False ident or", test_false_ident_or)
     ; ("True ident and", test_true_ident_and)
     ]
+
+(* Top-level test-suite *)
+let suite =
+  suite [ ("Hello World", test_hello_world); ("Expression", exp_suite) ]
 
 let () = run suite
 ```
