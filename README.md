@@ -44,8 +44,7 @@ Popper.
 Here's what test output might look like:
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/820478/120936083-ebcc6a80-c6fd-11eb-9449-4f163ed7b03c.png"/>
-
+<img src="https://user-images.githubusercontent.com/820478/120936489-eb34d380-c6ff-11eb-8b3d-ce48094225a8.png"/>
 </p>
 
 It was generated from the following code:
