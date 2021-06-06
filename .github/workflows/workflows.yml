@@ -20,23 +20,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-version: ${{ matrix.ocaml-version }}
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-      - run: opam pin add popper.dev . --no-action
-
-      - run: opam depext popper --yes --with-doc --with-test
-
-      - run: opam install . --deps-only --with-doc --with-test
+      - run: opam install . --deps-only --with-test
 
       - run: opam exec -- dune build
 
       - run: opam exec -- dune runtest
-
-      - name: Upload the build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}-${{ matrix.ocaml-version }}-world.exe
-          path: _build/default/world.exe
