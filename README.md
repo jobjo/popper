@@ -21,12 +21,12 @@ how to get started.
 High-level features of Popper include:
 
 - A uniform API for defining regular unit- and property-based tests.
-- Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.
+- Embedded shrinking — invariants used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
 - Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
 - Deterministic (and reproducible) results.
-- Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration here).
-- Support for line-number reporting, timing information and logging.
+- Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration).
+- Support for line-number reporting, timing and logging.
 
 ## Contributing
 
