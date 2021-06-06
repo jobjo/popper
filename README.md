@@ -44,7 +44,8 @@ Popper.
 Here's what test output might look like:
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/820478/117573669-2deb9780-b0d1-11eb-842d-fcc7648d8985.png"/>
+<img src="https://user-images.githubusercontent.com/820478/120936083-ebcc6a80-c6fd-11eb-9449-4f163ed7b03c.png"/>
+
 </p>
 
 It was generated from the following code:
@@ -87,13 +88,17 @@ let test_true_ident_and =
     let* e = Sample.with_log "e" pp_exp exp_sample in
     is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
 
-let suite =
+(* Bundle some tests together *)
+let exp_suite =
   suite
-    [ ("Hello World", test_hello_world)
-    ; ("Lit true", test_lit_true)
+    [ ("Lit true", test_lit_true)
     ; ("False ident or", test_false_ident_or)
     ; ("True ident and", test_true_ident_and)
     ]
+
+(* Top-level test-suite *)
+let suite =
+  suite [ ("Hello World", test_hello_world); ("Expression", exp_suite) ]
 
 let () = run suite
 ```
