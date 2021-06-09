@@ -1,6 +1,5 @@
 (** Popper is an OCaml testing library that can be used for writing simple
-    unit-tests as well as property-based ones. Its underlying design is inspired
-    by the Python library Hypothesis. *)
+    unit-tests as well as property-based ones. *)
 
 (** {1 Modules } *)
 
@@ -62,6 +61,11 @@ module Comparator : sig
 end
 
 module Consumed : sig
+  (** This module defines a type that represents the output of running a sample
+      function ( an ['a Sample.t] value) on some input. The ouput is a a record
+      of the input stream consumed with tags indicating the various sub-sections
+      of the stream that were used for sampling different types of values *)
+
   (** {1 Types }*)
 
   type t
@@ -73,6 +77,10 @@ module Consumed : sig
 end
 
 module Sample : sig
+  (** This module contains functions for drawing arbitrary samples of test data.
+      There are some primitive sample functions as well as combinators for
+      building more complex ones. *)
+
   (** {1 Types }*)
 
   (** A value of type ['a t] is a parser that when run with an [Input.t] value,
@@ -194,6 +202,8 @@ module Sample : sig
   val tag_name : string -> 'a t -> 'a t
 
   module Syntax : sig
+    (** This modules defines the let-bind syntax used for composing samples. *)
+
     (** [let* x = s in body] is the same as [bind s (fun x -> body)]. *)
     val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
@@ -317,6 +327,8 @@ end
 module Proposition : sig
   (** {1 Types } *)
 
+  (** A value of type [t] is a proposition stating some assertion. The values
+      can bet one of [pass], [fail] or [discarded]. *)
   type t
 
   (** {1 Primitives } *)
@@ -380,6 +392,7 @@ module Proposition : sig
 end
 
 module Test : sig
+  (** The type of a single test or a suite of tests. *)
   type t
 end
 
