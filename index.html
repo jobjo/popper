@@ -325,8 +325,8 @@
                 
                 
                 <h1 id="about">About</h1>
-<p><a href="https://github.com/jobjo/popper">Popper</a> (after Karl) is an OCaml testing
-library that can be used for writing simple <em>unit-tests</em> as well as
+<p><a href="https://github.com/jobjo/popper">Popper</a> is an OCaml testing library that can
+be used for writing simple <em>unit-tests</em> as well as
 <em>property-based</em> ones. Its underlying design is inspired by the Python library
 <a href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis</a>. </p>
 <div class="admonition warning">
@@ -336,7 +336,7 @@ library that can be used for writing simple <em>unit-tests</em> as well as
 <p>High-level features of Popper include:</p>
 <ul>
 <li>A uniform API for defining regular unit- and property-based tests.</li>
-<li>Embedded shrinking — invariants that were used when constructing samples for property-based tests are always respected.</li>
+<li>Embedded shrinking — invariants used when constructing samples for property-based tests are always respected.</li>
 <li>Compositional design — tests may be bundled and nested arbitrarily.</li>
 <li>Ships with a <code>ppx</code> for automatically deriving <em>comparator</em> and <em>sample</em> functions for custom data types.  </li>
 <li>Deterministic (and reproducible) results.</li>
@@ -352,7 +352,7 @@ library that can be used for writing simple <em>unit-tests</em> as well as
 </ul>
 <h2 id="show-me-an-example">Show me an example</h2>
 <p>Here's what test output looks like:</p>
-<p><img src="https://user-images.githubusercontent.com/820478/117573669-2deb9780-b0d1-11eb-842d-fcc7648d8985.png"/></p>
+<p><img src="https://user-images.githubusercontent.com/820478/120936083-ebcc6a80-c6fd-11eb-9449-4f163ed7b03c.png"/></p>
 <p>It was generated from the following code:</p>
 <pre><code class="language-ocaml">open Popper
 open Sample.Syntax
@@ -391,13 +391,17 @@ let test_true_ident_and =
     let* e = Sample.with_log &quot;e&quot; pp_exp exp_sample in
     is_true ~loc:__LOC__ (eval e = eval (And (Lit true, e)))
 
-let suite =
+(* Bundle some tests together *)
+let exp_suite =
   suite
-    [ (&quot;Hello World&quot;, test_hello_world)
-    ; (&quot;Lit true&quot;, test_lit_true)
+    [ (&quot;Lit true&quot;, test_lit_true)
     ; (&quot;False ident or&quot;, test_false_ident_or)
     ; (&quot;True ident and&quot;, test_true_ident_and)
     ]
+
+(* Top-level test-suite *)
+let suite =
+  suite [ (&quot;Hello World&quot;, test_hello_world); (&quot;Expression&quot;, exp_suite) ]
 
 let () = run suite
 </code></pre>
