@@ -11,7 +11,7 @@
 [Popper](https://github.com/jobjo/popper) is an OCaml testing library that can
 be used for writing simple *unit-tests* as well as *property-based* ones. Its
 underlying design is inspired by the Python library
-[Hypothesis](https://hypothesis.readthedocs.io/en/latest/). 
+[Hypothesis](https://hypothesis.readthedocs.io/en/latest/).
 
 See the [documentation page](https://jobjo.github.io/popper/) for information on
 how to get started.
@@ -23,7 +23,7 @@ High-level features of Popper include:
 - A uniform API for defining regular unit- and property-based tests.
 - Embedded shrinking — invariants used when constructing samples for property-based tests are always respected.
 - Compositional design — tests may be bundled and nested arbitrarily.
-- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.  
+- Ships with a `ppx` for automatically deriving *comparator* and *sample* functions for custom data types.
 - Deterministic (and reproducible) results.
 - Colorful output (cred goes to [Alcotest](https://github.com/mirage/alcotest), couldn't resist some inspiration).
 - Support for line-number reporting, timing and logging.
@@ -107,7 +107,7 @@ let () = run suite
 Popper is designed with the following objectives in mind:
 
 1. Make it as seamless as possible to write property-based tests — for instance
-by using a ppx to derive *sample* functions for custom data-types.  
+by using a ppx to derive *sample* functions for custom data-types.
 
 2. Use embedded shrinking (ala
 [Hypothesis](https://hypothesis.readthedocs.io/en/latest/)) and eliminate the
@@ -124,13 +124,14 @@ library [Alcotest](https://github.com/mirage/alcotest).
 Here's a table comparing features across different OCaml testing libraries:
 
 
-| Library                                           | Test suites   | Property-based | Embeded shrinking | PPX generators | Fuzzying
-| --------------------------------------------------|:-------------:|:--------------:|:-----------------:|:--------------:|:---------:|
-| Popper                                            | ✅            | ✅              | ✅                | ✅             | ❌ 
-| [Alcotest](https://github.com/mirage/alcotest)    | ✅            | ❌              | -                 | ❌             | -
-| [OUnit](https://github.com/gildor478/ounit)       | ✅            | ❌              | -                 | ❌             | - 
-| [QCheck](https://github.com/c-cube/qcheck)        | ✅            | ✅              | ❌                | ❌             | ❌
-| [Crowbar](https://github.com/stedolan/crowbar)    | ❌            | ✅              | ❌                | ❌              | ✅  
+| Library                                                                   | Test suites   | Property-based | Embeded shrinking | PPX generators | Fuzzying
+| --------------------------------------------------------------------------|:-------------:|:--------------:|:-----------------:|:--------------:|:---------:|
+| [Popper](https://github.com/jobjo/popper)                                 | ✅            | ✅              | ✅                | ✅             | ❌
+| [Alcotest](https://github.com/mirage/alcotest)                            | ✅            | ❌              | -                 | ❌             | -
+| [OUnit](https://github.com/gildor478/ounit)                               | ✅            | ❌              | -                 | ❌             | -
+| [QCheck](https://github.com/c-cube/qcheck)                                | ✅            | ✅              | ❌                | ❌             | ❌
+| [Crowbar](https://github.com/stedolan/crowbar)                            | ❌            | ✅              | ❌                | ❌              | ✅
+| [Base_quickcheck](https://opensource.janestreet.com/base_quickcheck/)     | ❌            | ✅              | ❌                | ✅              | ❌
 
 It might be possible to write some adaptors to be able to integrate with
 these libraries but nothing such exists at the moment.
