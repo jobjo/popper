@@ -327,6 +327,18 @@ module String = struct
   let lower = map of_list @@ list Char.lower
 end
 
+module Bytes = struct
+  let map' = map Bytes.unsafe_of_string
+  let bytes = map' String.string
+  let of_length n = map' @@ String.of_length n
+  let range mn mx = map' @@ String.range mn mx
+  let numeric = map' @@ String.numeric
+  let alpha_numeric = map' @@ String.alpha_numeric
+  let alpha = map' @@ String.alpha
+  let upper = map' @@ String.upper
+  let lower = map' @@ String.lower
+end
+
 module Tuple = struct
   let pair g1 g2 =
     let* size = size in
@@ -359,4 +371,5 @@ let int64 =
   Int64.of_float f
 
 let string = String.string
+let bytes = Bytes.bytes
 let char = Char.char

@@ -22,6 +22,7 @@ val float : float t
 val bool : bool t
 val fn : 'a t -> ('b -> 'a) t
 val string : string t
+val bytes : bytes t
 val option : 'a t -> 'a option t
 val result : ok:'a t -> error:'b t -> ('a, 'b) result t
 val list : 'a t -> 'a list t
@@ -73,6 +74,16 @@ module String : sig
   val alpha : string t
   val upper : string t
   val lower : string t
+end
+
+module Bytes : sig
+  val of_length : int -> bytes t
+  val range : int -> int -> bytes t
+  val alpha_numeric : bytes t
+  val numeric : bytes t
+  val alpha : bytes t
+  val upper : bytes t
+  val lower : bytes t
 end
 
 module Tuple : sig

@@ -58,9 +58,18 @@ let array t =
     (pp_array @@ pp t)
 
 let int = make Int.compare pp_print_int
+let int32 = make Int32.compare (fun fmt a -> Format.fprintf fmt "%ld" a)
+let int64 = make Int64.compare (fun fmt a -> Format.fprintf fmt "%Ld" a)
+let char = make Char.compare pp_print_char
 let float = make Float.compare pp_print_float
 let string = make String.compare pp_print_string
+
+let bytes =
+  make Bytes.compare (fun fmt a ->
+    pp_print_string fmt (Bytes.unsafe_to_string a))
+
 let bool = make Bool.compare pp_print_bool
+let unit = make Unit.compare (fun fmt () -> Format.fprintf fmt "()")
 
 let option t =
   let compare = compare t in
