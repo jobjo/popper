@@ -350,7 +350,7 @@ module Sample : sig
     (** [upper] is sample that always produces upper-case characters. *)
     val upper : bytes t
 
-    (** [upper] is sample that always produces lower-case characters. *)
+    (** [lower] is sample that always produces lower-case characters. *)
     val lower : bytes t
   end
 
