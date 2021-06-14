@@ -85,6 +85,7 @@ type t20 =
   ; c : unit
   ; d : bool
   ; e : int32
+  ; f : bytes
   }
 [@@deriving show, ord, popper]
 

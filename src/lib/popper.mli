@@ -28,11 +28,26 @@ module Comparator : sig
   (** [int] is an integer comparator.*)
   val int : int t
 
+  (** [int32] is an int32 comparator. *)
+  val int32 : int32 t
+
+  (** [int64] is an int64 comparator. *)
+  val int64 : int64 t
+
+  (** [char] is a [char] comparator. *)
+  val char : char t
+
+  (** [unit] is an [unit] comparator. *)
+  val unit : unit t
+
   (** [float] is a float comparator. *)
   val float : float t
 
   (** [bool] is a bool comparator. *)
   val bool : bool t
+
+  (** [string] is a string comparator. *)
+  val bytes : bytes t
 
   (** [string] is a string comparator. *)
   val string : string t
@@ -162,6 +177,9 @@ module Sample : sig
   (** [bool] is a sample that produces [bool] values. *)
   val bool : bool t
 
+  (** [bytes] is a sample that produces [bytes] values. *)
+  val bytes : bytes t
+
   (** [fn s] is a sample that produces a function value. *)
   val fn : 'a t -> ('b -> 'a) t
 
@@ -287,8 +305,8 @@ module Sample : sig
         [n]. *)
     val of_length : int -> string t
 
-    (** [range min max s] is a sample that always produces a string of size [n],
-        where [min <= n < max], using the given sample [s]. *)
+    (** [range min max] is a sample that always produces a string of size [n],
+        where [min <= n < max]. *)
     val range : int -> int -> string t
 
     (** [alpha_numeric] is a sample that produces strings containing
@@ -307,6 +325,33 @@ module Sample : sig
 
     (** [upper] is sample that always produces lower-case characters. *)
     val lower : string t
+  end
+
+  module Bytes : sig
+    (** [of_length n] is a sample that always produces [bytes] of fixed size
+        [n]. *)
+    val of_length : int -> bytes t
+
+    (** [range min max] is a sample that always produces a [bytes] of size [n],
+        where [min <= n < max]. *)
+    val range : int -> int -> bytes t
+
+    (** [alpha_numeric] is a sample that produces [bytes] containing
+        alhpa-numeric characthers. *)
+    val alpha_numeric : bytes t
+
+    (** [numeric] is a sample that produces [bytes] containing numbers *)
+    val numeric : bytes t
+
+    (** [alpha] a sample that produces [bytes] containing characters a-z, both
+        upper and lower case. *)
+    val alpha : bytes t
+
+    (** [upper] is sample that always produces upper-case characters. *)
+    val upper : bytes t
+
+    (** [upper] is sample that always produces lower-case characters. *)
+    val lower : bytes t
   end
 
   module Tuple : sig
