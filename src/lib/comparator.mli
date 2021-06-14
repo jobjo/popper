@@ -11,6 +11,7 @@ val bool : bool t
 val char : char t
 val string : string t
 val bytes : bytes t
+val unit : unit t
 val tuple : 'a t -> 'b t -> ('a * 'b) t
 val list : 'a t -> 'a list t
 val array : 'a t -> 'a array t

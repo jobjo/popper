@@ -69,6 +69,7 @@ let bytes =
     pp_print_string fmt (Bytes.unsafe_to_string a))
 
 let bool = make Bool.compare pp_print_bool
+let unit = make Unit.compare (fun fmt () -> Format.fprintf fmt "()")
 
 let option t =
   let compare = compare t in
