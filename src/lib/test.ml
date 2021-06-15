@@ -56,7 +56,7 @@ let run ?(config = Config.default) ts =
   let test_result =
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  Test_result.pp Format.std_formatter test_result;
+  let () = Test_result.pp Format.std_formatter test_result in
   test_result.Test_result.num_failed = 0
 
 let single t = Single t
@@ -73,7 +73,11 @@ let log_verbose ~index output out =
     log
 
 let make ?(config = Config.default) test_fun =
-  let max_count_discarded = 100 in
+  let test_fun () =
+    try test_fun () with
+    | e -> Sample.return @@ Proposition.fail_with (Printexc.to_string e)
+  in
+  let max_num_discarded = Config.get_max_num_discarded config in
   let eval override =
     let config = Config.all [ override; config ] in
     let count = Config.get_num_samples config in
@@ -89,10 +93,22 @@ let make ?(config = Config.default) test_fun =
       if num_passed >= count then
         Random.return
           (num_passed, Test_result.Pass, Log.empty, verbose_log, false)
-      else if num_discarded > max_count_discarded then
+      else if num_discarded > max_num_discarded then
+        let pp out () =
+          Format.fprintf
+            out
+            {|Maximum number of discarded samples exceeded. The configured limit is %d.|}
+            max_num_discarded
+        in
         Random.return
           ( num_passed
-          , Test_result.Discarded { num_discarded }
+          , Test_result.Fail
+              { num_shrinks = 0
+              ; num_attempts = 1
+              ; explanation = "Too many samples discarded"
+              ; pp
+              ; location = None
+              }
           , Log.empty
           , verbose_log
           , false )
@@ -113,7 +129,7 @@ let make ?(config = Config.default) test_fun =
         | Proposition.Discard ->
           if is_unit then
             Random.return
-              ( 1
+              ( 0
               , Test_result.Discarded { num_discarded = 1 }
               , Log.empty
               , verbose_log

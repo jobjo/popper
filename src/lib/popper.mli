@@ -475,6 +475,8 @@ module Config : sig
   (** [all cs] combines all configuration options [cs]. In case there are
       overlaps, the values at the end of the list take precedence. *)
   val all : t list -> t
+
+  val max_num_discarded : int -> t
 end
 
 (** {1 Types and exceptions } *)
@@ -503,6 +505,9 @@ val pass : Proposition.t Sample.t
 (** [fail ?loc msg] is a sample that returns the value [fail] with location
     [loc] if given and error message [msg]. *)
 val fail : ?loc:string -> string -> Proposition.t Sample.t
+
+(** [discard] is a sample that returns the value [discard]. *)
+val discard : Proposition.t Sample.t
 
 (** [equal ?loc cmp x y] is a sample that returns a proposition that is [pass]
     only if [x] and [y] are equal using the given comparator [cmp]. If [loc] is

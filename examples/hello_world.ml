@@ -19,4 +19,11 @@ let test_rev_twice =
     let* xs = int_list_sample in
     eq_list (List.rev (List.rev xs)) xs)
 
-let suite = suite [ ("Reverse", test_rev); ("Reverse twice", test_rev_twice) ]
+let test_discarded = test (fun () -> discard)
+
+let suite =
+  suite
+    [ ("Reverse", test_rev)
+    ; ("Reverse twice", test_rev_twice)
+    ; ("A discarded test", test_discarded)
+    ]
