@@ -131,6 +131,7 @@ let pp_results out res =
       let color =
         match status with
         | Fail _ -> red
+        | Discarded _ -> yellow
         | _ -> Util.Format.blue
       in
       Table.cell @@ fun out () ->
@@ -150,7 +151,10 @@ let pp_results out res =
             Printf.sprintf "Passed %d samples" num_passed
         | Fail { explanation; _ } -> explanation
         | Discarded { num_discarded } ->
-          Printf.sprintf "Passed %d and %d discarded" num_passed num_discarded
+          if num_passed = 0 && num_discarded = 1 then
+            Printf.sprintf "Discarded"
+          else
+            Printf.sprintf "Passed %d and %d discarded" num_passed num_discarded
       in
       Table.cell @@ fun out () -> fprintf out "%a" (faint pp_print_string) msg
     in

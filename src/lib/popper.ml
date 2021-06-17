@@ -32,6 +32,7 @@ let all ps = Sample.sequence ps |> Sample.map Proposition.all
 let any ps = Sample.sequence ps |> Sample.map Proposition.any
 let pass = Sample.return Proposition.pass
 let fail ?loc s = Sample.return @@ Proposition.fail_with ?loc s
+let discard = Sample.return Proposition.discard
 let test ?(config = Config.default) = Test.make ~config
 
 let run ?(config = Config.default) t =
@@ -40,4 +41,4 @@ let run ?(config = Config.default) t =
   else
     raise Test_failure
 
-let check ?config f = run ?config (Test.make f)
+let check ?config f = run @@ test ?config f
