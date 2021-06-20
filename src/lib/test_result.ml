@@ -113,7 +113,7 @@ let pp_header
       pp_time
       ()
 
-let pp_results out res =
+let pp_results config out res =
   let open Util.Format in
   let to_row
     { name; num_passed; status; time; is_unit; log = _; verbose_log = _ }
@@ -123,9 +123,9 @@ let pp_results out res =
         Table.cell (fun out () -> fprintf out "%a" (color pp_print_string) icon)
       in
       match status with
-      | Pass -> bracket green "✓"
-      | Fail _ -> bracket red "✖"
-      | Discarded _ -> bracket yellow "☐"
+      | Pass -> bracket green @@ Config.get_symbol_pass config
+      | Fail _ -> bracket red @@ Config.get_symbol_fail config
+      | Discarded _ -> bracket yellow @@ Config.get_symbol_discard config
     in
     let name =
       let color =
@@ -272,7 +272,7 @@ let pp_verbose out results =
            log
        | None -> ())
 
-let pp out ({ results; _ } as res) =
+let pp config out ({ results; _ } as res) =
   if num_tests res = 0 then
     fprintf out "No tests run."
   else
@@ -283,7 +283,7 @@ let pp out ({ results; _ } as res) =
       results
       pp_header
       res
-      pp_results
+      (pp_results config)
       results
       pp_failed_results
       results

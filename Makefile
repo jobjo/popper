@@ -1,7 +1,7 @@
 .PHONY: test format examples publish-docs api-docs serve-docs
 
 all:
-	dune build 
+	dune build
 
 clean:
 	dune clean
@@ -9,6 +9,8 @@ clean:
 test:
 	dune runtest --force
 
+test-expect:
+	dune runtest test/expect --force
 examples:
 	dune exec examples/run.exe
 
@@ -21,6 +23,10 @@ make api-docs:
 # Serves docs using MkDocs
 serve-docs:
 	mkdocs serve
+
+# Promote expectation tests
+promote :
+	dune promote
 
 # Builds and publishes docs to gh-pages branch
 publish-docs:

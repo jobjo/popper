@@ -6,5 +6,7 @@ let suite =
     ; ("Config", Config.suite)
     ]
 
+type foo = { bar : int array } [@@deriving show, ord, popper]
+
 let config = Popper.Config.num_samples 1000
 let () = Popper.run ~config suite

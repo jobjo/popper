@@ -41,4 +41,4 @@ let run ?(config = Config.default) t =
   else
     raise Test_failure
 
-let check ?config f = run @@ test ?config f
+let check ?config f = run ?config (test ?config f)
