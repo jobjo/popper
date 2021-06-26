@@ -29,14 +29,6 @@ let leading_spaces s =
   let s' = String.trim s in
   String.length s - String.length s'
 
-let trim f xs =
-  let rec aux = function
-    | [] -> []
-    | x :: xs when f x -> aux xs
-    | xs -> xs
-  in
-  aux xs |> List.rev |> aux |> List.rev
-
 let normalize s =
   let lines =
     s
@@ -47,7 +39,6 @@ let normalize s =
          let s = String.trim s in
          let s = String.sub s 1 (String.length s - 1) in
          s)
-    |> trim (fun s -> String.trim s = "")
   in
   let min_leading_spaces =
     let accum ms s =
@@ -70,4 +61,4 @@ let run suite =
     | _ -> ()
   in
   let output = Format.flush_str_formatter () in
-  Printf.printf "%s\n" @@ normalize output
+  Printf.printf "%s" @@ normalize output

@@ -1,0 +1,18 @@
+
+
+FAIL: 0/1 tests passed and 1 failed in XXs.
+
+  ✖  Anonymous  Failed
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    [3; 2; 1] <> [2; 3; 1]
+
+  Location:
+
+    File "test/expect/fail_with_location.ml", line 7, characters 13-20
+
