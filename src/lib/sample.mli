@@ -26,6 +26,7 @@ val bytes : bytes t
 val option : 'a t -> 'a option t
 val result : ok:'a t -> error:'b t -> ('a, 'b) result t
 val list : 'a t -> 'a list t
+val array : 'a t -> 'a array t
 val log_key_value : string -> string -> unit t
 val with_log : string -> (Format.formatter -> 'a -> unit) -> 'a t -> 'a t
 val with_consumed : 'a t -> ('a * Consumed.t) t

@@ -119,6 +119,8 @@ and of_applied_type ~loc ~is_rec_type ~size ~name ts =
     [%expr Popper.Sample.option [%e of_core_type ~is_rec_type ~size t]]
   | "list", [ t ] ->
     [%expr Popper.Sample.list [%e of_core_type ~is_rec_type ~size t]]
+  | "array", [ t ] ->
+    [%expr Popper.Sample.array [%e of_core_type ~is_rec_type ~size t]]
   | "result", [ t1; t2 ] ->
     [%expr
       Popper.Sample.result

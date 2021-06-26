@@ -150,6 +150,8 @@ let list g =
   in
   tag Tag.List @@ sized aux
 
+let array s = map Array.of_list @@ list s
+
 let option g =
   sized (fun size ->
     if size <= 1 then

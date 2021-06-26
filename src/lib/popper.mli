@@ -201,6 +201,10 @@ module Sample : sig
       parameter. *)
   val list : 'a t -> 'a list t
 
+  (** [array s] is a sample that produces an array using the give [s]. The size
+      of the array is influenced by the implicit [size] parameter. *)
+  val array : 'a t -> 'a array t
+
   (** {1 Debugging combinators } *)
 
   (** [log_key_value key value] is a sample that when run logs the given [key]
