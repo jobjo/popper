@@ -89,6 +89,8 @@ type t20 =
   }
 [@@deriving show, ord, popper]
 
+type t21 = { bar : int array } [@@deriving show, ord, popper]
+
 let make_test name comparator sample =
   let open Popper in
   let open Sample.Syntax in
@@ -116,4 +118,5 @@ let suite =
     ; make_test "T18" t18_comparator t18_sample
     ; make_test "T19" t19_comparator t19_sample
     ; make_test "T20" t20_comparator t20_sample
+    ; make_test "T21" t21_comparator t21_sample
     ]
