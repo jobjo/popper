@@ -1,8 +1,9 @@
 
-
-PASS: 2/3 tests passed, 1 discarded and 0 failed in XXs.
+2/3 tests passed, 1 discarded and 0 failed in XXs:
 
   ✓  Reverse           Passed
   ✓  Reverse twice     Passed 1000 samples
   ☐  A discarded test  Discarded
+
+Test Successful: 2/3 tests passed, 1 discarded and 0 failed in XXs.
 

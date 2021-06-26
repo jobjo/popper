@@ -1,6 +1,5 @@
 
-
-FAIL: 0/1 tests passed and 1 failed in XXs.
+0/1 tests passed and 1 failed in XXs:
 
   ✖  Anonymous  Failed
 
@@ -20,4 +19,6 @@ FAIL: 0/1 tests passed and 1 failed in XXs.
   Location:
 
     File "test/expect/fail_with_logs_and_location.ml", line 10, characters 13-20
+
+Test Failed: 0/1 tests passed and 1 failed in XXs.
 

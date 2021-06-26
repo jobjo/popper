@@ -1,6 +1,5 @@
 
-
-FAIL: 0/1 tests passed and 1 failed in XXs.
+0/1 tests passed and 1 failed in XXs:
 
   ✖  Anonymous  Failed
 
@@ -17,4 +16,5 @@ FAIL: 0/1 tests passed and 1 failed in XXs.
     x = 42
     y = Dummy
 
+Test Failed: 0/1 tests passed and 1 failed in XXs.
 
