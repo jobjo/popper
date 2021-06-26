@@ -1,0 +1,15 @@
+
+0/1 tests passed and 1 failed in XXs:
+
+  ✖  Anonymous  Failed
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed                                                                                 │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    Failure("Oh no")
+
+Test Failed: 0/1 tests passed and 1 failed in XXs.
+
