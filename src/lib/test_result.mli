@@ -31,4 +31,4 @@ type t =
   ; results : result list
   }
 
-val pp : Format.formatter -> t -> unit
+val pp : Config.t -> Format.formatter -> t -> unit

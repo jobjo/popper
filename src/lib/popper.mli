@@ -481,6 +481,22 @@ module Config : sig
   val all : t list -> t
 
   val max_num_discarded : int -> t
+
+  (*** [formatter fmt] sets the formatter to be used. Defaults to
+    [Format.std_formatter].*)
+  val formatter : Format.formatter -> t
+
+  (** [symbol_pass s] sets the symbol for the status column indicating
+      successful tests in the results table as [s]. *)
+  val symbol_pass : string -> t
+
+  (** [symbol_fail s] sets the symbol for the status column indicating failed
+      tests in the results table as [s]. *)
+  val symbol_fail : string -> t
+
+  (** [symbol_discard s] sets the symbol for the status column indicating
+      discarded tests in the results table as [s]. *)
+  val symbol_discard : string -> t
 end
 
 (** {1 Types and exceptions } *)

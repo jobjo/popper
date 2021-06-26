@@ -1,0 +1,8 @@
+(executable
+ (name gen_dune)
+ (modules gen_dune))
+
+(library
+ (name clean)
+ (modules clean)
+ (libraries str popper))

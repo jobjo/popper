@@ -1,0 +1,13 @@
+FAIL: 1/3 tests passed, 1 discarded and 1 failed in XXs.
+
+  ✖  Reverse           Failed
+  ✓  Reverse twice     Passed 1000 samples
+  ☐  A discarded test  Discarded
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Reverse'                                                                       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    [3; 2; 1] <> [2; 3; 1]

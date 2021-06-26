@@ -56,7 +56,7 @@ let run ?(config = Config.default) ts =
   let test_result =
     { Test_result.num_passed; num_discarded; num_failed; results; time }
   in
-  let () = Test_result.pp Format.std_formatter test_result in
+  let () = Test_result.pp config (Config.get_formatter config) test_result in
   test_result.Test_result.num_failed = 0
 
 let single t = Single t

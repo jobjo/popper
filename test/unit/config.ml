@@ -1,10 +1,12 @@
 open Popper
 open Sample.Syntax
 
+let skip_output = Config.formatter Format.str_formatter
+
 let test_exceed_num_discarded =
   test @@ fun () ->
   try
-    let config = Config.max_num_discarded 50 in
+    let config = Config.(all [ max_num_discarded 50; skip_output ]) in
     check ~config (fun () ->
       let* b = Sample.bool in
       if b then
@@ -27,7 +29,7 @@ let test_discard_unit =
   test @@ fun () ->
   try
     (* This test should run without throwing *)
-    check (fun () -> discard);
+    check ~config:skip_output (fun () -> discard);
     pass
   with
   | _ -> fail "Did not expect discard to throw"

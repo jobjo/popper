@@ -2,6 +2,7 @@ open Popper
 open Sample.Syntax
 
 let seed = 45
+let skip_output = Config.formatter Format.str_formatter
 
 let dist f gen =
   let map = Hashtbl.create 32 in
@@ -18,7 +19,7 @@ let dist f gen =
     Hashtbl.add map key count;
     pass
   in
-  let () = check test in
+  let () = check ~config:skip_output test in
   fun key ->
     match Hashtbl.find_opt map key with
     | Some n -> float n /. float !count
