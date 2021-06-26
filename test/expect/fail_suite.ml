@@ -3,7 +3,7 @@ open Sample.Syntax
 
 type int_list = int list [@@deriving show, ord, popper]
 
-let eq_list = equal int_list_comparator
+let eq_list ?loc = equal ?loc int_list_comparator
 let test = test ~config:(Config.num_samples 1000)
 
 let test_rev =
