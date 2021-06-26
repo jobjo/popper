@@ -194,7 +194,7 @@ let tuple_with_list_length_dist =
     (fun (xs, _, _) -> xs)
     (fun (_, ys, _) -> ys)
     (fun (_, _, zs) -> zs)
-    (Sample.Tuple.tripple
+    (Sample.Tuple.triple
        (Sample.list Sample.int)
        (Sample.list Sample.int)
        (Sample.list Sample.string))
