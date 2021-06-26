@@ -37,11 +37,13 @@ let num_tests { num_passed; num_failed; num_discarded; _ } =
   num_passed + num_discarded + num_failed
 
 let pp_header
+  ~show_status
+  ~punctuation
   out
   ({ num_passed; num_failed; num_discarded; time; results = _ } as res)
   =
-  let fail_label = "FAIL:" in
-  let pass_label = "PASS:" in
+  let fail_label = if show_status then "Test Failed: " else "" in
+  let pass_label = if show_status then "Test Successful: " else "" in
   let num_tests = num_tests res in
   let pp_passed out () =
     fprintf
@@ -59,22 +61,23 @@ let pp_header
     fprintf out "%a failed" (Util.Format.red pp_print_int) num_failed
   in
   let pp_time = Util.Format.blue @@ fun out () -> fprintf out "%.2fs" time in
-  (* OK: n/n tests passed!*)
+  (* n/n tests passed!*)
   if num_passed = num_tests then
     fprintf
       out
-      "%a %a in %a."
+      "%a%a in %a%s"
       (Util.Format.green pp_print_string)
       pass_label
       pp_passed
       ()
       pp_time
       ()
+      punctuation
   else if num_failed = 0 then
-    (* PASS a/n tests passed, x discared and 0 failed in ns!*)
+    (* a/n tests passed, x discared and 0 failed in ns!*)
     fprintf
       out
-      "%a %a, %a and %a in %a."
+      "%a%a, %a and %a in %a%s"
       (Util.Format.green pp_print_string)
       pass_label
       pp_passed
@@ -85,11 +88,12 @@ let pp_header
       ()
       pp_time
       ()
+      punctuation
   else if num_discarded > 0 then
-    (* FAIL a/n tests passed, x discared and y failed in ns.*)
+    (* a/n tests passed, x discared and y failed in ns.*)
     fprintf
       out
-      "%a %a, %a and %a in %a."
+      "%a%a, %a and %a in %a%s"
       (Util.Format.red pp_print_string)
       fail_label
       pp_passed
@@ -100,10 +104,11 @@ let pp_header
       ()
       pp_time
       ()
-  else (* FAIL: a/n tests passed and x failed in ns. *)
+      punctuation
+  else (* a/n tests passed and x failed in ns. *)
     fprintf
       out
-      "%a %a and %a in %a."
+      "%a%a and %a in %a%s"
       (Util.Format.red pp_print_string)
       fail_label
       pp_passed
@@ -112,6 +117,7 @@ let pp_header
       ()
       pp_time
       ()
+      punctuation
 
 let pp_results config out res =
   let open Util.Format in
@@ -225,11 +231,11 @@ let pp_failed_results out res =
               num_shrinks
         in
         let pp_reason out () =
-          Format.fprintf out "@[<v 2>Reason:@;@;%a@]" pp ()
+          Format.fprintf out "@[<v 2>Reason:@;@;%a@]@," pp ()
         in
         let pp_log out () =
           if Util.Format.rendered_length Log.pp log > 0 then
-            fprintf out "@,@[<v 2>Log:@,@,%a@]" Log.pp log
+            fprintf out "@,@[<v 2>Log:@,%a@]@," Log.pp log
           else
             ()
         in
@@ -238,14 +244,14 @@ let pp_failed_results out res =
           | Some loc ->
             fprintf
               out
-              "@[<v 2>Location:@,@,%a@]@;"
+              "@,@[<v 2>Location:@,@,%a@]@,"
               (Util.Format.blue pp_print_string)
               loc
           | None -> ()
         in
         fprintf
           out
-          "@[<v 2>%a@[<v 2>@,%a@,%a@,%a@]@,@]"
+          "@[<v 2>%a@[<v 2>@,%a%a%a@]@]@."
           (with_box pp_header)
           ()
           pp_reason
@@ -278,12 +284,14 @@ let pp config out ({ results; _ } as res) =
   else
     fprintf
       out
-      "@.@[<v 2>%a@]@.@[<v 2>%a@,%a@]@;%a"
+      "@[<v 2>%a@]@.@[<v 2>%a@,%a@]@;%a%a@.@."
       pp_verbose
       results
-      pp_header
+      (pp_header ~show_status:false ~punctuation:":")
       res
       (pp_results config)
       results
       pp_failed_results
       results
+      (pp_header ~show_status:true ~punctuation:".")
+      res
