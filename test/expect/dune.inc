@@ -18,6 +18,24 @@
  (action
   (diff discard.expected discard.output)))
 
+; Expect test for `exception`
+(executable
+ (name exception)
+ (modules exception)
+ (libraries clean)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
+
+(rule
+ (with-stdout-to
+  exception.output
+  (run ./exception.exe)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff exception.expected exception.output)))
+
 ; Expect test for `fail_suite`
 (executable
  (name fail_suite)
