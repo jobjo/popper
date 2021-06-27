@@ -89,6 +89,6 @@ end
 
 module Tuple : sig
   val pair : 'a t -> 'b t -> ('a * 'b) t
-  val tripple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+  val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
   val quad : 'a t -> 'b t -> 'c t -> 'd t -> ('a * 'b * 'c * 'd) t
 end

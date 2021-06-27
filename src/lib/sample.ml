@@ -349,7 +349,7 @@ module Tuple = struct
     let* y = resize size g2 in
     return (x, y)
 
-  let tripple g1 g2 g3 =
+  let triple g1 g2 g3 =
     let* size = map (fun s -> s / 3) size in
     let* x = resize size g1 in
     let* y = resize size g2 in

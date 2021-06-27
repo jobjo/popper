@@ -363,9 +363,9 @@ module Sample : sig
         combines their results. *)
     val pair : 'a t -> 'b t -> ('a * 'b) t
 
-    (** [tripple s1 s2 s3] is a sample that produces a tuple using [s1], [s2]
-        and [s3] and combines their results. *)
-    val tripple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
+    (** [triple s1 s2 s3] is a sample that produces a tuple using [s1], [s2] and
+        [s3] and combines their results. *)
+    val triple : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
 
     (** [quad s1 s2 s3 s4] is a sample that produces a tuple using [s1], [s2] ,
         [s3] and [s4] and combines their results. *)
