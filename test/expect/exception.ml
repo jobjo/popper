@@ -16,7 +16,7 @@ let test_e3 =
 let test_e4 =
   test @@ fun () ->
   let* n = Sample.int in
-  if n mod 2 = 1 then
+  if n mod 2 = 0 then
     fail "Not even"
   else
     assert false

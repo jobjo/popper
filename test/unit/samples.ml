@@ -47,9 +47,9 @@ let neg_pos_ratio =
   let neg = lookup `Neg in
   let zero = lookup `Zero in
   let pos = lookup `Positive in
-  let* () = Sample.log_key_value "Negative" (string_of_float neg) in
-  let* () = Sample.log_key_value "Zero" (string_of_float zero) in
-  let* () = Sample.log_key_value "Positive" (string_of_float pos) in
+  let* () = Sample.log_key_value "Negative" (Printf.sprintf "%.2f" neg) in
+  let* () = Sample.log_key_value "Zero" (Printf.sprintf "%.2f" zero) in
+  let* () = Sample.log_key_value "Positive" (Printf.sprintf "%.2f" pos) in
   all
     [ in_range 0.45 0.55 neg; in_range 0.45 0.55 pos; in_range 0.01 0.05 zero ]
 
@@ -226,9 +226,31 @@ let manual_with_list_length_dist =
     (fun (_, _, zs) -> zs)
     sample
 
+let int_range2 =
+  let config = Config.num_samples 100_000 in
+  test ~config @@ fun () ->
+  let* n = Sample.Int.range 0 256 in
+  less_than Comparator.int n 256
+
+let int_range3 =
+  test @@ fun () ->
+  let lower = Int.max_int - 10 in
+  let upper = Int.max_int in
+  let* n = Sample.Int.range lower upper in
+  all
+    [ less_than Comparator.int n upper; less_equal_than Comparator.int lower n ]
+
+let char_ok =
+  let config = Config.num_samples 100_000 in
+  test ~config @@ fun () ->
+  let* _ = Sample.char in
+  pass
+
 let suite =
   suite
     [ ("Int range", int_range)
+    ; ("Int range 2", int_range2)
+    ; ("Int range 3", int_range3)
     ; ("Int positive", int_positive)
     ; ("Int negative", int_negative)
     ; ("Float classes", float_classes)
@@ -244,4 +266,5 @@ let suite =
     ; ("Derived list length dist", derived_tuple_with_list_length_dist)
     ; ("Tuple list length dist", tuple_with_list_length_dist)
     ; ("Manual list length dist", manual_with_list_length_dist)
+    ; ("Char", char_ok)
     ]
