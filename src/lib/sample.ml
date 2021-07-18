@@ -101,11 +101,7 @@ let range mn mx =
   if mx <= mn then
     mn
   else
-    let n = mx - mn in
-    let n = Int32.of_int n in
-    let block = Int32.div Int32.max_int n in
-    let offset = Int32.div r block in
-    mn + Int32.to_int offset
+    (Int32.to_int r mod (mx - mn)) + mn
 
 let one_of gs =
   let* n = range 0 (List.length gs) in
@@ -200,11 +196,11 @@ module Int = struct
 
   let small =
     let pos = range 0 10 in
-    one_of [ pos; map Stdlib.Int.neg pos ]
+    choose [ (0.5, pos); (0.5, map Stdlib.Int.neg pos) ]
 
   let medium =
     let pos = range 0 1000 in
-    one_of [ pos; map Stdlib.Int.neg pos ]
+    choose [ (0.5, pos); (0.5, map Stdlib.Int.neg pos) ]
 
   let any_int =
     let* b = tag Sign int32 in
@@ -218,8 +214,8 @@ module Int = struct
     @@ choose
          [ (5., return 0)
          ; (20., return 1)
-         ; (10., return (-1))
-         ; (50., small)
+         ; (20., return (-1))
+         ; (100., small)
          ; (100., medium)
          ; (100., any_int)
          ; (2., return Int.max_int)
@@ -301,7 +297,7 @@ module Char = struct
   let numeric = map Char.chr @@ Int.range 48 58
   let alpha = choose [ (3., lower); (1., upper) ]
   let alpha_numeric = choose [ (5., lower); (2., upper); (1., numeric) ]
-  let any_char = map Char.chr @@ Int.range 0 256
+  let any_char = map Char.chr (Int.range 0 256)
 
   let char =
     choose

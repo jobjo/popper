@@ -36,7 +36,7 @@
 
   Reason:
 
-    File "test/expect/exception.ml", line 22, characters 4-10: Assertion failed
+    Not even
 
 Test Failed: 0/4 tests passed and 4 failed in XXs.
 

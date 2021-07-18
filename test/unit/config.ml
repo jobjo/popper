@@ -18,7 +18,8 @@ let test_exceed_num_discarded =
   | _ -> pass
 
 let test_some_discarded =
-  test @@ fun () ->
+  let config = Config.(max_num_discarded 1100) in
+  test ~config @@ fun () ->
   let* b = Sample.bool in
   if b then
     pass
