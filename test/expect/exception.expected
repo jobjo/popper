@@ -1,15 +1,43 @@
+Return error
 
-0/1 tests passed and 1 failed in XXs:
+0/4 tests passed and 4 failed in XXs:
 
-  ✖  Anonymous  Failed
+  ✖  Exception 1  Failed
+  ✖  Exception 2  Failed
+  ✖  Exception 3  Failed
+  ✖  Exception 4  Failed after 1 sample
 
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Failed                                                                                 │
+│ Failed `Exception 1'                                                                   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 
   Reason:
 
-    Failure("Oh no")
+    File "test/expect/exception.ml", line 4, characters 32-38: Assertion failed
 
-Test Failed: 0/1 tests passed and 1 failed in XXs.
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Exception 2'                                                                   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    File "test/expect/exception.ml", line 9, characters 2-8: Assertion failed
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Exception 3'                                                                   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    File "test/expect/exception.ml", line 14, characters 2-8: Assertion failed
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed `Exception 4' after 1 sample and 2 shrinks.                                     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    File "test/expect/exception.ml", line 22, characters 4-10: Assertion failed
+
+Test Failed: 0/4 tests passed and 4 failed in XXs.
 

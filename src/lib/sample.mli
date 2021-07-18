@@ -1,6 +1,6 @@
 type 'a t
 
-val run : Input.t -> 'a t -> 'a Output.t
+val run : on_exception:(exn -> 'a) -> Input.t -> 'a t -> 'a Output.t
 val map : ('a -> 'b) -> 'a t -> 'b t
 val return : 'a -> 'a t
 val bind : 'a t -> ('a -> 'b t) -> 'b t

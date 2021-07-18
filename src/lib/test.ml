@@ -181,7 +181,14 @@ let make ?(config = Config.default) test_fun =
       ~num_discarded:0
       ~num_passed:0
       ~verbose_log
-      (Seq.map (fun x -> Sample.run x @@ test_fun ()) inputs)
+      (Seq.map
+         (fun input ->
+           Sample.run
+             ~on_exception:(fun e ->
+               Proposition.fail_with (Printexc.to_string e))
+             input
+           @@ test_fun ())
+         inputs)
   in
   let test config =
     let+ (num_passed, status, log, verbose_log, is_unit), time =

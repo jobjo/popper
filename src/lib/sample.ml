@@ -375,3 +375,9 @@ let int64 =
 let string = String.string
 let bytes = Bytes.bytes
 let char = Char.char
+
+let run ~on_exception input sample =
+  try run input sample with
+  | e ->
+    let value = on_exception e in
+    Output.make ~value ~consumed:Consumed.empty ~remaining:input ~log:Log.empty
