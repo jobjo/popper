@@ -372,6 +372,18 @@ let string = String.string
 let bytes = Bytes.bytes
 let char = Char.char
 
+let uchar =
+  (* A small fraction of uchars in the range are invalid. Instead of listing
+     them upfront we recurse until we find a valid one *)
+  let rec aux () =
+    let* n = range (Uchar.to_int Uchar.min) (Uchar.to_int Uchar.max + 1) in
+    if Uchar.is_valid n then
+      return @@ Uchar.of_int n
+    else
+      aux ()
+  in
+  aux ()
+
 let run ~on_exception input sample =
   try run input sample with
   | e ->

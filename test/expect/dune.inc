@@ -54,6 +54,24 @@
  (action
   (diff fail_suite.expected fail_suite.output)))
 
+; Expect test for `fail_uchar`
+(executable
+ (name fail_uchar)
+ (modules fail_uchar)
+ (libraries clean)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
+
+(rule
+ (with-stdout-to
+  fail_uchar.output
+  (run ./fail_uchar.exe)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff fail_uchar.expected fail_uchar.output)))
+
 ; Expect test for `fail_with_location`
 (executable
  (name fail_with_location)

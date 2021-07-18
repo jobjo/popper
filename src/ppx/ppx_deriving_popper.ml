@@ -33,9 +33,10 @@ let sample_of_type ~is_rec_type ~size ~loc = function
   | "bool" -> [%expr Popper.Sample.bool]
   | "float" -> [%expr Popper.Sample.float]
   | "int32" -> [%expr Popper.Sample.int32]
-  | "char" -> [%expr Popper.Sample.char]
-  | "unit" -> [%expr Popper.Sample.unit]
   | "int64" -> [%expr Popper.Sample.int64]
+  | "char" -> [%expr Popper.Sample.char]
+  | "uchar" -> [%expr Popper.Sample.uchar]
+  | "unit" -> [%expr Popper.Sample.unit]
   | "bytes" -> [%expr Popper.Sample.bytes]
   | t ->
     let (module A) = Ast_builder.make loc in

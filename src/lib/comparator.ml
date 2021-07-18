@@ -64,6 +64,15 @@ let char = make Char.compare pp_print_char
 let float = make Float.compare pp_print_float
 let string = make String.compare pp_print_string
 
+let pp_uchar out uc =
+  let ui = Uchar.to_int uc in
+  if (ui > 31 && ui < 127) || ui = 9 || ui = 10 || ui = 13 then
+    Format.fprintf out "\\u'%s'" (Char.escaped (Uchar.to_char uc))
+  else
+    Format.fprintf out "\\u{%x}" ui
+
+let uchar = make Uchar.compare pp_uchar
+
 let bytes =
   make Bytes.compare (fun fmt a ->
     pp_print_string fmt (Bytes.unsafe_to_string a))

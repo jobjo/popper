@@ -246,6 +246,12 @@ let char_ok =
   let* _ = Sample.char in
   pass
 
+let uchar_ok =
+  let config = Config.num_samples 100_000 in
+  test ~config @@ fun () ->
+  let* _ = Sample.uchar in
+  pass
+
 let suite =
   suite
     [ ("Int range", int_range)
@@ -267,4 +273,5 @@ let suite =
     ; ("Tuple list length dist", tuple_with_list_length_dist)
     ; ("Manual list length dist", manual_with_list_length_dist)
     ; ("Char", char_ok)
+    ; ("Uchar", uchar_ok)
     ]

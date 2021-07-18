@@ -37,6 +37,9 @@ module Comparator : sig
   (** [char] is a [char] comparator. *)
   val char : char t
 
+  (** [uchar] is a [Uchar.t] comparator. *)
+  val uchar : Uchar.t t
+
   (** [unit] is an [unit] comparator. *)
   val unit : unit t
 
@@ -170,6 +173,9 @@ module Sample : sig
 
   (** [char] is a sample that produces [char] values. *)
   val char : char t
+
+  (** [uchar] is a sample that produces [Uchar.t] values. *)
+  val uchar : Uchar.t t
 
   (** [float] is a sample that produces [float] values. *)
   val float : float t
