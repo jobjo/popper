@@ -11,6 +11,10 @@ test:
 
 test-expect:
 	dune runtest test/expect --force
+
+test-unit:
+	dune runtest test/unit --force
+
 examples:
 	dune exec examples/run.exe
 

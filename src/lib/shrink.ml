@@ -171,14 +171,17 @@ let shrink_node c =
   | _ -> R.return None
 
 let try_shrink { indexed; nodes; overrides; node_indexes } =
-  let* arr_ix = R.range 0 @@ Array.length node_indexes in
-  let node_ix = Array.get node_indexes arr_ix in
-  let+ override = shrink_node @@ unindex @@ IM.find node_ix nodes in
-  Option.map
-    (fun override ->
-      let overrides = IM.add node_ix override overrides in
-      { indexed; nodes; overrides; node_indexes })
-    override
+  if Array.length node_indexes > 0 then
+    let* arr_ix = R.range 0 @@ Array.length node_indexes in
+    let node_ix = Array.get node_indexes arr_ix in
+    let+ override = shrink_node @@ unindex @@ IM.find node_ix nodes in
+    Option.map
+      (fun override ->
+        let overrides = IM.add node_ix override overrides in
+        { indexed; nodes; overrides; node_indexes })
+      override
+  else
+    Random.return None
 
 let modify ~max_tries data =
   let open Random.Syntax in
@@ -196,12 +199,17 @@ let shrink
   ~num_shrink_rounds
   ~size
   output
-  (gen : Proposition.t Sample.t)
+  (sample : Proposition.t Sample.t)
   =
   let node = of_consumed @@ Output.consumed output in
   let keep t =
     let input = to_input ~size t in
-    let output = Sample.run input gen in
+    let output =
+      Sample.run
+        ~on_exception:(fun e -> Proposition.fail_with (Printexc.to_string e))
+        input
+        sample
+    in
     match Output.value output with
     | Proposition.Fail _ -> Some (of_consumed @@ Output.consumed output)
     | _ -> None
@@ -228,8 +236,14 @@ let shrink
     R.best_of ~num_tries:num_shrink_rounds f (S.search node)
   in
   let input = to_input ~size node in
-  let output = Sample.run input gen in
-  Random.return
-    (match Output.value output with
-    | Proposition.Fail { pp; _ } -> { num_shrinks; num_attempts; pp; output }
-    | _ -> failwith "Should not return a non-failure")
+  let output =
+    Sample.run
+      ~on_exception:(fun e -> Proposition.fail_with (Printexc.to_string e))
+      input
+      sample
+  in
+  match Output.value output with
+  | Proposition.Fail { pp; _ } ->
+    Printf.printf "Return error\n";
+    Random.return { num_shrinks; num_attempts; pp; output }
+  | _ -> failwith "Should not return a non-failure"
