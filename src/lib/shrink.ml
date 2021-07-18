@@ -244,6 +244,5 @@ let shrink
   in
   match Output.value output with
   | Proposition.Fail { pp; _ } ->
-    Printf.printf "Return error\n";
     Random.return { num_shrinks; num_attempts; pp; output }
   | _ -> failwith "Should not return a non-failure"
