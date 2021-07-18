@@ -18,6 +18,7 @@ val int : int t
 val int32 : int32 t
 val int64 : int64 t
 val char : char t
+val uchar : Uchar.t t
 val float : float t
 val bool : bool t
 val fn : 'a t -> ('b -> 'a) t

@@ -9,6 +9,7 @@ val int64 : int64 t
 val float : float t
 val bool : bool t
 val char : char t
+val uchar : Uchar.t t
 val string : string t
 val bytes : bytes t
 val unit : unit t

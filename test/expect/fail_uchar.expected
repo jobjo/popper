@@ -1,0 +1,19 @@
+
+0/1 tests passed and 1 failed in XXs:
+
+  ✖  Anonymous  Failed after 1 sample
+
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Failed Anonymous after 1 sample and 3 shrinks.                                         │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Reason:
+
+    Failed
+
+  Log:
+
+    uchar = \u{0}
+
+Test Failed: 0/1 tests passed and 1 failed in XXs.
+
