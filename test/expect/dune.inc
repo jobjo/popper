@@ -144,6 +144,24 @@
  (action
   (diff fail_with_logs_and_location.expected fail_with_logs_and_location.output)))
 
+; Expect test for `nested_module`
+(executable
+ (name nested_module)
+ (modules nested_module)
+ (libraries clean)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving_popper)))
+
+(rule
+ (with-stdout-to
+  nested_module.output
+  (run ./nested_module.exe)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff nested_module.expected nested_module.output)))
+
 ; Expect test for `pass_single`
 (executable
  (name pass_single)

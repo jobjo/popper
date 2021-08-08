@@ -7,11 +7,23 @@ type bindings =
   ; num_poly : int
   }
 
-let sample_name n =
-  if String.equal n "t" then
-    "sample"
-  else
-    Printf.sprintf "%s_sample" n
+let rec label_of_long_ident = function
+  | Lident label -> label
+  | Ldot (longident, label) ->
+    Printf.sprintf "%s.%s" (label_of_long_ident longident) label
+  | Lapply (l1, l2) ->
+    Printf.sprintf "%s (%s)" (label_of_long_ident l1) (label_of_long_ident l2)
+
+let sample_name_of_string = function
+  | "t" -> "sample"
+  | n -> Printf.sprintf "%s_sample" n
+
+let rec sample_name = function
+  | Lident n -> sample_name_of_string n
+  | Ldot (li, l) ->
+    Printf.sprintf "%s.%s" (label_of_long_ident li) (sample_name_of_string l)
+  | Lapply (l1, l2) ->
+    Printf.sprintf "%s (%s)" (label_of_long_ident l1) (sample_name l2)
 
 let comparator_name = function
   | "t" -> "comparator"
@@ -27,7 +39,8 @@ let compare_name = function
 
 let poly_fun_name n = Printf.sprintf "sample_poly_%s" n
 
-let sample_of_type ~is_rec_type ~size ~loc = function
+let sample_of_type ~is_rec_type ~size ~loc name =
+  match label_of_long_ident name with
   | "int" -> [%expr Popper.Sample.int]
   | "string" -> [%expr Popper.Sample.string]
   | "bool" -> [%expr Popper.Sample.bool]
@@ -41,7 +54,7 @@ let sample_of_type ~is_rec_type ~size ~loc = function
   | t ->
     let (module A) = Ast_builder.make loc in
     let body =
-      let sample = A.evar (sample_name t) in
+      let sample = A.evar (sample_name name) in
       if is_rec_type t then
         [%expr [%e sample] [%e size]]
       else
@@ -130,7 +143,7 @@ and of_applied_type ~loc ~is_rec_type ~size ~name ts =
   | name, ts ->
     let accum exp t = [%expr [%e exp] [%e of_core_type ~is_rec_type ~size t]] in
     let is_rec_type = is_rec_type name in
-    let name = A.evar (sample_name name) in
+    let name = A.evar (sample_name @@ Lident name) in
     let exp = List.fold_left accum name ts in
     if is_rec_type then
       [%expr [%e exp] [%e size]]
@@ -156,7 +169,7 @@ and of_core_type_desc ~loc ~is_rec_type ~size exp =
   let (module A) = Ast_builder.make loc in
   match exp with
   | Ptyp_constr ({ txt = Lident name; loc }, []) ->
-    sample_of_type ~is_rec_type ~size ~loc name
+    sample_of_type ~is_rec_type ~size ~loc @@ Lident name
   | Ptyp_constr ({ txt = Lident name; _ }, ts) ->
     of_applied_type ~loc ~is_rec_type ~size ~name ts
   | Ptyp_arrow (_, _, t) ->
@@ -171,6 +184,7 @@ and of_core_type_desc ~loc ~is_rec_type ~size exp =
   | Ptyp_poly _ -> failwith "Unsupported core-type `Ptype_poly'"
   | Ptyp_any -> failwith "Unsupported core-type `Any'"
   | Ptyp_var v -> A.evar (poly_fun_name v)
+  | Ptyp_constr ({ txt; _ }, _) -> sample_of_type ~is_rec_type ~size ~loc txt
   | _ -> failwith "Unsupported core-type"
 
 and of_core_type ~is_rec_type ~size { ptyp_desc; ptyp_loc = loc; _ } =
@@ -292,7 +306,7 @@ let of_type_declaration
   }
   =
   let (module A) = Ast_builder.make loc in
-  let fun_name = sample_name type_name in
+  let fun_name = sample_name @@ Lident type_name in
   let param_types = List.map fst ptype_params in
   let sized, poly_gens =
     match ptype_kind with
