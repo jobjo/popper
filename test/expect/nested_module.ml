@@ -21,4 +21,4 @@ let test =
   let* x = k_sample in
   equal k_comparator x x
 
-let () = run test
+let () = Clean.run test
