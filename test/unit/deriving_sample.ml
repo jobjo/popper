@@ -78,6 +78,8 @@ and t18 = int t17 [@@deriving sample]
 
 type t19 = { fn : int -> bool } [@@deriving sample]
 type t20 = { bar : int array } [@@deriving sample]
+type t21 = { foo : name:string -> age:int -> unit } [@@deriving sample]
+type t22 = { foo : ?name:string -> age:int -> unit } [@@deriving sample]
 
 let make_test name sample =
   let open Popper in
@@ -106,4 +108,6 @@ let suite =
     ; make_test "T18" t18_sample
     ; make_test "T19" t19_sample
     ; make_test "T20" t20_sample
+    ; make_test "T21" t21_sample
+    ; make_test "T22" t22_sample
     ]

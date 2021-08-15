@@ -7,6 +7,8 @@ type bindings =
   ; num_poly : int
   }
 
+let with_loc ~loc txt = { txt; loc }
+
 let rec label_of_long_ident = function
   | Lident label -> label
   | Ldot (longident, label) ->
@@ -165,6 +167,22 @@ and of_row_field ~is_rec_type { prf_desc; prf_loc = loc; _ } =
 
 and of_row_fields ~is_rec_type rfs = List.map (of_row_field ~is_rec_type) rfs
 
+and of_arrow ~loc ~is_rec_type ~label core_type =
+  let (module A) = Ast_builder.make loc in
+  let gen_exp = of_core_type ~is_rec_type ~size:[%expr size] core_type in
+  let fun_exp = [%expr Popper.Sample.fn [%e gen_exp]] in
+  match label with
+  | Nolabel -> fun_exp
+  | Labelled l | Optional l ->
+    let labelize =
+      A.pexp_fun
+        label
+        None
+        (A.ppat_var (with_loc ~loc l))
+        [%expr f [%e A.evar l]]
+    in
+    [%expr Popper.Sample.map (fun f -> [%e labelize]) [%e fun_exp]]
+
 and of_core_type_desc ~loc ~is_rec_type ~size exp =
   let (module A) = Ast_builder.make loc in
   match exp with
@@ -172,9 +190,7 @@ and of_core_type_desc ~loc ~is_rec_type ~size exp =
     sample_of_type ~is_rec_type ~size ~loc @@ Lident name
   | Ptyp_constr ({ txt = Lident name; _ }, ts) ->
     of_applied_type ~loc ~is_rec_type ~size ~name ts
-  | Ptyp_arrow (_, _, t) ->
-    let gen_exp = of_core_type ~is_rec_type ~size:[%expr size] t in
-    [%expr Popper.Sample.fn [%e gen_exp]]
+  | Ptyp_arrow (label, _, t) -> of_arrow ~loc ~is_rec_type ~label t
   | Ptyp_tuple ts -> of_tuple ~is_rec_type ~loc ~size:[%expr size] ts Fun.id
   | Ptyp_alias (t, _) -> of_core_type ~is_rec_type ~size t
   | Ptyp_variant (row_fields, _, _) ->
@@ -235,8 +251,6 @@ let sized_fun ~loc ~fun_name ~param_types body =
 let of_record ~is_rec_type ~loc ~fun_name ~param_types label_decls =
   of_label_declarations ~is_rec_type ~loc label_decls Fun.id
   |> sized_fun ~loc ~fun_name ~param_types
-
-let with_loc ~loc txt = { txt; loc }
 
 let has_rec_types ~is_rec_type cargs =
   let rec aux { ptyp_desc; _ } =
